@@ -3,14 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Services\MondayService;
+use App\Services\UserService;
+use DateTime;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class TimesheetController extends Controller
 {
     protected $mondayService;
     protected $cacheTTL = 600; // Cache time-to-live in seconds (10 minutes)
+
     public function __construct(MondayService $mondayService)
     {
         $this->mondayService = $mondayService;
@@ -31,6 +36,7 @@ class TimesheetController extends Controller
 
         return $this->generatePDF($usersObj);
     }
+
     protected function initializeUsers($startOfWeek, $endOfWeek)
     {
         $users = Cache::remember('users', $this->cacheTTL, function () {
@@ -45,7 +51,7 @@ class TimesheetController extends Controller
             $usersObj->{$user['id']}['taskTotalSeconds'] = [];
 
             for ($i = 1; $i <= 7; $i++) {
-                $currentDay = (clone $startOfWeek)->modify('+' . ($i - 1) . ' days');
+                $currentDay = (clone $startOfWeek)->modify('+'.($i - 1).' days');
                 $usersObj->{$user['id']}['days'][$i] = [
                     'boards' => [],
                     'date' => [
@@ -63,15 +69,16 @@ class TimesheetController extends Controller
 
     protected function processBoards(&$usersObj, $startOfWeek, $endOfWeek)
     {
-        $boards = Cache::remember('boards_' . $startOfWeek->format('YW'), $this->cacheTTL, function () {
+        $boards = Cache::remember('boards_'.$startOfWeek->format('YW'), $this->cacheTTL, function () {
             return $this->mondayService->getBoards();
         });
 
         foreach ($boards as $board) {
             $board_id = $board['id'];
-            $boardData = Cache::remember('board_' . $startOfWeek->format('YW') . '_' . $board_id, $this->cacheTTL, function () use ($board_id) {
-                return $this->mondayService->getTimeTrackingDataForBoard($board_id);
-            });
+            $boardData = Cache::remember('board_'.$startOfWeek->format('YW').'_'.$board_id, $this->cacheTTL,
+                function () use ($board_id) {
+                    return $this->mondayService->getTimeTrackingDataForBoard($board_id);
+                });
 
             foreach ($boardData['items_page']['items'] as $item) {
                 $this->processItem($item, $boardData, $usersObj, $startOfWeek, $endOfWeek);
@@ -89,14 +96,22 @@ class TimesheetController extends Controller
             if (!empty($column_value)) {
                 foreach ($column_value['history'] as $history_item) {
                     var_dump($history_item);
-                    $this->processTimeRecord($history_item, $group_name, $item_name, $boardData, $usersObj, $startOfWeek, $endOfWeek);
+                    $this->processTimeRecord($history_item, $group_name, $item_name, $boardData, $usersObj,
+                        $startOfWeek, $endOfWeek);
                 }
             }
         }
     }
 
-    protected function processTimeRecord($history_item, $group_name, $item_name, $boardData, &$usersObj, $startOfWeek, $endOfWeek)
-    {
+    protected function processTimeRecord(
+        $history_item,
+        $group_name,
+        $item_name,
+        $boardData,
+        &$usersObj,
+        $startOfWeek,
+        $endOfWeek
+    ) {
         $time_record = new \stdClass();
         $time_record->started_at = $history_item['started_at'];
         $time_record->ended_at = $history_item['ended_at'];
@@ -128,7 +143,7 @@ class TimesheetController extends Controller
             ];
         }
 
-        $taskName = $group_name . ' - ' . $item_name;
+        $taskName = $group_name.' - '.$item_name;
         if (!isset($boardObj['tasks'][$taskName])) {
             $boardObj['tasks'][$taskName] = [
                 'name' => $taskName,
@@ -149,7 +164,8 @@ class TimesheetController extends Controller
         foreach ($usersObj as $userId => $user) {
             foreach ($user['days'] as $dayIndex => $dayData) {
                 foreach ($dayData['boards'] as $boardId => $boardData) {
-                    $usersObj->{$userId}['days'][$dayIndex]['boards'][$boardId]['name'] = str_replace("Subitems of ", "", $boardData['name']);
+                    $usersObj->{$userId}['days'][$dayIndex]['boards'][$boardId]['name'] = str_replace("Subitems of ",
+                        "", $boardData['name']);
                 }
             }
         }
@@ -168,4 +184,119 @@ class TimesheetController extends Controller
         $pdf = Pdf::loadHTML($html)->setPaper('a4', 'portrait');
         return $pdf->stream('timesheet.pdf');
     }
+
+    public function viewUserSheet(Request $request): View
+    {
+        $mondayService = new MondayService();
+
+        $userMail = Auth::user()->email;
+        if (isset($request->email)) {
+            $userMail = $request->email;
+        }
+        $usersService = new UserService($mondayService);
+
+        $User = $usersService->getUserBy('email', $userMail);
+
+        $startOfWeek = new DateTime();
+        if (isset($request->weekStartDate)) {
+            $startOfWeek = new DateTime($request->weekStartDate);
+        }
+
+        $startOfWeek->modify('Monday this week');
+
+        $endOfWeek = clone $startOfWeek;
+        $endOfWeek->modify('Sunday this week');
+
+        $timeTrackingItems = $User->getTimeTrackingItemsBetween($startOfWeek, $endOfWeek);
+        $itemIds = array_column($timeTrackingItems, 'item_id');
+
+        $items = $mondayService->getItems($itemIds);
+
+
+        $total = 0;
+        $days = [];
+
+        foreach ($timeTrackingItems as $history) {
+            $started_at = new DateTime($history['started_at']);
+            $ended_at = new DateTime($history['ended_at']);
+            $interval = $started_at->diff($ended_at);
+            $duration = $interval->h * 3600 + $interval->i * 60 + $interval->s;
+
+            $day_nr = $started_at->format('N');
+            $item_id = $history['item_id'];
+
+            $item = $items[$item_id];
+            $item_name = $item['name'];
+
+            if (!isset($days[$day_nr])) {
+                $days[$day_nr] = [
+                    'date' => $started_at->format('d/m/Y'),
+                    'day' => $started_at->format('l'),
+                    'time' => 0,
+                    'boards' => []
+                ];
+            }
+
+            $board_id = $item['board']['id'];
+            $board_name = str_replace('Subitems of ', '', $item['board']['name']);
+            $board_group = $item['group']['title'];
+
+            if (!isset($days[$day_nr]['boards'][$board_id])) {
+                $days[$day_nr]['boards'][$board_id] = [
+                    'name' => $board_name,
+                    'duration' => 0,
+                    'groups' => []
+                ];
+            }
+            if (!isset($days[$day_nr]['boards'][$board_id]['groups'][$board_group])) {
+                $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'] = [];
+                $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['duration'] = 0;
+            }
+
+            if (!isset($days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id])) {
+                $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id] = [
+                    'item_name' => $item_name,
+                    'duration' => 0,
+                ];
+            }
+
+
+            $total += $duration;
+            $days[$day_nr]['time'] += $duration;
+            $days[$day_nr]['boards'][$board_id]['duration'] += $duration;
+            $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['duration'] += $duration;
+            $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id]['duration'] += $duration;
+        }
+        ksort($days);
+
+        $data = [
+            'name' => $User->getName(),
+            'email' => $User->getEmail(),
+            'days' => $days,
+            'time' => $total,
+            'startOfWeek' => $startOfWeek->format('d/m/Y'),
+            'endOfWeek' => $endOfWeek->format('d/m/Y')
+        ];
+
+
+        if (Auth::user()->admin) {
+            $users = $usersService->getUsers();
+            usort($users, function ($a, $b) {
+                return strcmp($a['name'], $b['name']);
+            });
+        } else {
+            $users = array();
+            $users[] = Auth::user();
+        }
+
+
+        return view('dashboard', [
+            'user' => $request->user(),
+            'data' => $data,
+            'users' => $users,
+            'userMail' => $userMail,
+        ]);
+    }
+
+
 }

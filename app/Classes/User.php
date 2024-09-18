@@ -87,6 +87,7 @@ class User
 
     public function getTimeTrackingItemsBetween(DateTime $start, DateTime $end)
     {
+
         // Fetch all time tracking items for the user
         $items = $this->getTimeTrackingItems();
 
@@ -95,7 +96,6 @@ class User
             // Convert the 'started_at' and 'ended_at' to DateTime objects
             $startedAt = new DateTime($item['started_at']);
             $endedAt = new DateTime($item['ended_at']);
-
             // Check if the item falls within the specified date range
             return $startedAt >= $start && $endedAt <= $end;
         });
