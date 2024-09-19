@@ -74,6 +74,8 @@
             align-items: center;
             border-bottom: 1px solid #ddd;
             padding-bottom: 3px;
+            font-size: 24px;
+            font-weight: bold;
         }
 
         .logo {
