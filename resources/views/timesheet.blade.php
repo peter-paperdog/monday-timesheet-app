@@ -108,8 +108,8 @@
 
 @foreach($data['days'] as $day)
     <div class="day-header">
-        <h2>{{ $day['day'] }}, {{ $day['date'] }}</h2>
-        <span class="project-total">Total: {{ round($day['time'] / 3600, 2) }} hours</span>
+        <h2>{{ $day->day }}, {{ $day->date }}</h2>
+        <span class="project-total">Total: {{ round($day->time / 3600, 2) }} hours</span>
     </div>
 
     <table>
@@ -120,25 +120,25 @@
         </tr>
         </thead>
         <tbody>
-        @foreach($day['boards'] as $board)
+        @foreach($day->boards as $board)
             <tr>
-                <td colspan="2"><strong>{{ $board['name'] }}</strong></td>
+                <td colspan="2"><strong>{{ $board->name }}</strong></td>
             </tr>
-            @foreach($board['groups'] as $group_name => $group)
+            @foreach($board->groups as $group_name => $group)
                 <tr>
                     <td><strong>{{ $group_name }}</strong></td>
-                    <td class="item-total">{{ round($group['duration'] / 3600, 2) }} hours</td>
+                    <td class="item-total">{{ round($group->duration / 3600, 2) }} hours</td>
                 </tr>
-                @foreach($group['items'] as $item)
+                @foreach($group->items as $item)
                     <tr>
-                        <td>{{ $item['item_name'] }}</td>
-                        <td class="sub-item-total">{{ round($item['duration'] / 3600, 2) }} hours</td>
+                        <td>{{ $item->item_name }}</td>
+                        <td class="sub-item-total">{{ round($item->duration / 3600, 2) }} hours</td>
                     </tr>
                 @endforeach
             @endforeach
             <tr>
-                <td class="project-total">Total for {{ $board['name'] }}</td>
-                <td class="project-total">{{ round($board['duration'] / 3600, 2) }} hours</td>
+                <td class="project-total">Total for {{ $board->name }}</td>
+                <td class="project-total">{{ round($board->duration / 3600, 2) }} hours</td>
             </tr>
         @endforeach
         </tbody>
