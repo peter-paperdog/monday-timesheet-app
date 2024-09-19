@@ -81,35 +81,41 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                            <form method="get" action="{{ route('sheets.search') }}" class="mt-6 space-y-6">
-                                <select name="email" id="user" class="form-control input-sm">
-                                    @foreach($users as $user)
-                                        <option value="{{ $user['email'] }}" {{ $user['email'] == $userMail ? 'selected' : '' }}>
-                                            {{ $user['name'] }}
-                                        </option>
-                                    @endforeach
+                    <form method="get" action="{{ route('sheets.search') }}" class="mt-6 space-y-6">
+                        <select name="email" id="user" class="form-control input-sm">
+                            @foreach($users as $user)
+                                <option value="{{ $user['email'] }}" {{ $user['email'] == $userMail ? 'selected' : '' }}>
+                                    {{ $user['name'] }}
+                                </option>
+                            @endforeach
 
-                                </select>
+                        </select>
 
-                                <input type="text" id="datepicker" name="weekStartDate" readonly="readonly">
+                        <input type="text" id="datepicker" name="weekStartDate" readonly="readonly">
 
-                                <div class="flex items-center gap-4">
-                                    <x-primary-button>{{ __('Search') }}</x-primary-button>
-                                </div>
-                            </form>
+                        <div class="flex items-center gap-4">
+                            <x-primary-button>{{ __('Search') }}</x-primary-button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
+        </div>
+    </div>
 
     <div class="py-5">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <h1 style="text-align: center; padding: 0; margin: 0; font-style: italic; padding-bottom: 12px;">Weekly Timesheet</h1>
+                    <h1 style="text-align: center; padding: 0; margin: 0; font-style: italic; padding-bottom: 12px;">
+                        Weekly Timesheet</h1>
                     <p style="text-align: center; padding: 0; margin: 0; font-style: italic; padding-bottom: 12px;">{{ $data['startOfWeek'] }}
                         - {{ $data['endOfWeek'] }}</p>
                     <h1 style="text-align: center; padding: 0; margin: 0; font-style: italic; padding-bottom: 12px;">{{ $data['name'] }}</h1>
+                    <form action="{{ route('download.sheet') }}" method="post" target="_blank">
+                        @csrf
+                        <input type="hidden" name="data" value="{{ json_encode($data) }}">
+                        <x-primary-button>Download</x-primary-button>
+                    </form>
                     @foreach($data['days'] as $day)
                         <div class="day-header">
                             <h2>{{ $day['day'] }}, {{ $day['date'] }}</h2>
@@ -148,8 +154,10 @@
                             @endforeach
                             </tbody>
                         </table>
-
                     @endforeach
+                    <div class="final-total">
+                        Total for the Week: <strong>{{ round($data['time'] / 3600, 2) }} hours</strong>
+                    </div>
                 </div>
             </div>
         </div>

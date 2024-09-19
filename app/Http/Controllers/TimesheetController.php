@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\MondayService;
 use App\Services\UserService;
 use DateTime;
+use DateTimeZone;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -298,5 +299,31 @@ class TimesheetController extends Controller
         ]);
     }
 
+    public function downloadUserSheet(Request $request)
+    {
+        $decodedData = json_decode($request->data);
 
+        $data = [
+            'name' => $decodedData->name,
+            'email' => $decodedData->email,
+            'days' => $decodedData->days,
+            'time' => $decodedData->time,
+            'startOfWeek' => $decodedData->startOfWeek,
+            'endOfWeek' => $decodedData->endOfWeek
+        ];
+
+        // Append the view content for this user, adding a page break after each user
+        $html = view('timesheet', [
+            'data' => $data,
+            'printedDate' => (new DateTime())->setTimezone(new DateTimeZone('Europe/London'))->format('d/m/Y H:i:s')
+        ])->render();
+
+        // Generate the PDF from the concatenated HTML
+        $pdf = Pdf::loadHTML($html)
+            ->setPaper('a4', 'portrait');
+
+        // Display the  PDF in the browser
+        return $pdf->stream(str_replace("/", "_",
+            "$decodedData->startOfWeek.'-'.$decodedData->endOfWeek.'_timesheet_'.$decodedData->name.'.pdf'"));
+    }
 }

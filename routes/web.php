@@ -14,11 +14,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-
     Route::get('/dashboard', [TimesheetController::class, 'viewUserSheet'])->name('sheets.search');
+
+    Route::post('download', [TimesheetController::class, 'downloadUserSheet'])
+        ->name('download.sheet');
 });
 
-Route::get('/login/google', [SociaLoginController::class, 'redirectToProvider']);
+Route::get('/login/google', [SociaLoginController::class, 'redirectToProvider'])->name('google.login');
 Route::get('/login/google/callback', [SociaLoginController::class, 'handleProviderCallback']);
 
 require __DIR__.'/auth.php';
