@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SociaLogin;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
 
 class SociaLoginController extends Controller
@@ -24,6 +25,9 @@ class SociaLoginController extends Controller
             ],
             [
                 'name' => $socialiteUser->getName(),
+            ],
+            [
+                'password' => Hash::make(str()->random()),
             ]
         );
 
