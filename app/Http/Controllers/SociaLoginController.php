@@ -25,9 +25,7 @@ class SociaLoginController extends Controller
             ],
             [
                 'name' => $socialiteUser->getName(),
-            ],
-            [
-                'password' => Hash::make(str()->random()),
+                'password' => Hash::make(Hash::make(str()->random()))
             ]
         );
 
