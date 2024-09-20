@@ -17,9 +17,14 @@ class TimesheetController extends Controller
     protected $mondayService;
     protected $cacheTTL = 600; // Cache time-to-live in seconds (10 minutes)
 
-    public function __construct(MondayService $mondayService)
+    /*public function __construct(MondayService $mondayService)
     {
         $this->mondayService = $mondayService;
+    }*/
+
+    public function __construct()
+    {
+
     }
 
     public function generateTimesheet(Request $request)
@@ -328,38 +333,42 @@ class TimesheetController extends Controller
             "$decodedData->startOfWeek.'-'.$decodedData->endOfWeek.'_timesheet_'.$decodedData->name.'.pdf'"));
     }
 
-    public function downloadAllTimeSheet(Request $request)
+    public function downloadAllTimeSheet(): string
     {
-        Cache::clear();
+        //Cache::clear();
         $combinedHtml = '';
         $mondayService = new MondayService();
         $usersService = new UserService($mondayService);
 
+        $allTimeTrackingItems = $mondayService->getTimeTrackingItems();
 
         $users = $usersService->getUsers();
 
         $exceptions = [
-            'petra@paperdog.com', 'szonja@paperdog.com'
+            'petra@paperdog.com', 'szonja@paperdog.com', 'oliver@paperdog.com', 'amo@paperdog.com',
+            'morwenna@paperdog.com', 'gabriella@paperdog.com'
         ];
 
         foreach ($users as $user) {
             if (!in_array($user['email'], $exceptions)) {
+
                 $User = $usersService->getUserBy('email', $user['email']);
 
-                $startOfWeek = new DateTime('2024-09-15');
+                $startOfWeek = new DateTime();
                 $startOfWeek->modify('Monday this week');
 
                 $endOfWeek = clone $startOfWeek;
                 $endOfWeek->modify('Sunday this week');
 
-                $timeTrackingItems = $User->getTimeTrackingItemsBetween($startOfWeek, $endOfWeek);
+                $timeTrackingItems = $this->getTimeTrackingItemsBetween($startOfWeek, $endOfWeek,
+                    $allTimeTrackingItems, $User->getId());
+
                 $total = 0;
                 $days = [];
                 if (!empty($timeTrackingItems)) {
                     $itemIds = array_column($timeTrackingItems, 'item_id');
 
                     $items = $mondayService->getItems($itemIds);
-
 
                     foreach ($timeTrackingItems as $history) {
                         $started_at = new DateTime($history['started_at']);
@@ -370,47 +379,49 @@ class TimesheetController extends Controller
                         $day_nr = $started_at->format('N');
                         $item_id = $history['item_id'];
 
-                        $item = $items[$item_id];
-                        $item_name = $item['name'];
+                        if (isset($items[$item_id])) {
+                            $item = $items[$item_id];
+                            $item_name = $item['name'];
 
-                        if (!isset($days[$day_nr])) {
-                            $days[$day_nr] = [
-                                'date' => $started_at->format('d/m/Y'),
-                                'day' => $started_at->format('l'),
-                                'time' => 0,
-                                'boards' => []
-                            ];
+                            if (!isset($days[$day_nr])) {
+                                $days[$day_nr] = [
+                                    'date' => $started_at->format('d/m/Y'),
+                                    'day' => $started_at->format('l'),
+                                    'time' => 0,
+                                    'boards' => []
+                                ];
+                            }
+
+                            $board_id = $item['board']['id'];
+                            $board_name = str_replace('Subitems of ', '', $item['board']['name']);
+                            $board_group = $item['group']['title'];
+
+                            if (!isset($days[$day_nr]['boards'][$board_id])) {
+                                $days[$day_nr]['boards'][$board_id] = [
+                                    'name' => $board_name,
+                                    'duration' => 0,
+                                    'groups' => []
+                                ];
+                            }
+                            if (!isset($days[$day_nr]['boards'][$board_id]['groups'][$board_group])) {
+                                $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'] = [];
+                                $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['duration'] = 0;
+                            }
+
+                            if (!isset($days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id])) {
+                                $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id] = [
+                                    'item_name' => $item_name,
+                                    'duration' => 0,
+                                ];
+                            }
+
+
+                            $total += $duration;
+                            $days[$day_nr]['time'] += $duration;
+                            $days[$day_nr]['boards'][$board_id]['duration'] += $duration;
+                            $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['duration'] += $duration;
+                            $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id]['duration'] += $duration;
                         }
-
-                        $board_id = $item['board']['id'];
-                        $board_name = str_replace('Subitems of ', '', $item['board']['name']);
-                        $board_group = $item['group']['title'];
-
-                        if (!isset($days[$day_nr]['boards'][$board_id])) {
-                            $days[$day_nr]['boards'][$board_id] = [
-                                'name' => $board_name,
-                                'duration' => 0,
-                                'groups' => []
-                            ];
-                        }
-                        if (!isset($days[$day_nr]['boards'][$board_id]['groups'][$board_group])) {
-                            $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'] = [];
-                            $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['duration'] = 0;
-                        }
-
-                        if (!isset($days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id])) {
-                            $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id] = [
-                                'item_name' => $item_name,
-                                'duration' => 0,
-                            ];
-                        }
-
-
-                        $total += $duration;
-                        $days[$day_nr]['time'] += $duration;
-                        $days[$day_nr]['boards'][$board_id]['duration'] += $duration;
-                        $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['duration'] += $duration;
-                        $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id]['duration'] += $duration;
                     }
                     ksort($days);
                 }
@@ -423,25 +434,50 @@ class TimesheetController extends Controller
                     'endOfWeek' => $endOfWeek->format('d/m/Y')
                 ];
 
+
                 //return response()->json($data);
 
                 // Append the view content for this user, adding a page break after each user
-                $html = view('timesheet', [
+                $html = view('allusertimesheet', [
                     'data' => $data,
                     'printedDate' => (new DateTime())->setTimezone(new DateTimeZone('Europe/London'))->format('d/m/Y H:i:s')
                 ])->render();
+                $combinedHtml .= $html;
             }
+
         }
-
-        $combinedHtml .= $html;
-
-        $combinedHtml .= '<div style="page-break-before: always;"></div>';
 
         // Generate the PDF from the concatenated HTML
         $pdf = Pdf::loadHTML($combinedHtml)
             ->setPaper('a4', 'portrait');
 
         // Display the  PDF in the browser
-        return $pdf->stream($startOfWeek->format('Ymd').'-'.$endOfWeek->format('Ymd').'_timesheet_'.$User->getName().'.pdf');
+        //return $pdf->stream('test.pdf');
+        return $pdf->output();
+    }
+
+    public function getTimeTrackingItems($TimeTrackingItems, $userId)
+    {
+        return array_filter($TimeTrackingItems, function ($item) use ($userId) {
+            return $item['started_user_id'] === $userId;
+        });
+    }
+
+    public function getTimeTrackingItemsBetween(DateTime $start, DateTime $end, $TimeTrackingItems, $userId)
+    {
+
+        // Fetch all time tracking items for the user
+        $items = $this->getTimeTrackingItems($TimeTrackingItems, $userId);
+
+        // Filter the items based on the provided start and end dates
+        $filteredItems = array_filter($items, function ($item) use ($start, $end) {
+            // Convert the 'started_at' and 'ended_at' to DateTime objects
+            $startedAt = new DateTime($item['started_at']);
+            $endedAt = new DateTime($item['ended_at']);
+            // Check if the item falls within the specified date range
+            return $startedAt >= $start && $endedAt <= $end;
+        });
+
+        return $filteredItems;
     }
 }
