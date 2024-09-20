@@ -18,10 +18,10 @@ class MondayService
     /**
      * Makes a request to the Monday.com API with the given GraphQL query.
      *
-     * @param string $query The GraphQL query string.
+     * @param  string  $query  The GraphQL query string.
      * @return array The JSON response from the API.
      */
-    private function makeApiRequest(string $query, array $variables = []): array
+    private function makeApiRequest(string $query, array $variables = []): array|null
     {
         $response = Http::withHeaders([
             'Authorization' => $this->apiKey,
@@ -82,7 +82,7 @@ class MondayService
     /**
      * Fetches the time tracking data for all boards.
      *
-     * @param string $boardId The ID of the board.
+     * @param  string  $boardId  The ID of the board.
      * @return array The array of items with time tracking data.
      */
     public function getTimeTrackingItems(): array
@@ -117,17 +117,19 @@ class MondayService
         });
 
         $items = [];
-        foreach ($timeTrackingData['data']['boards'] as $item) {
-            foreach ($item['items_page']['items'] as $_item) {
-                foreach ($_item['column_values'] as $column_value) {
-                    if (!empty($column_value)) {
-                        foreach ($column_value['history'] as $history) {
-                            $history['id'] = intval($history['id']);
-                            $history['started_user_id'] = intval($history['started_user_id']);
-                            $items[] = array_merge(
-                                ['item_id' => intval($_item['id'])],
-                                $history
-                            );
+        if ($timeTrackingData != null) {
+            foreach ($timeTrackingData['data']['boards'] as $item) {
+                foreach ($item['items_page']['items'] as $_item) {
+                    foreach ($_item['column_values'] as $column_value) {
+                        if (!empty($column_value)) {
+                            foreach ($column_value['history'] as $history) {
+                                $history['id'] = intval($history['id']);
+                                $history['started_user_id'] = intval($history['started_user_id']);
+                                $items[] = array_merge(
+                                    ['item_id' => intval($_item['id'])],
+                                    $history
+                                );
+                            }
                         }
                     }
                 }
@@ -139,7 +141,7 @@ class MondayService
 
     public function getItems($ids = []): array
     {
-        if(empty($ids)){
+        if (empty($ids)) {
             return [];
         }
         $ids_string = implode(',', $ids);
@@ -171,11 +173,11 @@ class MondayService
 
         $items = [];
 
-        if(!isset($response['data']['items'])){
+        if (!isset($response['data']['items'])) {
             var_dump($response);
             exit;
         }
-        foreach($response['data']['items'] as $item){
+        foreach ($response['data']['items'] as $item) {
             $items[$item['id']] = $item;
         }
 
