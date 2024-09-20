@@ -52,6 +52,11 @@
         padding-bottom: 3px;
     }
 
+    .day-header-days {
+        font-weight: bolder;
+        font-size: large;
+    }
+
     .logo {
         max-width: 80px;
         height: auto;
@@ -118,8 +123,8 @@
                     </form>
                     @foreach($data['days'] as $day)
                         <div class="day-header">
-                            <h2>{{ $day['day'] }}, {{ $day['date'] }}</h2>
-                            <span class="project-total">Total: {{ round($day['time'] / 3600, 2) }} hours</span>
+                            <h1 class="day-header-days">{{ $day['day'] }}, {{ $day['date'] }}</h1>
+                            <span class="project-total day-header-days">Total: {{ round($day['time'] / 3600, 2) }} hours</span>
                         </div>
 
                         <table>
