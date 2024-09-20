@@ -115,7 +115,7 @@
                         Weekly Timesheet</h1>
                     <p style="text-align: center; padding: 0; margin: 0; font-style: italic; padding-bottom: 12px;">{{ $data['startOfWeek'] }}
                         - {{ $data['endOfWeek'] }}</p>
-                    <h1 style="text-align: center; padding: 0; margin: 0; font-style: italic; padding-bottom: 12px;">{{ $data['name'] }}</h1>
+                    <h1 style="text-align: center; padding: 0; margin: 0; font-style: italic; padding-bottom: 12px;" class="day-header-days">{{ $data['name'] }}</h1>
                     <form action="{{ route('download.sheet') }}" method="post" target="_blank">
                         @csrf
                         <input type="hidden" name="data" value="{{ json_encode($data) }}">
