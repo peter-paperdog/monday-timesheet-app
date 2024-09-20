@@ -43,7 +43,5 @@ class weeklyNotification extends Command
                 Mail::to($user['email'])->send(new attentionEmail($user['name']));
             }
         }
-
-
     }
 }
