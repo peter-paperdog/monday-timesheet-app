@@ -36,7 +36,7 @@ class weeklyNotification extends Command
 
         $users = $usersService->getUsers();
 
-        $exceptions = ['petra@paperdog.com', 'szonja@paperdog.com'];
+        $exceptions = ['petra@paperdog.com', 'szonja@paperdog.com', 'oliver@paperdog.com', 'amo@paperdog.com', 'morwenna@paperdog.com'];
 
         foreach ($users as $user) {
             if (!in_array($user['email'], $exceptions)) {
