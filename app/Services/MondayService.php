@@ -117,6 +117,8 @@ class MondayService
         });
 
         $items = [];
+        var_dump($timeTrackingData);
+        die();
         if ($timeTrackingData != null) {
             foreach ($timeTrackingData['data']['boards'] as $item) {
                 foreach ($item['items_page']['items'] as $_item) {
