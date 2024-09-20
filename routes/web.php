@@ -23,4 +23,6 @@ Route::middleware('auth')->group(function () {
 Route::get('/login/google', [SociaLoginController::class, 'redirectToProvider'])->name('google.login');
 Route::get('/login/google/callback', [SociaLoginController::class, 'handleProviderCallback']);
 
+Route::get('/test', [TimesheetController::class, 'downloadAllTimeSheet']);
+
 require __DIR__.'/auth.php';
