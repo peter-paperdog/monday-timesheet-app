@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Http\Controllers\TimesheetController;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -51,12 +52,27 @@ class allUserSummaryEmail extends Mailable
     public function attachments(): array
     {
         $TimesheetController = new TimesheetController();
+        $combinedHtml = '';
+
+        $timesheets = $TimesheetController->downloadAllTimeSheet();
+
+        foreach ($timesheets as $timesheet) {
+            $combinedHtml .= $timesheet;
+        }
 
         return [
+            Attachment::fromData(function () use ($combinedHtml) {
+                return Pdf::loadHTML($combinedHtml)
+                    ->setPaper('a4', 'portrait')->output();
+            }, 'allTimeSheetWeeklySummary.pdf')
+                ->withMime('application/pdf'),
+        ];
+
+        /*return [
             Attachment::fromData(function () use ($TimesheetController) {
                 return $TimesheetController->downloadAllTimeSheet();
             }, 'allTimeSheetWeeklySummary.pdf')
                 ->withMime('application/pdf'),
-        ];
+        ];*/
     }
 }

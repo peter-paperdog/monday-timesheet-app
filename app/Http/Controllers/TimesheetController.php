@@ -333,7 +333,7 @@ class TimesheetController extends Controller
             "$decodedData->startOfWeek.'-'.$decodedData->endOfWeek.'_timesheet_'.$decodedData->name.'.pdf'"));
     }
 
-    public function downloadAllTimeSheet(): string
+    public function downloadAllTimeSheet(): array
     {
         //Cache::clear();
         $combinedHtml = '';
@@ -348,6 +348,8 @@ class TimesheetController extends Controller
             'petra@paperdog.com', 'szonja@paperdog.com', 'oliver@paperdog.com', 'amo@paperdog.com',
             'morwenna@paperdog.com', 'gabriella@paperdog.com'
         ];
+
+        $htmls = [];
 
         foreach ($users as $user) {
             if (!in_array($user['email'], $exceptions)) {
@@ -442,18 +444,12 @@ class TimesheetController extends Controller
                     'data' => $data,
                     'printedDate' => (new DateTime())->setTimezone(new DateTimeZone('Europe/London'))->format('d/m/Y H:i:s')
                 ])->render();
-                $combinedHtml .= $html;
+                //$combinedHtml .= $html;
+                $htmls[$User->getEmail()] = $html;
             }
 
         }
-
-        // Generate the PDF from the concatenated HTML
-        $pdf = Pdf::loadHTML($combinedHtml)
-            ->setPaper('a4', 'portrait');
-
-        // Display the  PDF in the browser
-        //return $pdf->stream('test.pdf');
-        return $pdf->output();
+        return $htmls;
     }
 
     public function getTimeTrackingItems($TimeTrackingItems, $userId)
