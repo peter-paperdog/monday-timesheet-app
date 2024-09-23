@@ -324,8 +324,8 @@
                     <!-- START MAIN CONTENT AREA -->
                     <tr>
                         <td class="wrapper">
-                            <p>Hi Morwenna</p>
-                            <p>You will find a summary of everyone’s logged hours for this week attached.</p>
+                            <p>Hi there</p>
+                            <p>You will find a summary of logged hours for this week attached.</p>
                             <p>Cheers,</p>
                             <p>Paper Dog My Timesheet app</p>
                         </td>
