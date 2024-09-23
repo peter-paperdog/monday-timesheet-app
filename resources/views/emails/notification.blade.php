@@ -328,7 +328,7 @@
                             <p>Please do not forget to log your hours for this week into Monday.</p>
                             <p>We will send the weekly summary soon!</p>
                             <p>Cheers,</p>
-                            <p>Morwenna</p>
+                            <p>Paper Dog My Timesheet app</p>
                         </td>
                     </tr>
 
