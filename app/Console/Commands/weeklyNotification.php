@@ -36,15 +36,15 @@ class weeklyNotification extends Command
 
         $users = $usersService->getUsers();
 
-        $exceptions = ['petra@paperdog.com', 'szonja@paperdog.com', 'oliver@paperdog.com', 'amo@paperdog.com', 'morwenna@paperdog.com'];
+        $exceptions = [
+            'petra@paperdog.com', 'szonja@paperdog.com', 'oliver@paperdog.com', 'amo@paperdog.com',
+            'morwenna@paperdog.com'
+        ];
 
         foreach ($users as $user) {
-            if ($user['email'] == 'bence@paperdog.com') {
+            if (!in_array($user['email'], $exceptions)) {
                 Mail::to($user['email'])->send(new attentionEmail($user['name']));
             }
-            /*if (!in_array($user['email'], $exceptions)) {
-                Mail::to($user['email'])->send(new attentionEmail($user['name']));
-            }*/
         }
     }
 }
