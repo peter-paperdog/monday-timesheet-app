@@ -28,6 +28,7 @@ class weeklyAllPdf extends Command
     public function handle()
     {
         info("Weekly summary with all users data sent to Morwenna ".now());
-        Mail::to('morwenna@paperdog.com')->send(new allUserSummaryEmail());
+        //Mail::to('morwenna@paperdog.com')->send(new allUserSummaryEmail());
+        Mail::to('bence@paperdog.com')->send(new allUserSummaryEmail());
     }
 }
