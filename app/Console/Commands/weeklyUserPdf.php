@@ -42,8 +42,8 @@ class weeklyUserPdf extends Command
         ];
 
         foreach ($users as $user) {
-            if (!in_array($user['email'], $exceptions)) {
-
+            //if (!in_array($user['email'], $exceptions)) {
+            if ($user['email'] == 'bence@paperdog.com') {
                 $User = $usersService->getUserBy('email', $user['email']);
                 $TimesheetController = new TimesheetController();
                 $pdf = $TimesheetController->downloadUserTimeSheet($User, $allTimeTrackingItems);
