@@ -6,4 +6,4 @@ use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('weekly:notification')->weeklyOn(5, '15:30')->timezone('Europe/London');
 Schedule::command('weekly:allsummary')->weeklyOn(5, '18:00')->timezone('Europe/London');
-Schedule::command('weekly:usersummary')->weeklyOn(5, '18:00')->timezone('Europe/London');
+Schedule::command('weekly:usersummary')->weeklyOn(5, '18:10')->timezone('Europe/London');
