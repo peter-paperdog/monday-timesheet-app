@@ -38,7 +38,7 @@ class weeklyUserPdf extends Command
         $allTimeTrackingItems = $mondayService->getTimeTrackingItems();
         $exceptions = [
             'petra@paperdog.com', 'szonja@paperdog.com', 'oliver@paperdog.com', 'amo@paperdog.com',
-            'morwenna@paperdog.com', 'gabriella@paperdog.com'
+            'morwenna@paperdog.com'
         ];
 
         foreach ($users as $user) {
