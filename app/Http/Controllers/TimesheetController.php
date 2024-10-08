@@ -31,8 +31,8 @@ class TimesheetController extends Controller
     {
         $date = new \DateTime();
 
-        $startOfWeek = (clone $date)->modify('Monday this week');
-        $endOfWeek = (clone $date)->modify('Sunday this week');
+        $startOfWeek = (clone $date)->modify('Monday last week');
+        $endOfWeek = (clone $date)->modify('Sunday last week');
 
         $usersObj = $this->initializeUsers($startOfWeek, $endOfWeek);
 
@@ -208,10 +208,10 @@ class TimesheetController extends Controller
             $startOfWeek = new DateTime($request->weekStartDate);
         }
 
-        $startOfWeek->modify('Monday this week');
+        $startOfWeek->modify('Monday last week');
 
         $endOfWeek = clone $startOfWeek;
-        $endOfWeek->modify('Sunday this week');
+        $endOfWeek->modify('Sunday last week');
 
         $timeTrackingItems = $User->getTimeTrackingItemsBetween($startOfWeek, $endOfWeek);
 
@@ -355,10 +355,10 @@ class TimesheetController extends Controller
                 $User = $usersService->getUserBy('email', $user['email']);
 
                 $startOfWeek = new DateTime();
-                $startOfWeek->modify('Monday this week');
+                $startOfWeek->modify('Monday last week');
 
                 $endOfWeek = clone $startOfWeek;
-                $endOfWeek->modify('Sunday this week');
+                $endOfWeek->modify('Sunday last week');
 
                 $timeTrackingItems = $this->getTimeTrackingItemsBetween($startOfWeek, $endOfWeek,
                     $allTimeTrackingItems, $User->getId());
@@ -486,10 +486,10 @@ class TimesheetController extends Controller
         Cache::clear();
         $mondayService = new MondayService();
         $startOfWeek = new DateTime();
-        $startOfWeek->modify('Monday this week');
+        $startOfWeek->modify('Monday last week');
 
         $endOfWeek = clone $startOfWeek;
-        $endOfWeek->modify('Sunday this week');
+        $endOfWeek->modify('Sunday last week');
 
         $timeTrackingItems = $this->getTimeTrackingItemsBetween($startOfWeek, $endOfWeek,
             $allTimeTrackingItems, $User->getId());
