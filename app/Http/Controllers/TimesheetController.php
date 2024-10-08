@@ -32,7 +32,7 @@ class TimesheetController extends Controller
         $date = new \DateTime();
 
         $startOfWeek = (clone $date)->modify('Monday last week');
-        $endOfWeek = (clone $date)->modify('Sunday last week');
+        $endOfWeek = (clone $date)->modify('Sunday this week');
 
         $usersObj = $this->initializeUsers($startOfWeek, $endOfWeek);
 
@@ -211,7 +211,7 @@ class TimesheetController extends Controller
         $startOfWeek->modify('Monday last week');
 
         $endOfWeek = clone $startOfWeek;
-        $endOfWeek->modify('Sunday last week');
+        $endOfWeek->modify('Sunday this week');
 
         $timeTrackingItems = $User->getTimeTrackingItemsBetween($startOfWeek, $endOfWeek);
 
@@ -358,7 +358,7 @@ class TimesheetController extends Controller
                 $startOfWeek->modify('Monday last week');
 
                 $endOfWeek = clone $startOfWeek;
-                $endOfWeek->modify('Sunday last week');
+                $endOfWeek->modify('Sunday this week');
 
                 $timeTrackingItems = $this->getTimeTrackingItemsBetween($startOfWeek, $endOfWeek,
                     $allTimeTrackingItems, $User->getId());
@@ -489,7 +489,7 @@ class TimesheetController extends Controller
         $startOfWeek->modify('Monday last week');
 
         $endOfWeek = clone $startOfWeek;
-        $endOfWeek->modify('Sunday last week');
+        $endOfWeek->modify('Sunday this week');
 
         $timeTrackingItems = $this->getTimeTrackingItemsBetween($startOfWeek, $endOfWeek,
             $allTimeTrackingItems, $User->getId());
