@@ -11,8 +11,3 @@ use Illuminate\Support\Facades\Route;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
-
-Route::get('/send-test-email', function () {
-    Mail::to('bence@paperdog.com')->send(new allUserSummaryEmail());
-});
-
