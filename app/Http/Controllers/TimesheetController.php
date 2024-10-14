@@ -15,7 +15,7 @@ use Illuminate\View\View;
 class TimesheetController extends Controller
 {
     protected $mondayService;
-    protected $cacheTTL = 600; // Cache time-to-live in seconds (10 minutes)
+   // protected $cacheTTL = 600; // Cache time-to-live in seconds (10 minutes)
 
     /*public function __construct(MondayService $mondayService)
     {
@@ -45,9 +45,11 @@ class TimesheetController extends Controller
 
     protected function initializeUsers($startOfWeek, $endOfWeek)
     {
-        $users = Cache::remember('users', $this->cacheTTL, function () {
+        /*$users = Cache::remember('users', $this->cacheTTL, function () {
             return $this->mondayService->getUsers();
-        });
+        });*/
+
+        $users = $this->mondayService->getUsers();
 
         $usersObj = new \stdClass();
         foreach ($users as $user) {
@@ -75,16 +77,19 @@ class TimesheetController extends Controller
 
     protected function processBoards(&$usersObj, $startOfWeek, $endOfWeek)
     {
-        $boards = Cache::remember('boards_'.$startOfWeek->format('YW'), $this->cacheTTL, function () {
+        /*$boards = Cache::remember('boards_'.$startOfWeek->format('YW'), $this->cacheTTL, function () {
             return $this->mondayService->getBoards();
-        });
+        });*/
+        $boards = $this->mondayService->getBoards();
 
         foreach ($boards as $board) {
             $board_id = $board['id'];
-            $boardData = Cache::remember('board_'.$startOfWeek->format('YW').'_'.$board_id, $this->cacheTTL,
+            /*$boardData = Cache::remember('board_'.$startOfWeek->format('YW').'_'.$board_id, $this->cacheTTL,
                 function () use ($board_id) {
                     return $this->mondayService->getTimeTrackingDataForBoard($board_id);
-                });
+                });*/
+
+            $boardData = $this->mondayService->getTimeTrackingDataForBoard($board_id);
 
             foreach ($boardData['items_page']['items'] as $item) {
                 $this->processItem($item, $boardData, $usersObj, $startOfWeek, $endOfWeek);
@@ -335,7 +340,7 @@ class TimesheetController extends Controller
 
     public function downloadAllTimeSheet(): string
     {
-        Cache::clear();
+        //Cache::clear();
         $combinedHtml = '';
         $mondayService = new MondayService();
         $usersService = new UserService($mondayService);
@@ -483,7 +488,7 @@ class TimesheetController extends Controller
 
     public function downloadUserTimeSheet($User, $allTimeTrackingItems): string
     {
-        Cache::clear();
+        //Cache::clear();
         $mondayService = new MondayService();
         $startOfWeek = new DateTime();
         $startOfWeek->modify('Monday last week');
@@ -575,7 +580,7 @@ class TimesheetController extends Controller
         ])->render();
 
 
-    // Generate the PDF from the concatenated HTML
+        // Generate the PDF from the concatenated HTML
         $pdf = Pdf::loadHTML($html)
             ->setPaper('a4', 'portrait');
 

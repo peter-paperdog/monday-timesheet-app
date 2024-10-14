@@ -88,7 +88,7 @@ class MondayService
     public function getTimeTrackingItems(): array
     {
         // Check if the data is already in the cache
-        $timeTrackingData = Cache::rememberForever('timeTrackingData', function () {
+        /*$timeTrackingData = Cache::rememberForever('timeTrackingData', function () {
             // Define the GraphQL query
             $query = <<<GRAPHQL
             {
@@ -114,7 +114,34 @@ class MondayService
 
             // Make the API request and return the result
             return $this->makeApiRequest($query);
-        });
+        });*/
+
+        // Define the GraphQL query
+        $query = <<<GRAPHQL
+                {
+                  boards (limit:300){
+                    items_page(limit:500){
+                        items{
+                            id
+                            column_values {
+                                ... on TimeTrackingValue {
+                                    history {
+                                        id
+                                        started_user_id
+                                        started_at
+                                        ended_at
+                                    }
+                                }
+                            }
+                        }
+                    }
+                  }
+                }
+            GRAPHQL;
+
+        // Make the API request and return the result
+        $timeTrackingData = $this->makeApiRequest($query);
+
 
         $items = [];
         if ($timeTrackingData != null) {
