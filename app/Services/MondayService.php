@@ -66,7 +66,7 @@ class MondayService
     {
         $query = <<<'GRAPHQL'
     query {
-      boards(limit: 999){
+      boards(limit: 999, workspace_ids: 5096840){
             id
             name
       }
@@ -119,7 +119,7 @@ class MondayService
         // Define the GraphQL query
         $query = <<<GRAPHQL
                 {
-                  boards (limit:300){
+                  boards (limit:300, workspace_ids: 5096840){
                     items_page(limit:500){
                         items{
                             id
@@ -205,7 +205,8 @@ class MondayService
             exit;
         }
         foreach ($response['data']['items'] as $item) {
-            $items[$item['id']] = $item;
+            return [$item['id'], $item];
+            //$items[$item['id']] = $item;
         }
 
         return $items;
