@@ -226,7 +226,12 @@ class TimesheetController extends Controller
         if (!empty($timeTrackingItems)) {
             $itemIds = array_column($timeTrackingItems, 'item_id');
 
-            $items = $mondayService->getItems($itemIds);
+            //$items = $mondayService->getItems($itemIds);
+            $items = [];
+            foreach ($itemIds as $itemId){
+                $item = $mondayService->getItems([$itemId]);
+                $items[$item[0]] = $item[1];
+            }
 
             foreach ($timeTrackingItems as $history) {
                 $started_at = new DateTime($history['started_at']);
@@ -373,7 +378,12 @@ class TimesheetController extends Controller
                 if (!empty($timeTrackingItems)) {
                     $itemIds = array_column($timeTrackingItems, 'item_id');
 
-                    $items = $mondayService->getItems($itemIds);
+                    //$items = $mondayService->getItems($itemIds);
+                    $items = [];
+                    foreach ($itemIds as $itemId){
+                        $item = $mondayService->getItems([$itemId]);
+                        $items[$item[0]] = $item[1];
+                    }
 
                     foreach ($timeTrackingItems as $history) {
                         $started_at = new DateTime($history['started_at']);
@@ -504,7 +514,12 @@ class TimesheetController extends Controller
         if (!empty($timeTrackingItems)) {
             $itemIds = array_column($timeTrackingItems, 'item_id');
 
-            $items = $mondayService->getItems($itemIds);
+            //$items = $mondayService->getItems($itemIds);
+            $items = [];
+            foreach ($itemIds as $itemId){
+                $item = $mondayService->getItems([$itemId]);
+                $items[$item[0]] = $item[1];
+            }
 
             foreach ($timeTrackingItems as $history) {
                 $started_at = new DateTime($history['started_at']);
