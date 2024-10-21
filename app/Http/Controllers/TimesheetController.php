@@ -356,7 +356,7 @@ class TimesheetController extends Controller
 
         $exceptions = [
             'petra@paperdog.com', 'szonja@paperdog.com', 'oliver@paperdog.com', 'amo@paperdog.com',
-            'morwenna@paperdog.com'
+            'morwenna@paperdog.com', 'jason@paperdog.com', 'kata@paperdg.com', 'gabriel@paperdg.com',
         ];
 
         foreach ($users as $user) {
