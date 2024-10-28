@@ -23,14 +23,19 @@ class MondayService
      */
     private function makeApiRequest(string $query, array $variables = []): array|null
     {
+        $requestData = [
+            'query' => $query
+        ];
+
+        if (!empty($variables)) {
+            $requestData['variables'] = $variables;
+        }
+
         $response = Http::withHeaders([
             'Authorization' => $this->apiKey,
         ])
             ->timeout(120) // Set timeout to 60 seconds
-            ->post('https://api.monday.com/v2', [
-                'query' => $query,
-                'variables' => $variables
-            ]);
+            ->post('https://api.monday.com/v2', $requestData);
 
         return $response->json();
     }
