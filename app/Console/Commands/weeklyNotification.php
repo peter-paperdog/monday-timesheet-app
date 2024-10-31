@@ -44,6 +44,7 @@ class weeklyNotification extends Command
         foreach ($users as $user) {
             if (!in_array($user['email'], $exceptions)) {
                 Mail::to($user['email'])->send(new attentionEmail($user['name']));
+                info("Weekly notification sent to ".$user['email'].' '.now());
             }
         }
     }
