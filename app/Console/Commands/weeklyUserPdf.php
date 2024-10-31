@@ -36,6 +36,7 @@ class weeklyUserPdf extends Command
         $usersService = new UserService($mondayService);
         $users = $usersService->getUsers();
         $allTimeTrackingItems = $mondayService->getTimeTrackingItems();
+        $pdfs = array();
         $exceptions = [
             'petra@paperdog.com', 'szonja@paperdog.com', 'oliver@paperdog.com', 'amo@paperdog.com',
             'morwenna@paperdog.com', 'jason@paperdog.com',
@@ -45,10 +46,13 @@ class weeklyUserPdf extends Command
             if (!in_array($user['email'], $exceptions)) {
                 $User = $usersService->getUserBy('email', $user['email']);
                 $TimesheetController = new TimesheetController();
-                $pdf = $TimesheetController->downloadUserTimeSheet($User, $allTimeTrackingItems);
-                info("Weekly summary sent to ".$user['email'].' '.now());
-                Mail::to($user['email'])->send(new userSummaryEmail($pdf));
+                $pdfs[$user['email']] = $TimesheetController->downloadUserTimeSheet($User, $allTimeTrackingItems);
             }
+        }
+
+        foreach ($pdfs as $email => $pdf) {
+            $pdfAttachment = new userSummaryEmail($pdf);
+            Mail::to($email)->send($pdfAttachment);
         }
     }
 }
