@@ -12,4 +12,4 @@ Schedule::command('weekly:allsummary')->weeklyOn(1, '17:57')->timezone('Europe/L
 
 //all user summary mails
 Schedule::command('weekly:usersummary')->weeklyOn(1, '09:00')->timezone('Europe/London');
-Schedule::command('weekly:usersummary')->weeklyOn(1, '15:00')->timezone('Europe/London');
+Schedule::command('weekly:usersummary')->weeklyOn(1, '15:15')->timezone('Europe/London');
