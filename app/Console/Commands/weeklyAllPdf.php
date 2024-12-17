@@ -28,7 +28,9 @@ class weeklyAllPdf extends Command
     public function handle()
     {
         info("Weekly summary with all users data sent to Morwenna ".now());
-        Mail::to('morwenna@paperdog.com')->bcc('bence@paperdog.com')->send(new allUserSummaryEmail());
+        Mail::to('morwenna@paperdog.com')
+            ->bcc(['bence@paperdog.com', 'peter@paperdog.com', 'gabriella@paperdog.com'])
+            ->send(new allUserSummaryEmail());
         //Mail::to('bence@paperdog.com')->send(new allUserSummaryEmail());
     }
 }
