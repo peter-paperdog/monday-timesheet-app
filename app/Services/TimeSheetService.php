@@ -45,7 +45,7 @@ class TimeSheetService
         $this->endOfWeek = clone $this->date;
         $this->endOfWeek->modify('Sunday this week');*/
 
-        $this->startOfWeek = new DateTime('2025-01-05');
+        $this->startOfWeek = new DateTime('2024-12-09');
         $this->endOfWeek = new DateTime('2025-01-10');
     }
 
