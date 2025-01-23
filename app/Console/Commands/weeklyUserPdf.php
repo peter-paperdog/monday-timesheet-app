@@ -31,19 +31,20 @@ class weeklyUserPdf extends Command
      */
     public function handle()
     {
-
         $mondayService = new MondayService();
         $usersService = new UserService($mondayService);
         $users = $usersService->getUsers();
         $allTimeTrackingItems = $mondayService->getTimeTrackingItems();
         $pdfs = array();
-        $exceptions = [
+        /*$exceptions = [
             'petra@paperdog.com', 'szonja@paperdog.com', 'oliver@paperdog.com', 'amo@paperdog.com',
             'morwenna@paperdog.com', 'jason@paperdog.com',
-        ];
+        ];*/
+
+        $exceptions = ['carys@paperdog.com', 'allison@paperdog.com', 'hannah@paperdog.com'];
 
         foreach ($users as $user) {
-            if (!in_array($user['email'], $exceptions)) {
+            if (in_array($user['email'], $exceptions)) {
                 $User = $usersService->getUserBy('email', $user['email']);
                 $TimesheetController = new TimesheetController();
                 $pdfs[$user['email']] = $TimesheetController->downloadUserTimeSheet($User, $allTimeTrackingItems);
@@ -52,7 +53,7 @@ class weeklyUserPdf extends Command
 
         foreach ($pdfs as $email => $pdf) {
             $pdfAttachment = new userSummaryEmail($pdf);
-            Mail::to($email)->send($pdfAttachment);
+            Mail::to('bence@paperdog.com')->send($pdfAttachment);
         }
     }
 }
