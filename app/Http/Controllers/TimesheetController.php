@@ -31,11 +31,8 @@ class TimesheetController extends Controller
     {
         $date = new \DateTime();
 
-        //$startOfWeek = (clone $date)->modify('Monday last week');
-        //$endOfWeek = (clone $date)->modify('Sunday this week');
-
-        $startOfWeek = new DateTime('2024-12-08');
-        $endOfWeek = new DateTime('2024-12-14');
+        $startOfWeek = (clone $date)->modify('Monday last week');
+        $endOfWeek = (clone $date)->modify('Sunday this week');
 
         $usersObj = $this->initializeUsers($startOfWeek, $endOfWeek);
 
@@ -216,13 +213,10 @@ class TimesheetController extends Controller
             $startOfWeek = new DateTime($request->weekStartDate);
         }
 
-        /*$startOfWeek->modify('Monday last week');
+        $startOfWeek->modify('Monday last week');
 
         $endOfWeek = clone $startOfWeek;
-        $endOfWeek->modify('Sunday this week');*/
-
-        $startOfWeek = new DateTime('2024-12-08');
-        $endOfWeek = new DateTime('2024-12-14');
+        $endOfWeek->modify('Sunday this week');
 
         $timeTrackingItems = $User->getTimeTrackingItemsBetween($startOfWeek, $endOfWeek);
 
@@ -370,14 +364,11 @@ class TimesheetController extends Controller
 
                 $User = $usersService->getUserBy('email', $user['email']);
 
-                /*$startOfWeek = new DateTime();
+                $startOfWeek = new DateTime();
                 $startOfWeek->modify('Monday last week');
 
                 $endOfWeek = clone $startOfWeek;
-                $endOfWeek->modify('Sunday this week');*/
-
-                $startOfWeek = new DateTime('2024-12-08');
-                $endOfWeek = new DateTime('2024-12-14');
+                $endOfWeek->modify('Sunday this week');
 
                 $timeTrackingItems = $this->getTimeTrackingItemsBetween($startOfWeek, $endOfWeek,
                     $allTimeTrackingItems, $User->getId());
@@ -509,14 +500,11 @@ class TimesheetController extends Controller
     {
         //Cache::clear();
         $mondayService = new MondayService();
-        /*$startOfWeek = new DateTime();
+        $startOfWeek = new DateTime();
         $startOfWeek->modify('Monday last week');
 
         $endOfWeek = clone $startOfWeek;
-        $endOfWeek->modify('Sunday this week');*/
-
-        $startOfWeek = new DateTime('2024-12-08');
-        $endOfWeek = new DateTime('2024-12-14');
+        $endOfWeek->modify('Sunday this week');
 
         $timeTrackingItems = $this->getTimeTrackingItemsBetween($startOfWeek, $endOfWeek,
             $allTimeTrackingItems, $User->getId());
