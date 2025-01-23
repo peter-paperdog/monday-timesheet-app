@@ -39,11 +39,14 @@ class TimeSheetService
 
     private function initializeWeekBounds()
     {
-        $this->startOfWeek = clone $this->date;
+        /*$this->startOfWeek = clone $this->date;
         $this->startOfWeek->modify('Monday this week');
 
         $this->endOfWeek = clone $this->date;
-        $this->endOfWeek->modify('Sunday this week');
+        $this->endOfWeek->modify('Sunday this week');*/
+
+        $this->startOfWeek = new DateTime('2024-12-09');
+        $this->endOfWeek = new DateTime('2025-01-17');
     }
 
     private function loadBoards()
