@@ -15,17 +15,17 @@ use Illuminate\View\View;
 class TimesheetController extends Controller
 {
     protected $mondayService;
-     protected $cacheTTL = 600; // Cache time-to-live in seconds (10 minutes)
+    // protected $cacheTTL = 600; // Cache time-to-live in seconds (10 minutes)
 
-    public function __construct(MondayService $mondayService)
+    /*public function __construct(MondayService $mondayService)
     {
         $this->mondayService = $mondayService;
-    }
+    }*/
 
-    /*public function __construct()
+    public function __construct()
     {
 
-    }*/
+    }
 
     public function generateTimesheet(Request $request)
     {
@@ -45,9 +45,9 @@ class TimesheetController extends Controller
 
     protected function initializeUsers($startOfWeek, $endOfWeek)
     {
-        $users = Cache::remember('users', $this->cacheTTL, function () {
+        /*$users = Cache::remember('users', $this->cacheTTL, function () {
             return $this->mondayService->getUsers();
-        });
+        });*/
 
         $users = $this->mondayService->getUsers();
 
@@ -77,17 +77,17 @@ class TimesheetController extends Controller
 
     protected function processBoards(&$usersObj, $startOfWeek, $endOfWeek)
     {
-        $boards = Cache::remember('boards_'.$startOfWeek->format('YW'), $this->cacheTTL, function () {
+        /*$boards = Cache::remember('boards_'.$startOfWeek->format('YW'), $this->cacheTTL, function () {
             return $this->mondayService->getBoards();
-        });
+        });*/
         $boards = $this->mondayService->getBoards();
 
         foreach ($boards as $board) {
             $board_id = $board['id'];
-            $boardData = Cache::remember('board_'.$startOfWeek->format('YW').'_'.$board_id, $this->cacheTTL,
+            /*$boardData = Cache::remember('board_'.$startOfWeek->format('YW').'_'.$board_id, $this->cacheTTL,
                 function () use ($board_id) {
                     return $this->mondayService->getTimeTrackingDataForBoard($board_id);
-                });
+                });*/
 
             $boardData = $this->mondayService->getTimeTrackingDataForBoard($board_id);
 

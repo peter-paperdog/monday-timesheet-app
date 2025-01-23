@@ -48,9 +48,9 @@ class TimeSheetService
 
     private function loadBoards()
     {
-        $boardsMonday = Cache::remember('boards_' . $this->startOfWeek->format('YW'), $this->ttl, function () {
+        /*$boardsMonday = Cache::remember('boards_' . $this->startOfWeek->format('YW'), $this->ttl, function () {
             return $this->mondayService->getBoards();
-        });
+        });*/
 
         $boardsMonday = $this->mondayService->getBoards();
 
@@ -65,9 +65,9 @@ class TimeSheetService
     private function processBoards()
     {
         foreach ($this->boards as $boardId => $boardName) {
-            $boardData = Cache::remember('board_' . $this->startOfWeek->format('YW') . '_' . $boardId, $this->ttl, function () use ($boardId) {
+            /*$boardData = Cache::remember('board_' . $this->startOfWeek->format('YW') . '_' . $boardId, $this->ttl, function () use ($boardId) {
                 return $this->mondayService->getTimeTrackingDataForBoard($boardId);
-            });
+            });*/
             $boardData = $this->mondayService->getTimeTrackingDataForBoard($boardId);
 
             foreach ($boardData['items_page']['items'] as $boardItem) {
