@@ -119,7 +119,12 @@
                     <form action="{{ route('download.sheet') }}" method="post" target="_blank">
                         @csrf
                         <input type="hidden" name="data" value="{{ json_encode($data) }}">
-                        <x-primary-button>Download</x-primary-button>
+                        <x-primary-button>Download PDF</x-primary-button>
+                    </form>
+                    <form action="{{ route('download.sheetcsv') }}" method="post" target="_blank">
+                        @csrf
+                        <input type="hidden" name="data" value="{{ json_encode($data) }}">
+                        <x-primary-button>Download CSV</x-primary-button>
                     </form>
                     @foreach($data['days'] as $day)
                         <div class="day-header">
