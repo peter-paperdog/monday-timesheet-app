@@ -343,9 +343,156 @@ class TimesheetController extends Controller
             "$decodedData->startOfWeek.'-'.$decodedData->endOfWeek.'_timesheet_'.$decodedData->name.'.pdf'"));
     }
 
+    public function downloadUserSheetCsv(Request $request)
+    {
+        $decodedData = json_decode($request->data);
+
+        $data = [
+            'name' => $decodedData->name,
+            'email' => $decodedData->email,
+            'days' => $decodedData->days,
+            'time' => $decodedData->time,
+            'startOfWeek' => $decodedData->startOfWeek,
+            'endOfWeek' => $decodedData->endOfWeek,
+        ];
+
+        // Prepare CSV headers
+        $csvHeaders = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . str_replace("/", "_", "{$data['startOfWeek']}-{$data['endOfWeek']}_timesheet_{$data['name']}.csv") . '"',
+        ];
+
+        // Create CSV content
+        $callback = function () use ($data) {
+            $file = fopen('php://output', 'w');
+
+            // Add headers
+            fputcsv($file, ['Date', 'Day', 'Project/Task', 'Group', 'Item', 'Hours']);
+
+            // Add data for each day
+            foreach ($data['days'] as $day) {
+                foreach ($day->boards as $board) {
+                    foreach ($board->groups as $groupName => $group) {
+                        foreach ($group->items as $item) {
+                            fputcsv($file, [
+                                $day->date,
+                                $day->day,
+                                $board->name,
+                                $groupName,
+                                $item->item_name,
+                                round($item->duration / 3600, 2),
+                            ]);
+                        }
+                    }
+
+                    // Add board total row
+                    fputcsv($file, [
+                        $day->date,
+                        $day->day,
+                        $board->name,
+                        '',
+                        'Total for Board',
+                        round($board->duration / 3600, 2),
+                    ]);
+                }
+
+                // Add day total row
+                fputcsv($file, [
+                    $day->date,
+                    $day->day,
+                    '',
+                    '',
+                    'Total for Day',
+                    round($day->time / 3600, 2),
+                ]);
+            }
+
+            // Add weekly total row
+            fputcsv($file, ['', '', '', '', 'Total for Week', round($data['time'] / 3600, 2)]);
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $csvHeaders);
+    }
+
+    private function getDailyData($timeTrackingItems){
+        $mondayService = new MondayService();
+
+        $total = 0;
+        $days = [];
+        if (!empty($timeTrackingItems)) {
+            $itemIds = array_column($timeTrackingItems, 'item_id');
+
+            $items = [];
+            foreach ($itemIds as $itemId){
+                $item = $mondayService->getItems([$itemId]);
+                $items[$item[0]] = $item[1];
+            }
+
+            foreach ($timeTrackingItems as $history) {
+                $started_at = new DateTime($history['started_at']);
+                $ended_at = new DateTime($history['ended_at']);
+                $interval = $started_at->diff($ended_at);
+                $duration = $interval->h * 3600 + $interval->i * 60 + $interval->s;
+
+                $day_nr = $started_at->format('N');
+                $item_id = $history['item_id'];
+
+                if (isset($items[$item_id])) {
+                    $item = $items[$item_id];
+                    $item_name = $item['name'];
+
+                    if (!isset($days[$day_nr])) {
+                        $days[$day_nr] = [
+                            'date' => $started_at->format('d/m/Y'),
+                            'day' => $started_at->format('l'),
+                            'time' => 0,
+                            'boards' => []
+                        ];
+                    }
+
+                    $board_id = $item['board']['id'];
+                    $board_name = str_replace('Subitems of ', '', $item['board']['name']);
+                    $board_group = $item['group']['title'];
+
+                    if (!isset($days[$day_nr]['boards'][$board_id])) {
+                        $days[$day_nr]['boards'][$board_id] = [
+                            'name' => $board_name,
+                            'duration' => 0,
+                            'groups' => []
+                        ];
+                    }
+                    if (!isset($days[$day_nr]['boards'][$board_id]['groups'][$board_group])) {
+                        $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'] = [];
+                        $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['duration'] = 0;
+                    }
+
+                    if (!isset($days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id])) {
+                        $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id] = [
+                            'item_name' => $item_name,
+                            'duration' => 0,
+                        ];
+                    }
+
+
+                    $total += $duration;
+                    $days[$day_nr]['time'] += $duration;
+                    $days[$day_nr]['boards'][$board_id]['duration'] += $duration;
+                    $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['duration'] += $duration;
+                    $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id]['duration'] += $duration;
+                }
+            }
+            ksort($days);
+        }
+
+        return [
+            'days' =>$days,
+            'total' => $total
+        ];
+    }
     public function downloadAllTimeSheet(): string
     {
-        //Cache::clear();
         $combinedHtml = '';
         $mondayService = new MondayService();
         $usersService = new UserService($mondayService);
@@ -370,87 +517,16 @@ class TimesheetController extends Controller
                 $endOfWeek = clone $startOfWeek;
                 $endOfWeek->modify('Sunday this week');
 
-                $timeTrackingItems = $this->getTimeTrackingItemsBetween($startOfWeek, $endOfWeek,
-                    $allTimeTrackingItems, $User->getId());
+                $dailyData = $this->getDailyData($allTimeTrackingItems);
 
-                $total = 0;
-                $days = [];
-                if (!empty($timeTrackingItems)) {
-                    $itemIds = array_column($timeTrackingItems, 'item_id');
-
-                    //$items = $mondayService->getItems($itemIds);
-                    $items = [];
-                    foreach ($itemIds as $itemId){
-                        $item = $mondayService->getItems([$itemId]);
-                        $items[$item[0]] = $item[1];
-                    }
-
-                    foreach ($timeTrackingItems as $history) {
-                        $started_at = new DateTime($history['started_at']);
-                        $ended_at = new DateTime($history['ended_at']);
-                        $interval = $started_at->diff($ended_at);
-                        $duration = $interval->h * 3600 + $interval->i * 60 + $interval->s;
-
-                        $day_nr = $started_at->format('N');
-                        $item_id = $history['item_id'];
-
-                        if (isset($items[$item_id])) {
-                            $item = $items[$item_id];
-                            $item_name = $item['name'];
-
-                            if (!isset($days[$day_nr])) {
-                                $days[$day_nr] = [
-                                    'date' => $started_at->format('d/m/Y'),
-                                    'day' => $started_at->format('l'),
-                                    'time' => 0,
-                                    'boards' => []
-                                ];
-                            }
-
-                            $board_id = $item['board']['id'];
-                            $board_name = str_replace('Subitems of ', '', $item['board']['name']);
-                            $board_group = $item['group']['title'];
-
-                            if (!isset($days[$day_nr]['boards'][$board_id])) {
-                                $days[$day_nr]['boards'][$board_id] = [
-                                    'name' => $board_name,
-                                    'duration' => 0,
-                                    'groups' => []
-                                ];
-                            }
-                            if (!isset($days[$day_nr]['boards'][$board_id]['groups'][$board_group])) {
-                                $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'] = [];
-                                $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['duration'] = 0;
-                            }
-
-                            if (!isset($days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id])) {
-                                $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id] = [
-                                    'item_name' => $item_name,
-                                    'duration' => 0,
-                                ];
-                            }
-
-
-                            $total += $duration;
-                            $days[$day_nr]['time'] += $duration;
-                            $days[$day_nr]['boards'][$board_id]['duration'] += $duration;
-                            $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['duration'] += $duration;
-                            $days[$day_nr]['boards'][$board_id]['groups'][$board_group]['items'][$item_id]['duration'] += $duration;
-                        }
-                    }
-                    ksort($days);
-                }
                 $data = [
                     'name' => $User->getName(),
                     'email' => $User->getEmail(),
-                    'days' => $days,
-                    'time' => $total,
+                    'days' => $dailyData['days'],
+                    'time' => $dailyData['total'],
                     'startOfWeek' => $startOfWeek->format('d/m/Y'),
                     'endOfWeek' => $endOfWeek->format('d/m/Y')
                 ];
-
-
-                //return response()->json($data);
 
                 // Append the view content for this user, adding a page break after each user
                 $html = view('allusertimesheet', [
