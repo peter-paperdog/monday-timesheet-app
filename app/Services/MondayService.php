@@ -18,26 +18,48 @@ class MondayService
     /**
      * Makes a request to the Monday.com API with the given GraphQL query.
      *
-     * @param  string  $query  The GraphQL query string.
+     * @param string $query The GraphQL query string.
      * @return array The JSON response from the API.
      */
     private function makeApiRequest(string $query, array $variables = []): array|null
     {
         $requestData = [
-            'query' => $query
+            'query' => $query,
         ];
 
         if (!empty($variables)) {
             $requestData['variables'] = $variables;
         }
 
-        $response = Http::withHeaders([
-            'Authorization' => $this->apiKey,
-        ])
-            ->timeout(120) // Set timeout to 60 seconds
-            ->post('https://api.monday.com/v2', $requestData);
+        try {
+            // Set the script execution time limit dynamically
+            set_time_limit(300); // Allow up to 5 minutes
 
-        return $response->json();
+            $response = Http::withHeaders([
+                'Authorization' => $this->apiKey,
+            ])
+                ->timeout(120) // Timeout for the HTTP request (2 minutes)
+                ->post('https://api.monday.com/v2', $requestData);
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            // Log or handle non-successful responses
+            logger()->error('API request failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return null;
+        } catch (\Exception $e) {
+            // Log the exception for debugging purposes
+            logger()->error('API request encountered an error', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     /**
@@ -87,40 +109,11 @@ class MondayService
     /**
      * Fetches the time tracking data for all boards.
      *
-     * @param  string  $boardId  The ID of the board.
+     * @param string $boardId The ID of the board.
      * @return array The array of items with time tracking data.
      */
     public function getTimeTrackingItems(): array
     {
-        // Check if the data is already in the cache
-        /*$timeTrackingData = Cache::rememberForever('timeTrackingData', function () {
-            // Define the GraphQL query
-            $query = <<<GRAPHQL
-            {
-              boards (limit:300){
-                items_page(limit:500){
-                    items{
-                        id
-                        column_values {
-                            ... on TimeTrackingValue {
-                                history {
-                                    id
-                                    started_user_id
-                                    started_at
-                                    ended_at
-                                }
-                            }
-                        }
-                    }
-                }
-              }
-            }
-        GRAPHQL;
-
-            // Make the API request and return the result
-            return $this->makeApiRequest($query);
-        });*/
-
         // Define the GraphQL query
         $query = <<<GRAPHQL
                 {
@@ -146,7 +139,6 @@ class MondayService
 
         // Make the API request and return the result
         $timeTrackingData = $this->makeApiRequest($query);
-
 
         $items = [];
         if ($timeTrackingData != null) {
