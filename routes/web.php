@@ -18,6 +18,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('download', [TimesheetController::class, 'downloadUserSheet'])
         ->name('download.sheet');
+    Route::post('downloadcsv', [TimesheetController::class, 'downloadUserSheetCsv'])
+        ->name('download.sheetcsv');
 });
 
 Route::get('/login/google', [SociaLoginController::class, 'redirectToProvider'])->name('google.login');
