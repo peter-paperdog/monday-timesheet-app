@@ -367,7 +367,7 @@ class TimesheetController extends Controller
             $file = fopen('php://output', 'w');
 
             // Add headers
-            fputcsv($file, ['Date', 'Day', 'Project/Task', 'Group', 'Item', 'Hours']);
+            fputcsv($file, ['Date', 'Day', 'Project/Task', 'Group', 'Item', 'Hours'],";");
 
             // Add data for each day
             foreach ($data['days'] as $day) {
@@ -381,7 +381,7 @@ class TimesheetController extends Controller
                                 $groupName,
                                 $item->item_name,
                                 round($item->duration / 3600, 2),
-                            ]);
+                            ],";");
                         }
                     }
 
@@ -393,7 +393,7 @@ class TimesheetController extends Controller
                         '',
                         'Total for Board',
                         round($board->duration / 3600, 2),
-                    ]);
+                    ],";");
                 }
 
                 // Add day total row
@@ -404,11 +404,11 @@ class TimesheetController extends Controller
                     '',
                     'Total for Day',
                     round($day->time / 3600, 2),
-                ]);
+                ],";");
             }
 
             // Add weekly total row
-            fputcsv($file, ['', '', '', '', 'Total for Week', round($data['time'] / 3600, 2)]);
+            fputcsv($file, ['', '', '', '', 'Total for Week', round($data['time'] / 3600, 2)],";");
 
             fclose($file);
         };
