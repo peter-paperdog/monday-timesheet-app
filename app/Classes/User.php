@@ -3,7 +3,6 @@
 namespace App\Classes;
 
 use App\Services\MondayService;
-use App\Services\UserService;
 use DateTime;
 
 class User
@@ -87,6 +86,7 @@ class User
 
     public function getTimeTrackingItemsBetween(DateTime $start, DateTime $end)
     {
+        ini_set('max_execution_time', 300); // 5 minutes
 
         // Fetch all time tracking items for the user
         $items = $this->getTimeTrackingItems();
