@@ -96,6 +96,7 @@ class MondayService
       boards(limit: 999, workspace_ids: 5096840){
             id
             name
+            type
       }
     }
     GRAPHQL;
