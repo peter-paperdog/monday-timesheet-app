@@ -3,7 +3,7 @@
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
-
+/*
 //all user notify
 Schedule::command('weekly:notification')->weeklyOn(5, '15:30')->timezone('Europe/London');
 
@@ -13,3 +13,7 @@ Schedule::command('weekly:allsummary')->weeklyOn(1, '17:57')->timezone('Europe/L
 //all user summary mails
 Schedule::command('weekly:usersummary')->weeklyOn(1, '09:00')->timezone('Europe/London');
 Schedule::command('weekly:usersummary')->weeklyOn(1, '15:15')->timezone('Europe/London');
+*/
+
+// Sync Monday users at midnight every day
+Schedule::command('sync:monday-users')->dailyAt('00:00')->timezone('Europe/London');
