@@ -15,5 +15,8 @@ Schedule::command('weekly:usersummary')->weeklyOn(1, '09:00')->timezone('Europe/
 Schedule::command('weekly:usersummary')->weeklyOn(1, '15:15')->timezone('Europe/London');
 */
 
-// Sync Monday users at midnight every day
+// Sync Monday users
 Schedule::command('sync:monday-users')->dailyAt('00:00')->timezone('Europe/London');
+
+// Sync Monday boards
+Schedule::command('sync:monday-boards')->dailyAt('00:01')->timezone('Europe/London');
