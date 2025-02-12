@@ -20,3 +20,5 @@ Schedule::command('sync:monday-users')->dailyAt('00:00')->timezone('Europe/Londo
 
 // Sync Monday boards
 Schedule::command('sync:monday-boards')->dailyAt('00:01')->timezone('Europe/London');
+
+Schedule::command('sync:active-board-time-tracking')->dailyAt('00:05')->timezone('Europe/London');
