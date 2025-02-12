@@ -11,6 +11,10 @@ class MondayBoard extends Model
     public $incrementing = false; // Disable auto-incrementing
     protected $keyType = 'string'; // Ensure it's treated as a string
 
-    protected $fillable = ['id', 'name', 'type'];
+    protected $fillable = ['id', 'name', 'type', 'activity_at'];
+
+    protected $casts = [
+        'activity_at' => 'datetime', // Ensure it is treated as a timestamp
+    ];
 
 }
