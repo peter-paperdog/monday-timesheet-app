@@ -132,12 +132,12 @@ GRAPHQL;
      * @param string $boardId The ID of the board.
      * @return array The array of items with time tracking data.
      */
-    public function getTimeTrackingItems(): array
+    public function getTimeTrackingItems(string $boardId): array
     {
         // Define the GraphQL query
         $query = <<<GRAPHQL
                 {
-                  boards (limit:300, workspace_ids: 5096840){
+                  boards (ids:"$boardId", workspace_ids: 5096840){
                     items_page(limit:500){
                         items{
                             id
@@ -155,7 +155,7 @@ GRAPHQL;
                     }
                   }
                 }
-            GRAPHQL;
+GRAPHQL;
 
         // Make the API request and return the result
         $timeTrackingData = $this->makeApiRequest($query);
