@@ -10,9 +10,11 @@ class MondayTimeTracking extends Model
 {
     use HasFactory;
     public $incrementing = false; // Disable auto-incrementing
+    public $timestamps = false;
 
     protected $fillable = [
         'id',
+        'item_id',
         'user_id',
         'started_at',
         'ended_at'
