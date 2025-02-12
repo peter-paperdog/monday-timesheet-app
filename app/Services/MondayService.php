@@ -84,6 +84,25 @@ class MondayService
         return $response['data']['users'];
     }
 
+    public function getLastActivities($from, $to)
+    {
+        $query = <<<GRAPHQL
+        query {
+          boards (limit:999, workspace_ids: 5096840){
+                id
+                name
+                activity_logs (from: "$from", to: "$to") {
+                     created_at
+                }
+            }
+        }
+GRAPHQL;
+
+        $response = $this->makeApiRequest($query);
+
+        return $response['data']['boards'];
+    }
+
     /**
      * Fetches the list of boards from the Monday.com API.
      *
