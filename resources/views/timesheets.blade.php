@@ -4,6 +4,9 @@
             Weekly timesheets
         </h2>
     </x-slot>
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 text-right text-gray-400 mt-2 font-extralight" id="lastupdated">
+       Last updated: {{$lastupdated}}
+    </div>
 
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 py-5">
         <div class="text-gray-900 dark:text-gray-100">

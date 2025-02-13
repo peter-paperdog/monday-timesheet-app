@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MondayBoard;
 use App\Models\MondayTimeTracking;
 use App\Models\User;
-use App\Services\MondayService;
-use App\Services\UserService;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Support\Carbon;
@@ -31,6 +30,14 @@ class TimesheetController extends Controller
         $startOfWeek = Carbon::parse($selectedDate)->startOfWeek(); // Ensure it starts on Monday
         $endOfWeek = $startOfWeek->copy()->endOfWeek(); // Get Sunday of that week
 
+        // Fetch the most recent `updated_at` from boards
+        $oldestUpdatedBoard = MondayBoard::orderBy('updated_at', 'asc')->value('updated_at');
+
+        // Convert `updated_at` to human-readable format (e.g., "45 minutes ago")
+        $lastupdated = $oldestUpdatedBoard
+            ? (int) Carbon::parse($oldestUpdatedBoard)->diffInMinutes(Carbon::now()) . ' minutes ago'
+            : 'Never updated';
+
         $timeTrackings = MondayTimeTracking::where('user_id', $selectedUserId)
             ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
             ->orderBy('started_at', 'desc')
@@ -40,6 +47,7 @@ class TimesheetController extends Controller
             'timeTrackings' => $timeTrackings,
             'selectedUserId' => $selectedUserId,
             'selectedDate' => $selectedDate,
+            'lastupdated' => $lastupdated,
             'users' => User::orderBy('name', 'asc')->get()
         ]);
     }
