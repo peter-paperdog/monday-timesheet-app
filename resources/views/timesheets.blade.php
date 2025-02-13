@@ -1,62 +1,3 @@
-<style>
-
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 5px;
-        margin-bottom: 10px;
-    }
-
-    table, th, td {
-        border: 1px solid #ddd;
-    }
-
-    th, td {
-        padding: 4px 6px;
-        text-align: left;
-    }
-
-    th {
-        background-color: #f4f4f4;
-    }
-
-    .total-column {
-        width: 70px;
-        text-align: right;
-    }
-
-    .project-total, .item-total {
-        text-align: right;
-        font-weight: bold;
-    }
-
-    .project-total, .sub-item-total {
-        text-align: right;
-        font-style: italic;
-    }
-
-    .final-total {
-        font-size: 14px;
-        text-align: right;
-        margin-top: 20px;
-        font-weight: bold;
-    }
-
-    .day-header {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 3px;
-    }
-
-    .day-header-days {
-        font-weight: bolder;
-        font-size: large;
-    }
-</style>
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
@@ -68,18 +9,8 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <form method="get" action="{{ route('dashboard') }}" class="mt-6 space-y-6">
-                        <select name="email" id="user" class="form-control input-sm">
-                            @foreach($users as $option)
-                                <option value="{{ $option['email'] }}" {{ $option['email'] == $user->email ? 'selected' : '' }}>
-                                    {{ $option['name'] }}
-                                </option>
-                            @endforeach
-
-                        </select>
-
+                    <form method="get" action="{{ route('timesheets') }}" class="mt-6 space-y-6">
                         <input type="text" id="datepicker" name="weekStartDate" readonly="readonly">
-
                         <div class="flex items-center gap-4">
                             <x-primary-button>{{ __('Search') }}</x-primary-button>
                         </div>
