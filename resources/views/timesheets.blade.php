@@ -5,14 +5,14 @@
         </h2>
     </x-slot>
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 text-right text-gray-400 mt-2 font-extralight" id="lastupdated">
-       Last updated: {{$lastupdated}}
+        Last updated: {{$lastupdated}}
     </div>
 
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 py-5">
-        <div class="text-gray-900 dark:text-gray-100">
-            <form method="get" action="{{ route('timesheets') }}" class="flex items-center gap-4">
-                <!-- User Dropdown -->
-                @if(auth()->user()->admin)
+    @if(auth()->user()->admin)
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 py-5">
+            <div class="text-gray-900 dark:text-gray-100">
+                <form method="get" action="{{ route('timesheets') }}" class="flex items-center gap-4">
+                    <!-- User Dropdown -->
                     <select name="user_id"
                             class="px-4 py-2 border rounded-lg shadow-sm text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600">
                         @foreach($users as $userOption)
@@ -22,14 +22,14 @@
                             </option>
                         @endforeach
                     </select>
-                @endif
-                <!-- Search Button -->
-                <x-primary-button class="px-6 py-2 text-lg whitespace-nowrap">
-                    {{ __('Search') }}
-                </x-primary-button>
-            </form>
+                    <!-- Search Button -->
+                    <x-primary-button class="px-6 py-2 text-lg whitespace-nowrap">
+                        {{ __('Search') }}
+                    </x-primary-button>
+                </form>
+            </div>
         </div>
-    </div>
+    @endif
 
     <div class="flex items-center justify-center gap-4 my-4">
         <!-- Left Arrow (Previous Week) -->
