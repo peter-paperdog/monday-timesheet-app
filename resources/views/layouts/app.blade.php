@@ -19,36 +19,6 @@
         <!-- jQuery UI -->
         <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-
-        <script>
-            $(function () {
-                // Funkció a hét első napjának (hétfő) kiszámítására
-                function getMonday(d) {
-                    d = new Date(d);
-                    var day = d.getDay(),
-                        diff = d.getDate() - day + (day == 0 ? -6 : 1); // hétfő
-                    return new Date(d.setDate(diff));
-                }
-
-                // Alapértelmezett dátum beállítása a hét első napjára
-                var today = new Date();
-                var monday = getMonday(today);
-
-                // Datepicker inicializálása
-                $("#datepicker").datepicker({
-                    dateFormat: "yy-mm-dd",
-                    defaultDate: monday,
-                    onSelect: function (dateText) {
-                        var selectedDate = new Date(dateText);
-                        var monday = getMonday(selectedDate);
-                        $(this).datepicker('setDate', monday); // A mező értékét átváltjuk hétfőre
-                    }
-                });
-
-                // A datepicker mező értékének automatikus kitöltése a hétfői dátummal
-                $("#datepicker").val($.datepicker.formatDate('yy-mm-dd', monday));
-            });
-        </script>
     </head>
 
         <!-- Scripts -->
