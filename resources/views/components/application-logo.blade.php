@@ -1,1 +1,1 @@
-<img src="{{ env('APP_LOGO') }}"  alt="TEST"/>
+<img src="https://paperdog.com/images/pd-black.svg" alt="Paper Dog"/>
