@@ -17,7 +17,7 @@
                             class="px-4 py-2 border rounded-lg shadow-sm text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600">
                         @foreach($users as $userOption)
                             <option
-                                value="{{ $userOption->id }}" {{ $selectedUserId == $userOption->id ? 'selected' : '' }}>
+                                    value="{{ $userOption->id }}" {{ $selectedUserId == $userOption->id ? 'selected' : '' }}>
                                 {{ $userOption->name }}
                             </option>
                         @endforeach
@@ -65,7 +65,10 @@
                                             @php $previousBoard = $item->board->name; @endphp
                                         @endif
                                     </td>
-                                    <td class="border border-gray-300 px-4 py-2">{{ $item->name }}</td>
+                                    <td class="border border-gray-300 px-4 py-2">
+                                        <a href="https://paperdog-team.monday.com/boards/{{$item->board->id}}/pulses/{{$item->id}}"
+                                           target="_blank">{{ $item->name }}</a>
+                                    </td>
                                 </tr>
                             @endforeach
                             </tbody>
