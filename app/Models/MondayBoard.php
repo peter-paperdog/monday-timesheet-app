@@ -12,10 +12,11 @@ class MondayBoard extends Model
     public $timestamps = true;
     protected $keyType = 'int';
 
-    protected $fillable = ['id', 'name', 'type'];
+    protected $fillable = ['id', 'name', 'type', 'updated_at'];
 
     protected $casts = [
-        'id' => 'integer'
+        'id' => 'integer',
+        'updated_at' => 'datetime'
     ];
 
     /**
