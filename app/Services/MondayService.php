@@ -127,7 +127,34 @@ GRAPHQL;
     }
 
     /**
-     * Fetches the time tracking data for all boards.
+     * Fetches the items for the board.
+     *
+     * @param string $boardId The ID of the board.
+     * @return array The array of items with time tracking data.
+     */
+    public function getItems(string $boardId)
+    {
+        $query = <<<GRAPHQL
+    query {
+      boards (ids:"$boardId"){
+        items_page(limit:500){
+            items{
+                id
+                name
+            }
+        }
+      }
+    }
+GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+
+        return $response['data']['boards'][0]['items_page']['items'];
+    }
+
+    /**
+     * Fetches the time tracking data for the board.
      *
      * @param string $boardId The ID of the board.
      * @return array The array of items with time tracking data.
@@ -137,7 +164,7 @@ GRAPHQL;
         // Define the GraphQL query
         $query = <<<GRAPHQL
                 {
-                  boards (ids:"$boardId", workspace_ids: 5096840){
+                  boards (ids:"$boardId"){
                     items_page(limit:500){
                         items{
                             id
@@ -179,53 +206,6 @@ GRAPHQL;
                 }
             }
         }
-        return $items;
-    }
-
-
-    public function getItems($ids = []): array
-    {
-        if (empty($ids)) {
-            return [];
-        }
-        $ids_string = implode(',', $ids);
-
-        $query = <<<GRAPHQL
-        query{
-            items(ids: [$ids_string]) {
-                 id
-                 name
-                 group{
-                    id
-                    title
-                 }
-                 board{
-                    id
-                    name
-                 }
-                 parent_item{
-                    id
-                 }
-                 subitems{
-                    id
-                 }
-              }
-            }
-        GRAPHQL;
-
-        $response = $this->makeApiRequest($query);
-
-        $items = [];
-
-        if (!isset($response['data']['items'])) {
-            var_dump($response);
-            exit;
-        }
-        foreach ($response['data']['items'] as $item) {
-            return [$item['id'], $item];
-            //$items[$item['id']] = $item;
-        }
-
         return $items;
     }
 }
