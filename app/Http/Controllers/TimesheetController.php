@@ -18,9 +18,32 @@ use Illuminate\View\View;
 class TimesheetController extends Controller
 {
 
+    private function getLastUpdated()
+    {
+        // Fetch the most recent `updated_at` from boards
+        $oldestUpdatedBoard = MondayBoard::orderBy('updated_at', 'asc')->value('updated_at');
+
+        // Convert `updated_at` to human-readable format (e.g., "45 minutes ago")
+        return $oldestUpdatedBoard
+            ? (int)Carbon::parse($oldestUpdatedBoard)->setTimezone('UTC')->diffInMinutes(Carbon::now('UTC')) . ' minutes ago'
+            : 'Never updated';
+    }
+
     public function dashboard(Request $request, MondayService $mondayService): View
     {
-        return view('dashboard', ['items' => Auth::user()->assignedItems()->get()]);
+        $selectedUserId = $request->input('user_id', Auth::id()); // Default to logged-in user
+
+        return view('dashboard', [
+            'items' => MondayItem::whereHas('assignedUsers', function ($query) use ($selectedUserId) {
+                $query->where('users.id', $selectedUserId);
+            })
+                ->with('board:id,name') // Fetch only necessary board fields
+                ->select('id', 'name', 'board_id') // Fetch only required columns
+                ->lazy(),
+            'lastupdated' => $this->getLastUpdated(),
+            'selectedUserId' => $selectedUserId,
+            'users' => User::orderBy('name', 'asc')->get()
+        ]);
     }
 
     public function timesheets(Request $request): View
@@ -31,14 +54,6 @@ class TimesheetController extends Controller
         $selectedDate = $request->input('weekStartDate') ?: Carbon::now()->startOfWeek()->toDateString();
         $startOfWeek = Carbon::parse($selectedDate)->startOfWeek();
         $endOfWeek = $startOfWeek->copy()->endOfWeek(); // Get Sunday of that week
-
-        // Fetch the most recent `updated_at` from boards
-        $oldestUpdatedBoard = MondayBoard::orderBy('updated_at', 'asc')->value('updated_at');
-
-        // Convert `updated_at` to human-readable format (e.g., "45 minutes ago")
-        $lastupdated = $oldestUpdatedBoard
-            ? (int)Carbon::parse($oldestUpdatedBoard)->setTimezone('UTC')->diffInMinutes(Carbon::now('UTC')) . ' minutes ago'
-            : 'Never updated';
 
         $timeTrackings = MondayTimeTracking::where('user_id', $selectedUserId)
             ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
@@ -51,7 +66,7 @@ class TimesheetController extends Controller
             'selectedDate' => $startOfWeek->toDateString(),
             'startOfWeek' => $startOfWeek,
             'endOfWeek' => $endOfWeek,
-            'lastupdated' => $lastupdated,
+            'lastupdated' => $this->getLastUpdated(),
             'users' => User::orderBy('name', 'asc')->get()
         ]);
     }
