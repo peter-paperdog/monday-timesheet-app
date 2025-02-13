@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class MondayBoard extends Model
 {
     use HasFactory;
-    public $incrementing = false; // Disable auto-incrementing
-    protected $keyType = 'string'; // Ensure it's treated as a string
+    public $incrementing = false;
+    protected $keyType = 'int';
 
     protected $fillable = ['id', 'name', 'type', 'activity_at'];
 
     protected $casts = [
+        'id' => 'integer',
         'activity_at' => 'datetime', // Ensure it is treated as a timestamp
     ];
 
