@@ -157,10 +157,10 @@ class MondayService
             items{
                 id
                 name
-                parent_item{
+                group{
                     id
                 }
-                group{
+                parent_item{
                     id
                 }
             }
@@ -197,7 +197,7 @@ GRAPHQL;
         // Define the variables to pass into the query
         $response = $this->makeApiRequest($query);
 
-        return $response['data']['boards']['groups'];
+        return $response['data']['boards'][0]['groups'];
     }
 
     /**
