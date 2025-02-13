@@ -34,8 +34,10 @@ class TimesheetController extends Controller
             'items' => MondayItem::whereHas('assignedUsers', function ($query) use ($selectedUserId) {
                 $query->where('users.id', $selectedUserId);
             })
-                ->with('board:id,name') // Fetch only necessary board fields
-                ->select('id', 'name', 'board_id') // Fetch only required columns
+                ->with('board:id,name') // Preload board details
+                ->select('monday_items.id', 'monday_items.name', 'monday_items.board_id') // Fetch required columns
+                ->join('monday_boards', 'monday_items.board_id', '=', 'monday_boards.id') // Join boards table
+                ->orderBy('monday_boards.name', 'asc') // Order by board name
                 ->lazy(),
             'lastupdated' => $this->getLastUpdated('monday-assignments'),
             'selectedUserId' => $selectedUserId,
