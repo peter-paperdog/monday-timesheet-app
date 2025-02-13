@@ -7,10 +7,13 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 text-right text-gray-400 mt-2 font-extralight" id="lastupdated">
         Last updated: {{$lastupdated}}
         <br>
-        <a href="{{ route('sync.assignments') }}"
-           class="text-sm py-2 bg-blue-600 hover:bg-blue-700 hover:underline  transition">
-            Update
-        </a>
+        @if(auth()->user()->admin)
+            <a href="{{ route('sync.assignments') }}"
+               onclick="return confirm('The sync process might take a few minutes. Do you want to continue?')"
+               class="text-sm py-2 bg-blue-600 hover:bg-blue-700 hover:underline  transition">
+                Update
+            </a>
+        @endif
     </div>
 
     @if(auth()->user()->admin)
@@ -22,7 +25,7 @@
                             class="px-4 py-2 border rounded-lg shadow-sm text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600">
                         @foreach($users as $userOption)
                             <option
-                                    value="{{ $userOption->id }}" {{ $selectedUserId == $userOption->id ? 'selected' : '' }}>
+                                value="{{ $userOption->id }}" {{ $selectedUserId == $userOption->id ? 'selected' : '' }}>
                                 {{ $userOption->name }}
                             </option>
                         @endforeach
