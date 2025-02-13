@@ -85,14 +85,13 @@ class SyncMondayBoards extends Command
                 $this->info("Found " . count($items) . " task items for board '{$board->name}' (#{$board->id})");
             }
 
-
             foreach ($items as $itemData) {
                 MondayItem::updateOrCreate(
                     ['id' => $itemData['id']],
                     [
                         'name' => $itemData['name'],
                         'board_id' => $board->id,
-                        'group_id' => $itemData['group']['id'] ? ($board->id . '_' . $groupData['id']) : null,
+                        'group_id' => $itemData['group']['id'] ? ($board->id . '_' . $itemData['group']['id']) : null,
                         'parent_id' => $itemData['parent_item']['id'] ?? null
                     ]
                 );
