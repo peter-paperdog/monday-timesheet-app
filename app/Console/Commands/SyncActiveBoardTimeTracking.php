@@ -50,17 +50,17 @@ class SyncActiveBoardTimeTracking extends Command
         $updatedCount = 0;
 
         foreach ($activeBoards as $activeBoard) {
-            $this->info("Processing board ID: {$activeBoard->id}");
+            $this->info("Processing board '{$activeBoard->name}' ({$activeBoard->id})");
 
             // Fetch time tracking data for this board
             $items = $this->mondayService->getTimeTrackingItems($activeBoard->id);
 
             if (empty($items)) {
-                $this->warn("No time tracking data found for Board ID: {$activeBoard->id}");
+                $this->warn("No time tracking data found for board '{$activeBoard->name}' ({$activeBoard->id})");
                 continue;
             }
 
-            $this->info("Found " . count($items) . " items for Board ID: {$activeBoard->id}");
+            $this->info("Found " . count($items) . " items for board '{$activeBoard->name}' ({$activeBoard->id})");
 
 
             foreach ($items as $trackingData) {
@@ -75,7 +75,7 @@ class SyncActiveBoardTimeTracking extends Command
                 );
                 $updatedCount++;
             }
-            $this->info("Updated " . count($items) . " items for Board ID: {$activeBoard->id}");
+            $this->info("Updated " . count($items) . " items for board '{$activeBoard->name}' ({$activeBoard->id})");
         }
 
         $this->info("Sync complete. Updated {$updatedCount} time tracking records.");
