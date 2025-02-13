@@ -31,11 +31,14 @@ class TimesheetController extends Controller
 
 
         return view('dashboard', [
-            'items' => MondayItem::whereHas('assignedUsers', function ($query) use ($selectedUserId) {
+            'items' =>  MondayItem::whereHas('assignedUsers', function ($query) use ($selectedUserId) {
                 $query->where('users.id', $selectedUserId);
             })
-                ->with('board:id,name') // Preload board details
-                ->select('monday_items.id', 'monday_items.name', 'monday_items.board_id') // Fetch required columns
+                ->with([
+                    'board:id,name', // Preload board details
+                    'parent:id,name' // Preload parent details
+                ])
+                ->select('monday_items.id', 'monday_items.name', 'monday_items.board_id', 'monday_items.parent_id') // Fetch required columns
                 ->join('monday_boards', 'monday_items.board_id', '=', 'monday_boards.id') // Join boards table
                 ->orderBy('monday_boards.name', 'asc') // Order by board name
                 ->lazy(),
@@ -57,6 +60,10 @@ class TimesheetController extends Controller
         $timeTrackings = MondayTimeTracking::where('user_id', $selectedUserId)
             ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
             ->orderBy('started_at', 'desc')
+            ->with([
+                'item.board:id,name', // Load board details
+                'item.parent:id,name' // Load parent item details
+            ])
             ->get();
 
         return view('timesheets', [
