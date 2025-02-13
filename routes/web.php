@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SociaLoginController;
+use App\Http\Controllers\SyncController;
 use App\Http\Controllers\TimesheetController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,8 @@ Route::middleware('auth')->group(function () {
         ->name('download.sheet');
     Route::post('downloadcsv', [TimesheetController::class, 'downloadUserSheetCsv'])
         ->name('download.sheetcsv');
+
+    Route::get('/sync-monday', [SyncController::class, 'syncMondayAssignments'])->name('sync.assignments');
 });
 
 Route::get('/login/google', [SociaLoginController::class, 'redirectToProvider'])->name('google.login');
