@@ -60,18 +60,21 @@
                             <thead>
                             <tr class="bg-gray-100 dark:bg-gray-700">
                                 <th class="border border-gray-300 px-4 py-2 text-left">Board</th>
+                                <th class="border border-gray-300 px-4 py-2 text-left">Group</th>
                                 <th class="border border-gray-300 px-4 py-2 text-left">Task</th>
                             </tr>
                             </thead>
                             <tbody>
                             @php
                                 $previousBoard = null;
+                                $previousGroup = null;
                             @endphp
 
                             @foreach($items as $item)
                                 <tr class="border border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                    <!-- Board Column -->
                                     <td class="border border-gray-300 px-4 py-2 font-bold">
-                                        @if($item->board->name !== $previousBoard)
+                                        @if($previousBoard !== ($item->board->name ?? null))
                                             <a href="https://paperdog-team.monday.com/boards/{{$item->board->id}}"
                                                target="_blank"
                                                class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 hover:underline transition">
@@ -80,11 +83,22 @@
                                             @php $previousBoard = $item->board->name; @endphp
                                         @endif
                                     </td>
+
+                                    <!-- Group Column -->
+                                    <td class="border border-gray-300 px-4 py-2">
+                                        @if($previousGroup !== optional($item->group)->name)
+                                            {{ optional($item->group)->name }}
+                                            @php $previousGroup = optional($item->group)->name; @endphp
+                                        @endif
+                                    </td>
+
+                                    <!-- Task Column -->
                                     <td class="border border-gray-300 px-4 py-2">
                                         <a href="https://paperdog-team.monday.com/boards/{{$item->board->id}}/pulses/{{$item->id}}"
                                            target="_blank"
                                            class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 hover:underline transition">
-                                            {{ $item->parent ? $item->parent->name . ' → ' : '' }}{{ $item->name }}                                        </a>
+                                            {{ $item->parent ? $item->parent->name . ' → ' : '' }}{{ $item->name }}
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach
