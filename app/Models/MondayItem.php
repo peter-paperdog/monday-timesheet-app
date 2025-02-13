@@ -16,4 +16,20 @@ class MondayItem extends Model
         'id' => 'integer',
         'board_id' => 'integer'
     ];
+
+    /**
+     * An item belongs to a board.
+     */
+    public function board()
+    {
+        return $this->belongsTo(MondayBoard::class, 'board_id', 'id');
+    }
+
+    /**
+     * An item has many time tracking entries.
+     */
+    public function timeTrackings()
+    {
+        return $this->hasMany(MondayTimeTracking::class, 'item_id', 'id');
+    }
 }
