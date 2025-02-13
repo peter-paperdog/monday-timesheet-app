@@ -3,10 +3,14 @@
 namespace App\Console\Commands;
 
 use App\Models\MondayBoard;
+use App\Models\MondayItem;
+use App\Models\MondayTimeTracking;
+use App\Models\User;
 use App\Services\MondayService;
 use DateTime;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 class SyncMondayBoards extends Command
 {
@@ -34,6 +38,26 @@ class SyncMondayBoards extends Command
      */
     public function handle()
     {
+        $this->info('Fetching users from Monday.com...');
+        $users = $this->mondayService->getUsers();
+
+        foreach ($users as $userData) {
+
+            $user = User::updateOrCreate(
+                ['id' => $userData['id']],
+                [
+                    'id' => $userData['id'],
+                    'name' => $userData['name'],
+                    'email' => $userData['email'],
+                    'password' => Hash::make(str()->random(12)), // Set a random password for new users
+                ]
+            );
+
+            $this->info("User {$user->name} synced with Monday ID: {$user->id}");
+        }
+
+        $this->info('User synchronization complete.');
+        
         $this->info('Fetching boards from Monday.com...');
 
         $boards = $this->mondayService->getBoards(); // Assume this method exists
@@ -48,44 +72,54 @@ class SyncMondayBoards extends Command
                 ]
             );
 
-            $this->info("Board '{$board->name}' synced with Monday ID: {$board->id}");
+
+            $this->info("Processing board '{$board->name}' ({$board->id})");
+
+            $items = $this->mondayService->getItems($board->id);
+
+            if (empty($items)) {
+                $this->warn("No item data found for board '{$board->name}' (#{$board->id})");
+                continue;
+            }
+
+            $this->info("Found " . count($items) . " items for board '{$board->name}' (#{$board->id})");
+
+            foreach ($items as $itemData) {
+                MondayItem::updateOrCreate(
+                    ['id' => $itemData['id']],
+                    [
+                        'name' => $itemData['name'],
+                        'board_id' => $board->id
+                    ]
+                );
+            }
+            $this->info("Updated " . count($items) . " items for board '{$board->name}' (#{$board->id})");
+
+            // Fetch time tracking data for this board
+            $items = $this->mondayService->getTimeTrackingItems($board->id);
+
+            if (empty($items)) {
+                $this->warn("No time tracking data found for board '{$board->name}' ({$board->id})");
+                continue;
+            }
+
+            $this->info("Found " . count($items) . " items for board '{$board->name}' ({$board->id})");
+
+            foreach ($items as $trackingData) {
+                MondayTimeTracking::updateOrCreate(
+                    ['id' => $trackingData['id']],
+                    [
+                        'item_id' => $trackingData['item_id'],
+                        'user_id' => $trackingData['started_user_id'],
+                        'started_at' => Carbon::parse($trackingData['started_at'])->toDateTimeString(),
+                        'ended_at' => !empty($trackingData['ended_at']) ? Carbon::parse($trackingData['ended_at'])->toDateTimeString() : null,
+                    ]
+                );
+            }
+            $this->info("Updated " . count($items) . " items for board '{$board->name}' ({$board->id})");
+            $this->info("Board successfully synced with Monday.");
         }
 
-
-        $this->info("Updating board activities...");
-
-        //check activity
-        $fromDate = Carbon::now()->subDays(1)->toIso8601String(); // Last 1 day
-        $toDate = Carbon::now()->toIso8601String(); // Current time
-
-        $items = $this->mondayService->getLastActivities($fromDate, $toDate);
-
-        $filteredItems = array_filter($items, function ($item) {
-            return !empty($item['activity_logs']);
-        });
-
-        $results = array_map(function ($item) {
-            $highestCreatedAt = max(array_column($item['activity_logs'], 'created_at'));
-
-            return [
-                'id' => $item['id'],
-                'name' => $item['name'],
-                'activity_at' => gmdate("Y-m-d\TH:i:s\Z", $highestCreatedAt / 10000000)
-            ];
-        }, $filteredItems);
-
-        $results = array_values($results);
-
-        $this->info("Updating " . count($results) . " active boards...");
-
-        foreach ($results as $boardData) {
-            $board = MondayBoard::where('id', $boardData['id'])->first();
-            $board->update(['activity_at' => new DateTime($boardData['activity_at'])]);
-            $this->info("Board '{$board->name}' updated with activity_at: {$board->activity_at}");
-            $this->info("Board '{$board->name}' activity: {$board->activity_at}");
-        }
-
-
-        $this->info('Board synchronization complete.');
+        $this->info('Monday synchronization complete.');
     }
 }
