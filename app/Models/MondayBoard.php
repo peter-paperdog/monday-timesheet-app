@@ -18,4 +18,11 @@ class MondayBoard extends Model
         'activity_at' => 'datetime', // Ensure it is treated as a timestamp
     ];
 
+    /**
+     * A board has many items.
+     */
+    public function items()
+    {
+        return $this->hasMany(MondayItem::class, 'board_id', 'id');
+    }
 }
