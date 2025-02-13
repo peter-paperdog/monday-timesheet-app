@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,4 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        // Schedule tasks to run every hour between 6 AM and 12 PM (weekdays only)
+        $schedule->command('sync:monday-users')->daily()->weekdays();
+        $schedule->command('sync:monday-boards')->hourly()->between('6:05', '12:05')->weekdays();
+
+        // Debugging: Log when the scheduler runs
+        \Log::info("Scheduler executed at " . now());
+    })
+    ->create();
