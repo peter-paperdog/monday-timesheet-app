@@ -15,6 +15,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/dashboard', [TimesheetController::class, 'dashboard'])->name('dashboard');
+    Route::get('/timesheets', [TimesheetController::class, 'timesheets'])->name('timesheets');
 
     Route::post('download', [TimesheetController::class, 'downloadUserSheet'])
         ->name('download.sheet');
