@@ -6,6 +6,7 @@ use App\Models\SyncStatus;
 use App\Models\User;
 use App\Services\MondayService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Hash;
 
 class SyncMondayUsers extends Command
 {
