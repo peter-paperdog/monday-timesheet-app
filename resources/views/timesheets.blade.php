@@ -80,37 +80,71 @@
                             </tr>
                             </thead>
                             <tbody>
+                            @php
+                                $weeklyTotal = 0;
+                            @endphp
+
                             @foreach (range(0, 6) as $dayOffset)
                                 @php
-                                    $dateKey = $startOfWeek->copy()->addDays($dayOffset)->format('Y-m-d (l)');
+                                    $date = $startOfWeek->copy()->addDays($dayOffset);
+                                    $dateKey = $date->format('Y-m-d (l)');
                                     $dailyTotal = 0;
+                                    $previousBoard = null;
+                                    $previousGroup = null;
+                                    $boardCount = isset($groupedData[$dateKey]) ? count($groupedData[$dateKey]) : 0;
                                 @endphp
 
+                                @if ($date->isFuture())
+                                    @continue
+                                @endif
+
+                                @if ($date->isWeekend() && !isset($groupedData[$dateKey]))
+                                    @continue
+                                @endif
+
                                 <tr class="bg-gray-200 dark:bg-gray-700 font-bold">
-                                    <td class="border border-gray-300 px-4 py-2" colspan="5">
+                                    <td class="border border-gray-300 px-4 py-2 text-lg" colspan="5">
                                         {{ $dateKey }}
                                     </td>
                                 </tr>
 
                                 @if (isset($groupedData[$dateKey]))
                                     @foreach ($groupedData[$dateKey] as $boardName => $groups)
+                                        @php
+                                            $boardTotal = 0;
+                                            $groupCount = count($groups);
+                                        @endphp
+
                                         @foreach ($groups as $groupName => $tasks)
+                                            @php
+                                                $groupTotal = 0;
+                                                $taskCount = count($tasks);
+                                            @endphp
+
                                             @foreach ($tasks as $taskName => $entries)
                                                 @php
-                                                    $taskTotal = $entries->sum(fn($t) => Carbon::parse($t->started_at)->diffInMinutes(Carbon::parse($t->ended_at)));
+                                                    $taskTotal = $entries->sum(fn($t) => \Carbon\Carbon::parse($t->started_at)->diffInMinutes(\Carbon\Carbon::parse($t->ended_at)));
                                                     $dailyTotal += $taskTotal;
+                                                    $groupTotal += $taskTotal;
+                                                    $boardTotal += $taskTotal;
                                                 @endphp
                                                 <tr>
-                                                    <td class="border border-gray-300 px-4 py-2"></td> <!-- Empty for alignment -->
+                                                    <td class="border border-gray-300 px-4 py-2"></td>
                                                     <td class="border border-gray-300 px-4 py-2">
-                                                        <a href="https://paperdog-team.monday.com/boards/{{$entries->first()->item->board->id}}"
-                                                           target="_blank"
-                                                           class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 hover:underline transition">
-                                                            {{ $boardName }}
-                                                        </a>
+                                                        @if ($boardName !== $previousBoard)
+                                                            <a href="https://paperdog-team.monday.com/boards/{{$entries->first()->item->board->id}}"
+                                                               target="_blank"
+                                                               class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 hover:underline transition">
+                                                                {{ $boardName }}
+                                                            </a>
+                                                            @php $previousBoard = $boardName; @endphp
+                                                        @endif
                                                     </td>
                                                     <td class="border border-gray-300 px-4 py-2">
-                                                        {{ $groupName ?? 'No Group' }}
+                                                        @if ($groupName !== $previousGroup)
+                                                            {{ $groupName ?? 'No Group' }}
+                                                            @php $previousGroup = $groupName; @endphp
+                                                        @endif
                                                     </td>
                                                     <td class="border border-gray-300 px-4 py-2">
                                                         <a href="https://paperdog-team.monday.com/boards/{{$entries->first()->item->board->id}}/pulses/{{$entries->first()->item->id}}"
@@ -124,30 +158,52 @@
                                                     </td>
                                                 </tr>
                                             @endforeach
+
+                                            @if ($taskCount > 1)
+                                                <tr class="bg-gray-100 dark:bg-gray-700 font-semibold">
+                                                    <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">Group Total:</td>
+                                                    <td class="border border-gray-300 px-4 py-2 text-center">
+                                                        {{ floor($groupTotal / 60) }}h {{ $groupTotal % 60 }}m
+                                                    </td>
+                                                </tr>
+                                            @endif
                                         @endforeach
+
+                                        @if ($boardCount > 1)
+                                            <tr class="bg-gray-200 dark:bg-gray-800 font-bold">
+                                                <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">Board Total:</td>
+                                                <td class="border border-gray-300 px-4 py-2 text-center">
+                                                    {{ floor($boardTotal / 60) }}h {{ $boardTotal % 60 }}m
+                                                </td>
+                                            </tr>
+                                        @endif
                                     @endforeach
                                 @else
-                                    <tr>
-                                        <td class="border border-gray-300 px-4 py-2 text-center" colspan="5">
-                                            No entries for this day.
-                                        </td>
-                                    </tr>
+                                    @if (!$date->isWeekend())
+                                        <tr>
+                                            <td class="border border-gray-300 px-4 py-2 text-center" colspan="5">
+                                                No entries for this day.
+                                            </td>
+                                        </tr>
+                                    @endif
                                 @endif
 
-                                <!-- Daily Total Row -->
-                                <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
-                                    <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">Daily Total</td>
+                                <tr class="bg-gray-300 dark:bg-gray-700 font-bold text-lg">
+                                    <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">Daily Total:</td>
                                     <td class="border border-gray-300 px-4 py-2 text-center">
                                         {{ $dailyTotal > 0 ? floor($dailyTotal / 60) . 'h ' . ($dailyTotal % 60) . 'm' : '-' }}
                                     </td>
                                 </tr>
+
+                                @php
+                                    $weeklyTotal += $dailyTotal;
+                                @endphp
                             @endforeach
 
-                            <!-- Weekly Total Row -->
-                            <tr class="bg-gray-900 dark:bg-gray-600 font-bold text-white">
-                                <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">Weekly Total</td>
+                            <tr class="bg-gray-900 dark:bg-gray-600 font-bold text-xl">
+                                <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">Weekly Total:</td>
                                 <td class="border border-gray-300 px-4 py-2 text-center">
-                                    {{ $groupedData->flatten()->sum(fn($t) => Carbon::parse($t->started_at)->diffInMinutes(Carbon::parse($t->ended_at))) / 60 }}h
+                                    {{ floor($weeklyTotal / 60) }}h {{ $weeklyTotal % 60 }}m
                                 </td>
                             </tr>
                             </tbody>
