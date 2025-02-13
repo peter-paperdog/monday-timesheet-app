@@ -25,9 +25,9 @@ class TimesheetController extends Controller
     {
         $selectedUserId = $request->input('user_id', Auth::id()); // Default to logged-in user
 
-        // Get selected date from request, or default to current week's Monday
-        $selectedDate = $request->input('weekStartDate', Carbon::now()->startOfWeek()->toDateString());
-        $startOfWeek = Carbon::parse($selectedDate)->startOfWeek(); // Ensure it starts on Monday
+        // Get the selected week's start date or default to current Monday
+        $selectedDate = $request->input('weekStartDate') ?: Carbon::now()->startOfWeek()->toDateString();
+        $startOfWeek = Carbon::parse($selectedDate)->startOfWeek();
         $endOfWeek = $startOfWeek->copy()->endOfWeek(); // Get Sunday of that week
 
         // Fetch the most recent `updated_at` from boards
@@ -46,7 +46,9 @@ class TimesheetController extends Controller
         return view('timesheets', [
             'timeTrackings' => $timeTrackings,
             'selectedUserId' => $selectedUserId,
-            'selectedDate' => $selectedDate,
+            'selectedDate' => $startOfWeek->toDateString(),
+            'startOfWeek' => $startOfWeek,
+            'endOfWeek' => $endOfWeek,
             'lastupdated' => $lastupdated,
             'users' => User::orderBy('name', 'asc')->get()
         ]);

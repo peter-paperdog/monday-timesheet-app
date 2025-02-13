@@ -11,12 +11,6 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 py-5">
         <div class="text-gray-900 dark:text-gray-100">
             <form method="get" action="{{ route('timesheets') }}" class="flex items-center gap-4">
-
-                <!-- Date Picker -->
-                <input type="text" id="datepicker" name="weekStartDate"
-                       class="w-auto px-4 py-2 border rounded-lg shadow-sm text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600"
-                       placeholder="Select date" value="{{ $selectedDate }}">
-
                 <!-- User Dropdown -->
                 @if(auth()->user()->admin)
                     <select name="user_id"
@@ -35,6 +29,25 @@
                 </x-primary-button>
             </form>
         </div>
+    </div>
+
+    <div class="flex items-center justify-center gap-4 my-4">
+        <!-- Left Arrow (Previous Week) -->
+        <a href="{{ route('timesheets', ['weekStartDate' => $startOfWeek->copy()->subWeek()->toDateString(), 'user_id' => $selectedUserId]) }}"
+           class="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white text-2xl px-3">
+            ←
+        </a>
+
+        <!-- Current Week Display -->
+        <span class="font-semibold text-lg">
+        {{ $startOfWeek->format('M d, Y') }} - {{ $endOfWeek->format('M d, Y') }}
+    </span>
+
+        <!-- Right Arrow (Next Week) -->
+        <a href="{{ route('timesheets', ['weekStartDate' => $startOfWeek->copy()->addWeek()->toDateString(), 'user_id' => $selectedUserId]) }}"
+           class="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white text-2xl px-3">
+            →
+        </a>
     </div>
 
     <div class="py-5">
