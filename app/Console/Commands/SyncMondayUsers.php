@@ -33,16 +33,16 @@ class SyncMondayUsers extends Command
         foreach ($users as $userData) {
 
             $user = User::updateOrCreate(
-                ['monday_id' => $userData['id']],
+                ['id' => $userData['id']],
                 [
-                    'monday_id' => $userData['id'],
+                    'id' => $userData['id'],
                     'name' => $userData['name'],
                     'email' => $userData['email'],
                     'password' => Hash::make(str()->random(12)), // Set a random password for new users
                 ]
             );
 
-            $this->info("User {$user->name} synced with Monday ID: {$user->monday_id}");
+            $this->info("User {$user->name} synced with Monday ID: {$user->id}");
         }
 
         $this->info('User synchronization complete.');
