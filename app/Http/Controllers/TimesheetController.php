@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MondayTimeTracking;
 use App\Models\User;
 use App\Services\MondayService;
 use App\Services\UserService;
 use DateTime;
 use DateTimeZone;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -185,9 +187,20 @@ class TimesheetController extends Controller
 
     public function timesheets(Request $request): View
     {
+
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $endOfWeek = Carbon::now()->endOfWeek();
+
+        $userId = 12914717; // Or pass the user ID dynamically
+
+        $timeTrackings = MondayTimeTracking::where('user_id', $userId)
+            ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
+            ->orderBy('started_at', 'desc')
+            ->get();
+
         return view('timesheets', [
             'user' => Auth::user(),
-            'data' => [],
+            'timeTrackings' => $timeTrackings,
          'users' => User::all()
         ]);
 
