@@ -26,4 +26,10 @@ class MondayBoard extends Model
     {
         return $this->hasMany(MondayItem::class, 'board_id', 'id');
     }
+
+    // A board can have multiple groups
+    public function groups()
+    {
+        return $this->hasMany(MondayGroup::class, 'board_id');
+    }
 }
