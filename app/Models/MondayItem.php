@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class MondayItem extends Model
 {
     use HasFactory;
+
     public $incrementing = false;
     protected $keyType = 'int';
     public $timestamps = false;
@@ -31,5 +32,9 @@ class MondayItem extends Model
     public function timeTrackings()
     {
         return $this->hasMany(MondayTimeTracking::class, 'item_id', 'id');
+    }
+    public function assignedUsers()
+    {
+        return $this->belongsToMany(User::class, 'monday_assignments', 'item_id', 'user_id');
     }
 }
