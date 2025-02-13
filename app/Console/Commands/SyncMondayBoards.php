@@ -42,7 +42,6 @@ class SyncMondayBoards extends Command
         $users = $this->mondayService->getUsers();
 
         foreach ($users as $userData) {
-
             $user = User::updateOrCreate(
                 ['id' => $userData['id']],
                 [
@@ -57,9 +56,8 @@ class SyncMondayBoards extends Command
         }
 
         $this->info('User synchronization complete.');
-        
-        $this->info('Fetching boards from Monday.com...');
 
+        $this->info('Fetching boards from Monday.com...');
         $boards = $this->mondayService->getBoards(); // Assume this method exists
 
         foreach ($boards as $boardData) {
