@@ -127,6 +127,41 @@ GRAPHQL;
     }
 
     /**
+     * Fetches the list of boards from the Monday.com API.
+     *
+     * @return array The array of board objects.
+     */
+    public function getAssignments()
+    {
+        $query = <<<'GRAPHQL'
+    query {
+        boards (limit:500, workspace_ids: 5096840){
+            items_page(limit: 300) {
+                items {
+                    id
+                    column_values {
+                        ... on PeopleValue {
+                        persons_and_teams{
+                            id
+                        }
+                        }
+                        ... on StatusValue {
+                            is_done
+                        }
+                    }
+                }
+            }
+        }
+    }
+    GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+
+        return $response['data']['boards'];
+    }
+
+    /**
      * Fetches the items for the board.
      *
      * @param string $boardId The ID of the board.
