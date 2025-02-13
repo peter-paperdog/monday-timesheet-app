@@ -9,7 +9,8 @@ use Illuminate\Support\Carbon;
 class MondayTimeTracking extends Model
 {
     use HasFactory;
-    public $incrementing = false; // Disable auto-incrementing
+    public $incrementing = false;
+    protected $keyType = 'int';
     public $timestamps = false;
 
     protected $fillable = [
@@ -23,6 +24,9 @@ class MondayTimeTracking extends Model
     protected $casts = [
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
+        'id' => 'integer',
+        'item_id' => 'integer',
+        'user_id' => 'integer'
     ];
 
 

@@ -11,6 +11,8 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+    public $incrementing = false;
+    protected $keyType = 'int';
 
     /**
      * The attributes that are mass assignable.
@@ -42,6 +44,7 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
+        'id' => 'integer',
         'email_verified_at' => 'datetime',
     ];
     public function socialiteLogin(): BelongsTo
