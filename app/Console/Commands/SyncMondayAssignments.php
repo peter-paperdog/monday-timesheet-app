@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\MondayAssignment;
+use App\Models\SyncStatus;
 use App\Services\MondayService;
 use Illuminate\Console\Command;
 
@@ -75,6 +76,8 @@ class SyncMondayAssignments extends Command
         // Sync database with Monday.com data
         $this->syncAssignments($syncedAssignments);
         $this->info("Successfully fetched assignments.");
+        SyncStatus::recordSync('monday-assignments'); // Record sync time
+
     }
 
     private function syncAssignments(array $syncedAssignments)

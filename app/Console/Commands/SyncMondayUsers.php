@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\MondayBoard;
 use App\Models\MondayItem;
 use App\Models\MondayTimeTracking;
+use App\Models\SyncStatus;
 use App\Services\MondayService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -53,5 +54,6 @@ class SyncMondayUsers extends Command
         }
 
         $this->info('User synchronization complete.');
+        SyncStatus::recordSync('monday-users'); // Record sync time
     }
 }
