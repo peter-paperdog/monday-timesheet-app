@@ -160,6 +160,9 @@ class MondayService
                 parent_item{
                     id
                 }
+                group{
+                    id
+                }
             }
         }
       }
@@ -170,6 +173,31 @@ GRAPHQL;
         $response = $this->makeApiRequest($query);
 
         return $response['data']['boards'][0]['items_page']['items'];
+    }
+
+    /**
+     * Fetches the groups for the board.
+     *
+     * @param string $boardId The ID of the board.
+     * @return array The array of groups.
+     */
+    public function getGroups(string $boardId)
+    {
+        $query = <<<GRAPHQL
+    query {
+      boards (ids:"$boardId"){
+        groups{
+            id
+            title
+        }
+      }
+    }
+GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+
+        return $response['data']['boards']['groups'];
     }
 
     /**
