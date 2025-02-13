@@ -19,15 +19,8 @@ class SociaLoginController extends Controller
     {
         $socialiteUser = Socialite::driver('google')->user();
 
-        $user = User::firstOrCreate(
-            [
-                'email' => $socialiteUser->getEmail(),
-            ],
-            [
-                'name' => $socialiteUser->getName(),
-                'password' => Hash::make(Hash::make(str()->random()))
-            ]
-        );
+        $user = User::where('email', $socialiteUser->getEmail())->firstOrFail();
+
 
         SociaLogin::firstOrCreate(
             [

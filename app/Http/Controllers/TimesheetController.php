@@ -198,6 +198,15 @@ class TimesheetController extends Controller
 
     public function viewUserSheet(Request $request): View
     {
+
+
+        return view('dashboard', [
+            'user' => $request->user(),
+         //   'data' => $data,
+         //   'users' => $users,
+         //   'userMail' => $userMail,
+        ]);
+
         $mondayService = new MondayService();
 
         $userMail = Auth::user()->email;
