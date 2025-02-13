@@ -12,10 +12,11 @@ class MondayItem extends Model
     public $incrementing = false;
     protected $keyType = 'int';
     public $timestamps = false;
-    protected $fillable = ['id', 'board_id', 'name'];
+    protected $fillable = ['id', 'board_id', 'parent_id', 'name'];
     protected $casts = [
         'id' => 'integer',
-        'board_id' => 'integer'
+        'board_id' => 'integer',
+        'parent_id' => 'integer',
     ];
 
     /**
@@ -24,6 +25,11 @@ class MondayItem extends Model
     public function board()
     {
         return $this->belongsTo(MondayBoard::class, 'board_id', 'id');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(MondayItem::class, 'parent_id');
     }
 
     /**
