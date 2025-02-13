@@ -51,6 +51,9 @@ class SyncMondayBoards extends Command
             $this->info("Board '{$board->name}' synced with Monday ID: {$board->id}");
         }
 
+
+        $this->info("Updating board activities...");
+
         //check activity
         $fromDate = Carbon::now()->subDays(1)->toIso8601String(); // Last 1 day
         $toDate = Carbon::now()->toIso8601String(); // Current time
@@ -73,15 +76,12 @@ class SyncMondayBoards extends Command
 
         $results = array_values($results);
 
+        $this->info("Updating " . count($results) . " active boards...");
+
         foreach ($results as $boardData) {
             $board = MondayBoard::where('id', $boardData['id'])->first();
-
-            // Ensure the board exists before updating
-            if ($board && !empty($boardData['activity_logs'])) {
-                $board->update(['activity_at' => Carbon::createFromTimestamp($boardData['activity_at'])]);
-                $this->info("Board '{$board->name}' updated with activity_at: {$board->activity_at}");
-            }
-
+            $board->update(['activity_at' => new DateTime($boardData['activity_at'])]);
+            $this->info("Board '{$board->name}' updated with activity_at: {$board->activity_at}");
             $this->info("Board '{$board->name}' activity: {$board->activity_at}");
         }
 
