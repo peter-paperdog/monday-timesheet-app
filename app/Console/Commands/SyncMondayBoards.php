@@ -5,12 +5,9 @@ namespace App\Console\Commands;
 use App\Models\MondayBoard;
 use App\Models\MondayItem;
 use App\Models\MondayTimeTracking;
-use App\Models\User;
 use App\Services\MondayService;
-use DateTime;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Hash;
 
 class SyncMondayBoards extends Command
 {
@@ -70,7 +67,7 @@ class SyncMondayBoards extends Command
                     'type' => $boardData['type']
                 ]
             );
-
+            $board->touch();
 
             $this->info("Processing board '{$board->name}' ({$board->id})");
 
