@@ -24,23 +24,23 @@ class TimesheetController extends Controller
 
     public function timesheets(Request $request): View
     {
-        $user = Auth::User();
+        $selectedUserId = $request->input('user_id', Auth::id()); // Default to logged-in user
 
         // Get selected date from request, or default to current week's Monday
         $selectedDate = $request->input('weekStartDate', Carbon::now()->startOfWeek()->toDateString());
         $startOfWeek = Carbon::parse($selectedDate)->startOfWeek(); // Ensure it starts on Monday
         $endOfWeek = $startOfWeek->copy()->endOfWeek(); // Get Sunday of that week
 
-        $timeTrackings = MondayTimeTracking::where('user_id', $user->id)
+        $timeTrackings = MondayTimeTracking::where('user_id', $selectedUserId)
             ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
             ->orderBy('started_at', 'desc')
             ->get();
 
         return view('timesheets', [
-            'user' => $user,
             'timeTrackings' => $timeTrackings,
+            'selectedUserId' => $selectedUserId,
             'selectedDate' => $selectedDate,
-            'users' => User::all()
+            'users' => User::orderBy('name', 'asc')->get()
         ]);
     }
 
