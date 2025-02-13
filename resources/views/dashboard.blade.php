@@ -69,8 +69,8 @@
                             @endphp
 
                             @foreach($items as $item)
-                                <tr class="border border-gray-300">
-                                    <td class="border border-gray-300 px-4 py-2">
+                                <tr class="border border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                    <td class="border border-gray-300 px-4 py-2 font-bold">
                                         @if($item->board->name !== $previousBoard)
                                             {{ $item->board->name }}
                                             @php $previousBoard = $item->board->name; @endphp
