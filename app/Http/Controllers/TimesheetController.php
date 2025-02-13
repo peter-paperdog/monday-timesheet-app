@@ -65,17 +65,27 @@ class TimesheetController extends Controller
         $startOfWeek = Carbon::parse($selectedDate)->startOfWeek();
         $endOfWeek = $startOfWeek->copy()->endOfWeek(); // Get Sunday of that week
 
+
+        // Fetch time tracking records for the selected user & week
         $timeTrackings = MondayTimeTracking::where('user_id', $selectedUserId)
             ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
-            ->orderBy('started_at', 'desc')
-            ->with([
-                'item.board:id,name', // Load board details
-                'item.parent:id,name' // Load parent item details
-            ])
+            ->with(['item.group', 'item.board'])
+            ->orderBy('started_at')
             ->get();
 
+        // Group by Day → Board → Group → Task
+        $groupedData = $timeTrackings->groupBy([
+            function ($entry) {
+                return Carbon::parse($entry->started_at)->format('Y-m-d (l)'); // Group by Date
+            },
+            'item.board.name',   // Group by Board Name
+            'item.group.name',   // Group by Group Name
+            'item.name',         // Group by Task Name
+        ]);
+
+
         return view('timesheets', [
-            'timeTrackings' => $timeTrackings,
+            'groupedData' => $groupedData,
             'selectedUserId' => $selectedUserId,
             'selectedDate' => $startOfWeek->toDateString(),
             'startOfWeek' => $startOfWeek,
