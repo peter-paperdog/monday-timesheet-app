@@ -32,6 +32,12 @@ class MondayItem extends Model
         return $this->belongsTo(MondayItem::class, 'parent_id');
     }
 
+    // An item belongs to a group
+    public function group()
+    {
+        return $this->belongsTo(MondayGroup::class, 'group_id');
+    }
+
     /**
      * An item has many time tracking entries.
      */
