@@ -37,7 +37,7 @@ class SyncMondayBoards extends Command
     public function handle()
     {
         $this->info('Fetching boards from Monday.com...');
-        $boards = $this->mondayService->getBoards(); // Assume this method exists
+        $boards = $this->mondayService->getBoards();
         $this->info('Updating ' . count($boards) . ' items.' . PHP_EOL);
 
         foreach ($boards as $boardData) {
@@ -67,7 +67,8 @@ class SyncMondayBoards extends Command
                     ['id' => $itemData['id']],
                     [
                         'name' => $itemData['name'],
-                        'board_id' => $board->id
+                        'board_id' => $board->id,
+                        'parent_id' => $itemData['parent_item']['id'] ?? null
                     ]
                 );
             }
