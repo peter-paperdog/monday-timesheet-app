@@ -35,13 +35,21 @@ class TimesheetController extends Controller
                 $query->where('users.id', $selectedUserId);
             })
                 ->with([
-                    'board:id,name', // Preload board details
-                    'parent:id,name' // Preload parent details
+                    'board:id,name',    // Preload board details
+                    'parent:id,name',   // Preload parent details
+                    'group:id,name'     // Preload group details
                 ])
-                ->select('monday_items.id', 'monday_items.name', 'monday_items.board_id', 'monday_items.parent_id') // Fetch required columns
-                ->join('monday_boards', 'monday_items.board_id', '=', 'monday_boards.id') // Join boards table
+                ->select([
+                    'monday_items.id',
+                    'monday_items.name',
+                    'monday_items.board_id',
+                    'monday_items.parent_id',
+                    'monday_items.group_id'
+                ])
+                ->join('monday_boards', 'monday_items.board_id', '=', 'monday_boards.id') // Join boards
+                ->leftJoin('monday_groups', 'monday_items.group_id', '=', 'monday_groups.id') // Left join groups (handles null group_id)
                 ->orderBy('monday_boards.name', 'asc') // Order by board name
-                ->lazy(),
+                ->get(),
             'lastupdated' => $this->getLastUpdated('monday-assignments'),
             'selectedUserId' => $selectedUserId,
             'users' => User::orderBy('name', 'asc')->get()
