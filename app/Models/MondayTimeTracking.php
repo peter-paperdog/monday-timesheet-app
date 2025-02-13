@@ -31,6 +31,22 @@ class MondayTimeTracking extends Model
 
 
     /**
+     * A time tracking entry belongs to an item.
+     */
+    public function item()
+    {
+        return $this->belongsTo(MondayItem::class, 'item_id', 'id');
+    }
+
+    /**
+     * A time tracking entry belongs to a user.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    /**
      * Format the started_at timestamp.
      */
     public function getFormattedStartedAtAttribute()
