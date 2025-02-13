@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Services\MondayService;
 use App\Services\UserService;
 use DateTime;
@@ -15,12 +16,6 @@ use Illuminate\View\View;
 class TimesheetController extends Controller
 {
     protected $mondayService;
-    // protected $cacheTTL = 600; // Cache time-to-live in seconds (10 minutes)
-
-    /*public function __construct(MondayService $mondayService)
-    {
-        $this->mondayService = $mondayService;
-    }*/
 
     public function __construct()
     {
@@ -45,10 +40,6 @@ class TimesheetController extends Controller
 
     protected function initializeUsers($startOfWeek, $endOfWeek)
     {
-        /*$users = Cache::remember('users', $this->cacheTTL, function () {
-            return $this->mondayService->getUsers();
-        });*/
-
         $users = $this->mondayService->getUsers();
 
         $usersObj = new \stdClass();
@@ -77,17 +68,10 @@ class TimesheetController extends Controller
 
     protected function processBoards(&$usersObj, $startOfWeek, $endOfWeek)
     {
-        /*$boards = Cache::remember('boards_'.$startOfWeek->format('YW'), $this->cacheTTL, function () {
-            return $this->mondayService->getBoards();
-        });*/
         $boards = $this->mondayService->getBoards();
 
         foreach ($boards as $board) {
             $board_id = $board['id'];
-            /*$boardData = Cache::remember('board_'.$startOfWeek->format('YW').'_'.$board_id, $this->cacheTTL,
-                function () use ($board_id) {
-                    return $this->mondayService->getTimeTrackingDataForBoard($board_id);
-                });*/
 
             $boardData = $this->mondayService->getTimeTrackingDataForBoard($board_id);
 
@@ -195,16 +179,16 @@ class TimesheetController extends Controller
         $pdf = Pdf::loadHTML($html)->setPaper('a4', 'portrait');
         return $pdf->stream('timesheet.pdf');
     }
+    public function dashboard(Request $request): View{
+        return view('dashboard');
+    }
 
-    public function viewUserSheet(Request $request): View
+    public function timesheets(Request $request): View
     {
-
-
-        return view('dashboard', [
-            'user' => $request->user(),
-         //   'data' => $data,
-         //   'users' => $users,
-         //   'userMail' => $userMail,
+        return view('timesheets', [
+            'user' => Auth::user(),
+            'data' => [],
+         'users' => User::all()
         ]);
 
         $mondayService = new MondayService();
