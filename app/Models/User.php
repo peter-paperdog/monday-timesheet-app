@@ -63,4 +63,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(MondayTimeTracking::class, 'user_id', 'id');
     }
+
+    public function assignedItems()
+    {
+        return $this->belongsToMany(MondayItem::class, 'monday_assignments', 'user_id', 'item_id');
+    }
 }
