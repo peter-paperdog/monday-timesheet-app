@@ -15,7 +15,7 @@ class MondayItem extends Model
     protected $fillable = ['id', 'board_id', 'parent_id', 'name'];
     protected $casts = [
         'id' => 'integer',
-        'board_id' => 'integer',
+        'board_id' => 'string',
         'parent_id' => 'integer',
     ];
 
