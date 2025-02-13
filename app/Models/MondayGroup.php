@@ -8,12 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class MondayGroup extends Model
 {
     use HasFactory;
-
-    public $incrementing = false; // No auto-increment
-    protected $keyType = 'bigint'; // Ensures id is a big integer
+    public $incrementing = false;
+    protected $keyType = 'string';
     public $timestamps = false; // No timestamps
 
     protected $fillable = ['id', 'name', 'board_id'];
+
+    protected $casts = [
+        'id' => 'string', // Cast group_id as string
+        'board_id' => 'integer',
+    ];
 
     // A group belongs to a board
     public function board()
