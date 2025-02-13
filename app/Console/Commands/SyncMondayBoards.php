@@ -35,25 +35,6 @@ class SyncMondayBoards extends Command
      */
     public function handle()
     {
-        $this->info('Fetching users from Monday.com...');
-        /*     $users = $this->mondayService->getUsers();
-
-             foreach ($users as $userData) {
-                 $user = User::updateOrCreate(
-                     ['id' => $userData['id']],
-                     [
-                         'id' => $userData['id'],
-                         'name' => $userData['name'],
-                         'email' => $userData['email'],
-                         'password' => Hash::make(str()->random(12)), // Set a random password for new users
-                     ]
-                 );
-
-                 $this->info("User {$user->name} synced with Monday ID: {$user->id}");
-             }
-
-             $this->info('User synchronization complete.');
-     */
         $this->info('Fetching boards from Monday.com...');
         $boards = $this->mondayService->getBoards(); // Assume this method exists
         $this->info('Updating ' . count($boards) . ' items.' . PHP_EOL);
