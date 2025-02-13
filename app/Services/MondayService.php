@@ -157,6 +157,9 @@ class MondayService
             items{
                 id
                 name
+                parent_item{
+                    id
+                }
             }
         }
       }
