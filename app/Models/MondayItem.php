@@ -12,7 +12,7 @@ class MondayItem extends Model
     public $incrementing = false;
     protected $keyType = 'int';
     public $timestamps = false;
-    protected $fillable = ['id', 'board_id', 'parent_id', 'name'];
+    protected $fillable = ['id', 'board_id', 'group_id', 'parent_id', 'name'];
     protected $casts = [
         'id' => 'integer',
         'board_id' => 'string',
