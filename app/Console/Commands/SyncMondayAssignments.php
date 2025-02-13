@@ -74,6 +74,7 @@ class SyncMondayAssignments extends Command
 
         // Sync database with Monday.com data
         $this->syncAssignments($syncedAssignments);
+        $this->info("Successfully fetched assignments.");
     }
 
     private function syncAssignments(array $syncedAssignments)
