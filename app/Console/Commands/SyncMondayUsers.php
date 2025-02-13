@@ -2,13 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Models\MondayBoard;
-use App\Models\MondayItem;
-use App\Models\MondayTimeTracking;
 use App\Models\SyncStatus;
+use App\Models\User;
 use App\Services\MondayService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
 
 class SyncMondayUsers extends Command
 {
