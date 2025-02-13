@@ -39,26 +39,27 @@ class SyncMondayBoards extends Command
     public function handle()
     {
         $this->info('Fetching users from Monday.com...');
-        $users = $this->mondayService->getUsers();
+        /*     $users = $this->mondayService->getUsers();
 
-        foreach ($users as $userData) {
-            $user = User::updateOrCreate(
-                ['id' => $userData['id']],
-                [
-                    'id' => $userData['id'],
-                    'name' => $userData['name'],
-                    'email' => $userData['email'],
-                    'password' => Hash::make(str()->random(12)), // Set a random password for new users
-                ]
-            );
+             foreach ($users as $userData) {
+                 $user = User::updateOrCreate(
+                     ['id' => $userData['id']],
+                     [
+                         'id' => $userData['id'],
+                         'name' => $userData['name'],
+                         'email' => $userData['email'],
+                         'password' => Hash::make(str()->random(12)), // Set a random password for new users
+                     ]
+                 );
 
-            $this->info("User {$user->name} synced with Monday ID: {$user->id}");
-        }
+                 $this->info("User {$user->name} synced with Monday ID: {$user->id}");
+             }
 
-        $this->info('User synchronization complete.');
-
+             $this->info('User synchronization complete.');
+     */
         $this->info('Fetching boards from Monday.com...');
         $boards = $this->mondayService->getBoards(); // Assume this method exists
+        $this->info('Updating ' . count($boards) . ' items.' . PHP_EOL);
 
         foreach ($boards as $boardData) {
             $board = MondayBoard::updateOrCreate(
@@ -77,10 +78,10 @@ class SyncMondayBoards extends Command
 
             if (empty($items)) {
                 $this->warn("No item data found for board '{$board->name}' (#{$board->id})");
-                continue;
+            } else {
+                $this->info("Found " . count($items) . " task items for board '{$board->name}' (#{$board->id})");
             }
 
-            $this->info("Found " . count($items) . " items for board '{$board->name}' (#{$board->id})");
 
             foreach ($items as $itemData) {
                 MondayItem::updateOrCreate(
@@ -91,17 +92,15 @@ class SyncMondayBoards extends Command
                     ]
                 );
             }
-            $this->info("Updated " . count($items) . " items for board '{$board->name}' (#{$board->id})");
 
             // Fetch time tracking data for this board
             $items = $this->mondayService->getTimeTrackingItems($board->id);
 
             if (empty($items)) {
                 $this->warn("No time tracking data found for board '{$board->name}' ({$board->id})");
-                continue;
+            } else {
+                $this->info("Found " . count($items) . " time tracking items for board '{$board->name}' ({$board->id})");
             }
-
-            $this->info("Found " . count($items) . " items for board '{$board->name}' ({$board->id})");
 
             foreach ($items as $trackingData) {
                 MondayTimeTracking::updateOrCreate(
@@ -114,8 +113,7 @@ class SyncMondayBoards extends Command
                     ]
                 );
             }
-            $this->info("Updated " . count($items) . " items for board '{$board->name}' ({$board->id})");
-            $this->info("Board successfully synced with Monday.");
+            $this->info("Successfully updated board '{$board->name}' ({$board->id})".PHP_EOL.PHP_EOL);
         }
 
         $this->info('Monday synchronization complete.');

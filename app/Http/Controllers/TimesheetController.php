@@ -35,7 +35,7 @@ class TimesheetController extends Controller
 
         // Convert `updated_at` to human-readable format (e.g., "45 minutes ago")
         $lastupdated = $oldestUpdatedBoard
-            ? (int) Carbon::parse($oldestUpdatedBoard)->diffInMinutes(Carbon::now()) . ' minutes ago'
+            ? (int) Carbon::parse($oldestUpdatedBoard)->setTimezone('UTC')->diffInMinutes(Carbon::now('UTC')) . ' minutes ago'
             : 'Never updated';
 
         $timeTrackings = MondayTimeTracking::where('user_id', $selectedUserId)
