@@ -84,8 +84,7 @@
                                         <a href="https://paperdog-team.monday.com/boards/{{$item->board->id}}/pulses/{{$item->id}}"
                                            target="_blank"
                                            class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 hover:underline transition">
-                                            {{ $item->name }}
-                                        </a>
+                                            {{ $item->parent ? $item->parent->name . ' → ' : '' }}{{ $item->name }}                                        </a>
                                     </td>
                                 </tr>
                             @endforeach
