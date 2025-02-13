@@ -23,7 +23,8 @@ Route::middleware('auth')->group(function () {
     Route::post('downloadcsv', [TimesheetController::class, 'downloadUserSheetCsv'])
         ->name('download.sheetcsv');
 
-    Route::get('/sync-monday', [SyncController::class, 'syncMondayAssignments'])->name('sync.assignments');
+    Route::get('/sync-assignments', [SyncController::class, 'syncMondayAssignments'])->name('sync.assignments');
+    Route::get('/sync-boards', [SyncController::class, 'syncMondayBoards'])->name('sync.boards');
 });
 
 Route::get('/login/google', [SociaLoginController::class, 'redirectToProvider'])->name('google.login');

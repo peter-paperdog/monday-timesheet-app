@@ -6,6 +6,11 @@
     </x-slot>
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 text-right text-gray-400 mt-2 font-extralight" id="lastupdated">
         Last updated: {{$lastupdated}}
+        <br>
+        <a href="{{ route('sync.boards') }}"
+           class="text-sm py-2 bg-blue-600 hover:bg-blue-700 hover:underline  transition">
+            Update
+        </a>
     </div>
 
     @if(auth()->user()->admin)

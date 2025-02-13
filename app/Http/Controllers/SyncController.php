@@ -16,4 +16,12 @@ class SyncController extends Controller
         // Reload the page
         return redirect()->back();
     }
+    public function syncMondayBoards(Request $request)
+    {
+        // Run sync commands
+        Artisan::call('sync:monday-boards');
+
+        // Reload the page
+        return redirect()->back();
+    }
 }
