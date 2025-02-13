@@ -15,14 +15,17 @@
                        placeholder="Select date" value="{{ $selectedDate }}">
 
                 <!-- User Dropdown -->
-                <select name="user_id" class="px-4 py-2 border rounded-lg shadow-sm text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600">
-                    @foreach($users as $userOption)
-                        <option value="{{ $userOption->id }}" {{ $selectedUserId == $userOption->id ? 'selected' : '' }}>
-                            {{ $userOption->name }}
-                        </option>
-                    @endforeach
-                </select>
-
+                @if(auth()->user()->admin)
+                    <select name="user_id"
+                            class="px-4 py-2 border rounded-lg shadow-sm text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600">
+                        @foreach($users as $userOption)
+                            <option
+                                value="{{ $userOption->id }}" {{ $selectedUserId == $userOption->id ? 'selected' : '' }}>
+                                {{ $userOption->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                @endif
                 <!-- Search Button -->
                 <x-primary-button class="px-6 py-2 text-lg whitespace-nowrap">
                     {{ __('Search') }}
