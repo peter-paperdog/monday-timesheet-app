@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\MondayBoard;
+use App\Models\MondayGroup;
 use App\Models\MondayItem;
 use App\Models\MondayTimeTracking;
 use App\Models\SyncStatus;
@@ -53,6 +54,29 @@ class SyncMondayBoards extends Command
 
             $this->info("Processing board '{$board->name}' ({$board->id})");
 
+            $groups = $this->mondayService->getGroups($board->id);
+            $this->info('Adding groups for board.');
+
+            $g = 0;
+            foreach ($groups as $groupData) {
+                if ($groupData['title'] !== "Subitems") {
+                    MondayGroup::updateOrCreate(
+                        ['id' => $board->id . '_' . $groupData['id']],
+                        [
+                            'id' => $board->id . '_' . $groupData['id'],
+                            'name' => $groupData['title'],
+                            'board_id' => $board->id
+                        ]
+                    );
+                    $g++;
+                }
+            }
+            if ($g===0) {
+                $this->warn("No group found.");
+            } else {
+                $this->info("Added " . $g . " groups.");
+            }
+
             $items = $this->mondayService->getItems($board->id);
 
             if (empty($items)) {
@@ -68,6 +92,7 @@ class SyncMondayBoards extends Command
                     [
                         'name' => $itemData['name'],
                         'board_id' => $board->id,
+                        'group_id' => $itemData['group']['id'] ? ($board->id . '_' . $groupData['id']) : null,
                         'parent_id' => $itemData['parent_item']['id'] ?? null
                     ]
                 );
@@ -93,7 +118,7 @@ class SyncMondayBoards extends Command
                     ]
                 );
             }
-            $this->info("Successfully updated board '{$board->name}' ({$board->id})".PHP_EOL.PHP_EOL);
+            $this->info("Successfully updated board '{$board->name}' ({$board->id})" . PHP_EOL . PHP_EOL);
         }
 
         $this->info('Monday synchronization complete.');
