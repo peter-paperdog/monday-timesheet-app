@@ -76,18 +76,20 @@
                                 $dailyTotal = 0;
                                 $weeklyTotal = 0;
 
-                                  function formatTime($minutes) {
-                                        $hours = floor($minutes / 60);
-                                        $remainingMinutes = $minutes % 60;
-                                        return ($hours > 0 ? "{$hours} hours " : "") . ($remainingMinutes > 0 ? "{$remainingMinutes} minutes" : "");
-                                    }
+                                function formatTime($minutes) {
+                                    $hours = floor($minutes / 60);
+                                    $remainingMinutes = $minutes % 60;
+                                    return ($hours > 0 ? "{$hours} hours " : "") . ($remainingMinutes > 0 ? "{$remainingMinutes} minutes" : "");
+                                }
                             @endphp
 
                             @foreach($timeTrackings as $timeTracking)
                                 @php
                                     $entryDate = \Carbon\Carbon::parse($timeTracking->started_at)->format('Y-m-d (l)');
                                     $currentBoard = $timeTracking->item->board->name ?? null;
+                                    $parentTask = $timeTracking->item->parent->name ?? null;
                                     $currentTask = $timeTracking->item->name ?? null;
+                                    $fullTaskName = $parentTask ? "{$parentTask} → {$currentTask}" : $currentTask;
                                     $duration = ($timeTracking->started_at && $timeTracking->ended_at)
                                         ? \Carbon\Carbon::parse($timeTracking->started_at)->diffInMinutes(\Carbon\Carbon::parse($timeTracking->ended_at))
                                         : 0;
@@ -150,11 +152,11 @@
 
                                     <td width="20"></td>
 
-                                    {{-- Only show Task if it’s different from the previous row --}}
+                                    {{-- Show Parent Task with Child Task --}}
                                     <td>
-                                        @if ($currentTask !== $previousTask)
-                                            {{ $currentTask }}
-                                            @php $previousTask = $currentTask; @endphp
+                                        @if ($fullTaskName !== $previousTask)
+                                            {{ $fullTaskName }}
+                                            @php $previousTask = $fullTaskName; @endphp
                                         @endif
                                     </td>
                                 </tr>
@@ -164,7 +166,7 @@
                             @if ($currentDate !== null)
                                 <tr style="font-weight: bold; background-color: #e3e3e3;">
                                     <td colspan="4"></td>
-                                    <td class="text-right">{{formatTime($dailyTotal)}}</td>
+                                    <td class="text-right">{{ formatTime($dailyTotal) }}</td>
                                     <td colspan="4"></td>
                                 </tr>
                                 @php
@@ -178,7 +180,7 @@
                             {{-- Show Weekly Total at the end --}}
                             <tr style="font-weight: bold; background-color: #d1d1d1; font-size: 1.3em;">
                                 <td colspan="4"></td>
-                                <td class="text-right">{{ formatTime($weeklyTotal)  }}</td>
+                                <td class="text-right">{{ formatTime($weeklyTotal) }}</td>
                                 <td colspan="4"></td>
                             </tr>
                             </tbody>
