@@ -17,15 +17,19 @@ use Illuminate\View\View;
 class TimesheetController extends Controller
 {
 
-    public function dashboard(Request $request): View{
+    public function dashboard(Request $request): View
+    {
         return view('dashboard');
     }
 
     public function timesheets(Request $request): View
     {
         $user = Auth::User();
-        $startOfWeek = Carbon::now()->startOfWeek();
-        $endOfWeek = Carbon::now()->endOfWeek();
+
+        // Get selected date from request, or default to current week's Monday
+        $selectedDate = $request->input('weekStartDate', Carbon::now()->startOfWeek()->toDateString());
+        $startOfWeek = Carbon::parse($selectedDate)->startOfWeek(); // Ensure it starts on Monday
+        $endOfWeek = $startOfWeek->copy()->endOfWeek(); // Get Sunday of that week
 
         $timeTrackings = MondayTimeTracking::where('user_id', $user->id)
             ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
@@ -35,7 +39,8 @@ class TimesheetController extends Controller
         return view('timesheets', [
             'user' => $user,
             'timeTrackings' => $timeTrackings,
-         'users' => User::all()
+            'selectedDate' => $selectedDate,
+            'users' => User::all()
         ]);
     }
 
