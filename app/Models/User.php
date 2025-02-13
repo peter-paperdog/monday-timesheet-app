@@ -23,8 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'admin',
-        'monday_id'
+        'admin'
     ];
 
     /**
@@ -47,8 +46,20 @@ class User extends Authenticatable
         'id' => 'integer',
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * A user has one social login.
+     */
     public function socialiteLogin(): BelongsTo
     {
-        return $this->belongsTo(SocialiteLogin::class);
+        return $this->belongsTo(SociaLogin::class, 'user_id', 'id');
+    }
+
+    /**
+     * A user has many time tracking entries.
+     */
+    public function timeTrackings()
+    {
+        return $this->hasMany(MondayTimeTracking::class, 'user_id', 'id');
     }
 }
