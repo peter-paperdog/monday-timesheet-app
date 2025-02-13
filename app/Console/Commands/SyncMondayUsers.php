@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\MondayBoard;
+use App\Models\MondayItem;
+use App\Models\MondayTimeTracking;
+use App\Services\MondayService;
+use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
+
+class SyncMondayUsers extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'sync:monday-users';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Synchronize Monday.com users with the database';
+
+    public function __construct(private MondayService $mondayService)
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+        $this->info('Fetching users from Monday.com...');
+        $users = $this->mondayService->getUsers();
+
+        foreach ($users as $userData) {
+            $user = User::updateOrCreate(
+                ['id' => $userData['id']],
+                [
+                    'id' => $userData['id'],
+                    'name' => $userData['name'],
+                    'email' => $userData['email'],
+                    'password' => Hash::make(str()->random(12)), // Set a random password for new users
+                ]
+            );
+
+            $this->info("User {$user->name} synced with Monday ID: {$user->id}");
+        }
+
+        $this->info('User synchronization complete.');
+    }
+}
