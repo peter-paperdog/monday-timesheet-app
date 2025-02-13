@@ -35,10 +35,11 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <h1 class="mb-6" style="font-size: 1.3em">Hello {{Auth::User()->name}}!</h1>
+                    <h1 class="text-xl mb-6" style="font-size: 1.3em">Hello {{Auth::User()->name}}!</h1>
 
                     <p class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
-                        These are your tasks in Monday.com that are currently in progress:
+                        Below are your tasks that are currently in progress.<br/>
+                        Click on a task name to open it directly in Monday.com.
                     </p>
                     @if($items->isEmpty())
                         <p class="text-center text-gray-500 dark:text-gray-400 py-6">
@@ -67,7 +68,10 @@
                                     </td>
                                     <td class="border border-gray-300 px-4 py-2">
                                         <a href="https://paperdog-team.monday.com/boards/{{$item->board->id}}/pulses/{{$item->id}}"
-                                           target="_blank">{{ $item->name }}</a>
+                                           target="_blank"
+                                           class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 hover:underline transition">
+                                            {{ $item->name }}
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach
