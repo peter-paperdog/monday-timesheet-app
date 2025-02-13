@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MondayBoard;
 use App\Models\MondayItem;
 use App\Models\MondayTimeTracking;
+use App\Models\SyncStatus;
 use App\Models\User;
 use App\Services\MondayService;
 use DateTime;
@@ -18,20 +19,16 @@ use Illuminate\View\View;
 class TimesheetController extends Controller
 {
 
-    private function getLastUpdated()
+    private function getLastUpdated($type)
     {
-        // Fetch the most recent `updated_at` from boards
-        $oldestUpdatedBoard = MondayBoard::orderBy('updated_at', 'asc')->value('updated_at');
-
-        // Convert `updated_at` to human-readable format (e.g., "45 minutes ago")
-        return $oldestUpdatedBoard
-            ? (int)Carbon::parse($oldestUpdatedBoard)->setTimezone('UTC')->diffInMinutes(Carbon::now('UTC')) . ' minutes ago'
-            : 'Never updated';
+        $syncStatuses = SyncStatus::pluck('last_synced_at', 'type');
+        return isset($syncStatuses[$type]) ? Carbon::parse($syncStatuses[$type])->diffForHumans() : 'Never';
     }
 
     public function dashboard(Request $request, MondayService $mondayService): View
     {
         $selectedUserId = $request->input('user_id', Auth::id()); // Default to logged-in user
+
 
         return view('dashboard', [
             'items' => MondayItem::whereHas('assignedUsers', function ($query) use ($selectedUserId) {
@@ -40,7 +37,7 @@ class TimesheetController extends Controller
                 ->with('board:id,name') // Fetch only necessary board fields
                 ->select('id', 'name', 'board_id') // Fetch only required columns
                 ->lazy(),
-            'lastupdated' => $this->getLastUpdated(),
+            'lastupdated' => $this->getLastUpdated('monday-assignments'),
             'selectedUserId' => $selectedUserId,
             'users' => User::orderBy('name', 'asc')->get()
         ]);
@@ -66,7 +63,7 @@ class TimesheetController extends Controller
             'selectedDate' => $startOfWeek->toDateString(),
             'startOfWeek' => $startOfWeek,
             'endOfWeek' => $endOfWeek,
-            'lastupdated' => $this->getLastUpdated(),
+            'lastupdated' => $this->getLastUpdated('monday-boards'),
             'users' => User::orderBy('name', 'asc')->get()
         ]);
     }
