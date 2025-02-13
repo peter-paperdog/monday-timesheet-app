@@ -34,6 +34,6 @@ class SociaLoginController extends Controller
 
         auth()->login($user);
 
-        return redirect(route('sheets.search'));
+        return redirect(route('dashboard'));
     }
 }
