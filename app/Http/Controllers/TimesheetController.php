@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\MondayBoard;
+use App\Models\MondayItem;
 use App\Models\MondayTimeTracking;
 use App\Models\User;
+use App\Services\MondayService;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Support\Carbon;
@@ -16,9 +18,9 @@ use Illuminate\View\View;
 class TimesheetController extends Controller
 {
 
-    public function dashboard(Request $request): View
+    public function dashboard(Request $request, MondayService $mondayService): View
     {
-        return view('dashboard');
+        return view('dashboard', ['items' => Auth::user()->assignedItems()->get()]);
     }
 
     public function timesheets(Request $request): View
@@ -35,7 +37,7 @@ class TimesheetController extends Controller
 
         // Convert `updated_at` to human-readable format (e.g., "45 minutes ago")
         $lastupdated = $oldestUpdatedBoard
-            ? (int) Carbon::parse($oldestUpdatedBoard)->setTimezone('UTC')->diffInMinutes(Carbon::now('UTC')) . ' minutes ago'
+            ? (int)Carbon::parse($oldestUpdatedBoard)->setTimezone('UTC')->diffInMinutes(Carbon::now('UTC')) . ' minutes ago'
             : 'Never updated';
 
         $timeTrackings = MondayTimeTracking::where('user_id', $selectedUserId)
