@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 text-right text-gray-400 mt-2 font-extralight" id="lastupdated">
-        Last updated: {{$lastupdated}}
+        The data displayed here is updated hourly from Monday.com.<br>The last update was {{$lastupdated}}
         <br>
         @if(auth()->user()->admin)
             <a href="{{ route('sync.assignments') }}"
