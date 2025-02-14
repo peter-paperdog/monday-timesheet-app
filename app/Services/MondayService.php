@@ -178,6 +178,38 @@ GRAPHQL;
     /**
      * Fetches the groups for the board.
      *
+     * @param string | array $itemId The ID(s) of the item(s).
+     * @return array The array of TimeTrackingValue columns.
+     */
+    public function getTimeTrackingColumns(array|string $itemIds)
+    {
+        $itemIds = is_array($itemIds) ? implode(',', $itemIds) : $itemIds;
+        $query = <<<GRAPHQL
+        query {
+          items (ids: [$itemIds]) {
+            name
+            column_values{
+                ...on TimeTrackingValue{
+                    id
+                    column{
+                        id
+                        title
+                    }
+                }
+            }
+          }
+        }
+GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+
+        return $response['data']['items'];
+    }
+
+    /**
+     * Fetches the groups for the board.
+     *
      * @param string $boardId The ID of the board.
      * @return array The array of groups.
      */
