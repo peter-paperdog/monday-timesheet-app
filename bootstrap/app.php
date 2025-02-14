@@ -25,7 +25,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('sync:monday-assignments')->everyTenMinutes()->between('08:00', '22:00')->weekdays();
 
 
+        /*
+         * Fridays UK 3pm notification
+         * Mondays UK 9am user pdf
+         * Mondays UK 3pm user pdf
+         * Mondays UK 5pm admin pdfs
+         */
+
         // Send weekly timesheet PDFs to all users.
-        $schedule->command('email:send-weekly-timesheets')->weeklyOn(1, '14:15');
+        $schedule->command('email:send-weekly-timesheets')->weeklyOn(1, '09:15');
+        $schedule->command('email:send-weekly-timesheets')->weeklyOn(1, '15:15');
     })
     ->create();
