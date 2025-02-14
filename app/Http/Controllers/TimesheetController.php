@@ -2,16 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MondayBoard;
 use App\Models\MondayItem;
 use App\Models\MondayTimeTracking;
 use App\Models\SyncStatus;
 use App\Models\User;
-use App\Services\MondayService;
-use DateTime;
-use DateTimeZone;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
