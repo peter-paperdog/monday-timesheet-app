@@ -11,7 +11,7 @@
         @if(auth()->user()->admin)
             <a href="{{ route('sync.boards') }}"
                onclick="return confirm('The sync process might take a few minutes. Do you want to continue?')"
-               class="text-sm py-2 bg-blue-600 hover:bg-blue-700 hover:underline  transition">
+               class="text-sm py-2 hover:underline  transition">
                 Update
             </a>
         @endif
@@ -143,7 +143,7 @@
                                                         @if ($boardName !== $previousBoard)
                                                             <a href="https://paperdog-team.monday.com/boards/{{$entries->first()->item->board->id}}"
                                                                target="_blank"
-                                                               class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 hover:underline transition">
+                                                               class="dark:hover:text-blue-200 hover:underline transition">
                                                                 {{ $boardName }}
                                                             </a>
                                                             @php $previousBoard = $boardName; @endphp
@@ -158,7 +158,7 @@
                                                     <td class="border border-gray-300 px-4 py-2">
                                                         <a href="https://paperdog-team.monday.com/boards/{{$entries->first()->item->board->id}}/pulses/{{$entries->first()->item->id}}"
                                                            target="_blank"
-                                                           class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 hover:underline transition">
+                                                           class="dark:text-blue-400 hover:text-blue-800 hover:underline transition">
                                                             {{ $taskName }}
                                                         </a>
                                                     </td>
