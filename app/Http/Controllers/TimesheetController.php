@@ -25,9 +25,12 @@ class TimesheetController extends Controller
         return isset($syncStatuses[$type]) ? Carbon::parse($syncStatuses[$type])->diffForHumans() : 'Never';
     }
 
-    public function timesheetPDF($userId, $weekStartDate){
+    public function timesheetPDF($userId, $weekStartDate)
+    {
         $startOfWeek = Carbon::parse($weekStartDate)->startOfWeek(); // Ensure it's Monday
         $endOfWeek = $startOfWeek->copy()->endOfWeek(); // Get Sunday of that week
+
+        $userId = auth()->user()->admin ? $userId : auth()->id();
 
         $user = User::findOrFail($userId); // Ensure user exists
 
@@ -54,11 +57,10 @@ class TimesheetController extends Controller
 
     public function dashboard(Request $request): View
     {
-        $selectedUserId = $request->input('user_id', Auth::id()); // Default to logged-in user
-
+        $selectedUserId = auth()->user()->admin ? $request->input('user_id', auth()->id()) : auth()->id();
 
         return view('dashboard', [
-            'items' =>  MondayItem::whereHas('assignedUsers', function ($query) use ($selectedUserId) {
+            'items' => MondayItem::whereHas('assignedUsers', function ($query) use ($selectedUserId) {
                 $query->where('users.id', $selectedUserId);
             })
                 ->with([
@@ -85,7 +87,7 @@ class TimesheetController extends Controller
 
     public function timesheets(Request $request): View
     {
-        $selectedUserId = $request->input('user_id', Auth::id()); // Default to logged-in user
+        $selectedUserId = auth()->user()->admin ? $request->input('user_id', auth()->id()) : auth()->id();
 
         // Get the selected week's start date or default to current Monday
         $selectedDate = $request->input('weekStartDate') ?: Carbon::now()->startOfWeek()->toDateString();
@@ -120,33 +122,5 @@ class TimesheetController extends Controller
             'lastupdated' => $this->getLastUpdated('monday-boards'),
             'users' => User::orderBy('name', 'asc')->get()
         ]);
-    }
-
-    public function downloadUserSheet(Request $request)
-    {
-        $decodedData = json_decode($request->data);
-
-        $data = [
-            'name' => $decodedData->name,
-            'email' => $decodedData->email,
-            'days' => $decodedData->days,
-            'time' => $decodedData->time,
-            'startOfWeek' => $decodedData->startOfWeek,
-            'endOfWeek' => $decodedData->endOfWeek
-        ];
-
-        // Append the view content for this user, adding a page break after each user
-        $html = view('timesheet', [
-            'data' => $data,
-            'printedDate' => (new DateTime())->setTimezone(new DateTimeZone('Europe/London'))->format('d/m/Y H:i:s')
-        ])->render();
-
-        // Generate the PDF from the concatenated HTML
-        $pdf = Pdf::loadHTML($html)
-            ->setPaper('a4', 'portrait');
-
-        // Display the  PDF in the browser
-        return $pdf->stream(str_replace("/", "_",
-            "$decodedData->startOfWeek.'-'.$decodedData->endOfWeek.'_timesheet_'.$decodedData->name.'.pdf'"));
     }
 }
