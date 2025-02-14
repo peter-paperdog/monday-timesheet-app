@@ -41,10 +41,12 @@ class SendWeeklyTimesheetsAdmin extends Command
 
         // Define admin recipients
         $recipients = [
+            'morwenna@paperdog.com',
+            'oliver@paperdog.com',
+            'amo@paperdog.com',
+            'mark@paperdog.com',
             'peter@paperdog.com',
             'gabriella@paperdog.com',
-            'mark@paperdog.com',
-            'morwenna@paperdog.com'
         ];
 
         // Get all users and sort admins last
