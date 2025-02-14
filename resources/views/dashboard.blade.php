@@ -56,55 +56,85 @@
                             No tasks in progress.
                         </p>
                     @else
-                        <table class="w-full border-collapse border border-gray-300">
-                            <thead>
-                            <tr class="bg-gray-100 dark:bg-gray-700">
-                                <th class="border border-gray-300 px-4 py-2 text-left">Board</th>
-                                <th class="border border-gray-300 px-4 py-2 text-left">Group</th>
-                                <th class="border border-gray-300 px-4 py-2 text-left">Task</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @php
-                                $previousBoard = null;
-                                $previousGroup = null;
-                            @endphp
 
-                            @foreach($items as $item)
-                                <tr class="border border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-                                    <!-- Board Column -->
-                                    <td class="border border-gray-300 px-4 py-2 font-bold">
-                                        @if($previousBoard !== ($item->board->name ?? null))
-                                            <a href="https://paperdog-team.monday.com/boards/{{$item->board->id}}"
+                        <form method="POST" action="{{ route('admin.record') }}">
+                            @csrf
+                            <table class="w-full border-collapse border border-gray-300">
+                                <thead>
+                                <tr class="bg-gray-100 dark:bg-gray-700">
+                                    @if(request()->query('recordtime') === 'true' && auth()->user()->admin)
+                                        <th class="border border-gray-300 px-4 py-2 text-left w-10">Select</th>
+                                    @endif
+                                    <th class="border border-gray-300 px-4 py-2 text-left">Board</th>
+                                    <th class="border border-gray-300 px-4 py-2 text-left">Group</th>
+                                    <th class="border border-gray-300 px-4 py-2 text-left">Task</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @php
+                                    $previousBoard = null;
+                                    $previousGroup = null;
+                                @endphp
+
+                                @foreach($items as $item)
+                                    <tr class="border border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                        @if(request()->query('recordtime') === 'true' && auth()->user()->admin)
+                                            <td class="border border-gray-300 px-4 py-2 text-center">
+                                                <input type="checkbox" name="selected_tasks[]" value="{{ $item->id }}">
+                                            </td>
+                                        @endif
+                                        <!-- Board Column -->
+                                        <td class="border border-gray-300 px-4 py-2 font-bold">
+                                            @if($previousBoard !== ($item->board->name ?? null))
+                                                <a href="https://paperdog-team.monday.com/boards/{{$item->board->id}}"
+                                                   target="_blank"
+                                                   class="hover:underline transition">
+                                                    {{ $item->board->name }}
+                                                </a>
+                                                @php $previousBoard = $item->board->name; @endphp
+                                            @endif
+                                        </td>
+
+                                        <!-- Group Column -->
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            @if($previousGroup !== optional($item->group)->name)
+                                                {{ optional($item->group)->name }}
+                                                @php $previousGroup = optional($item->group)->name; @endphp
+                                            @endif
+                                        </td>
+
+                                        <!-- Task Column -->
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            <a href="https://paperdog-team.monday.com/boards/{{$item->board->id}}/pulses/{{$item->id}}"
                                                target="_blank"
                                                class="hover:underline transition">
-                                                {{ $item->board->name }}
+                                                {{ $item->parent ? $item->parent->name . ' → ' : '' }}{{ $item->name }}
                                             </a>
-                                            @php $previousBoard = $item->board->name; @endphp
-                                        @endif
-                                    </td>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
+                            @endif
 
-                                    <!-- Group Column -->
-                                    <td class="border border-gray-300 px-4 py-2">
-                                        @if($previousGroup !== optional($item->group)->name)
-                                            {{ optional($item->group)->name }}
-                                            @php $previousGroup = optional($item->group)->name; @endphp
-                                        @endif
-                                    </td>
 
-                                    <!-- Task Column -->
-                                    <td class="border border-gray-300 px-4 py-2">
-                                        <a href="https://paperdog-team.monday.com/boards/{{$item->board->id}}/pulses/{{$item->id}}"
-                                           target="_blank"
-                                           class="hover:underline transition">
-                                            {{ $item->parent ? $item->parent->name . ' → ' : '' }}{{ $item->name }}
-                                        </a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                            </tbody>
-                        </table>
-                    @endif
+                            @if(request()->query('recordtime') === 'true' && auth()->user()->admin)
+                                <div class="mt-4">
+                                    <x-primary-button type="submit">
+                                        Record Selected Time
+                                    </x-primary-button>
+                                </div>
+                            @endif
+                        </form>
+                        @if(request()->query('recordtime') !== 'true' && auth()->user()->email==='peter@paperdog.com')
+                            <div class="mt-6">
+                                <a href="{{ route('dashboard', ['recordtime' => 'true']) }}">
+                                    <x-primary-button class="px-6 py-2 text-lg whitespace-nowrap">
+                                        {{ __('Record time') }}
+                                    </x-primary-button>
+                                </a>
+                            </div>
+                        @endif
                 </div>
             </div>
         </div>
