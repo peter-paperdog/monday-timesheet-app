@@ -7,9 +7,9 @@ use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -23,5 +23,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('sync:monday-users')->daily()->weekdays();
         $schedule->command('sync:monday-boards')->hourly()->between('08:00', '22:00')->weekdays();
         $schedule->command('sync:monday-assignments')->everyTenMinutes()->between('08:00', '22:00')->weekdays();
+
+
+        // Send weekly timesheet PDFs to all users.
+        $schedule->command('email:send-weekly-timesheets')->weeklyOn(1, '14:00');
     })
     ->create();
