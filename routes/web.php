@@ -34,8 +34,6 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/download/timesheets/pdf/{weekStartDate}', [TimesheetController::class, 'timesheetsPDF'])->name('timesheet.download.PDFs');
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
-    Route::post('/admin/record', [AdminController::class, 'record'])->name('admin.record');
-    Route::post('/admin/monday/record', [MondayController::class, 'recordtime'])->name('admin.monday.recordtime');
 });
 
 Route::get('/login/google', [SociaLoginController::class, 'redirectToProvider'])->name('google.login');
