@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use DateTime;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class MondayService
