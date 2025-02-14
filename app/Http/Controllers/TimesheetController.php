@@ -10,6 +10,8 @@ use Illuminate\Support\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Mpdf\Mpdf;
+use Mpdf\Output\Destination;
 
 class TimesheetController extends Controller
 {
@@ -48,6 +50,76 @@ class TimesheetController extends Controller
 
         $pdf = Pdf::loadView('pdf.timesheet', compact('groupedData', 'startOfWeek', 'endOfWeek', 'user'));
         return $pdf->stream("timesheet_{$user->name}_{$startOfWeek->format('Y-m-d')}.pdf");
+    }
+
+    public function timesheetsPDF($weekStartDate)
+    {
+        $startOfWeek = Carbon::parse($weekStartDate)->startOfWeek(); // Ensure it's Monday
+        $endOfWeek = $startOfWeek->copy()->endOfWeek(); // Get Sunday of that week
+
+        $users = User::orderByRaw("
+        CASE
+            WHEN email IN ('amo@paperdog.com', 'mark@paperdog.com', 'morwenna@paperdog.com', 'oliver@paperdog.com', 'peter@paperdog.com') THEN 1
+            ELSE 0
+        END, name ASC
+    ")->get();
+
+        // Initialize Mpdf instance for merging
+        $mpdf = new Mpdf();
+
+        foreach ($users as $index => $user) {
+            // Fetch all time tracking records for the user at once to minimize queries
+            $timeTrackings = MondayTimeTracking::where('user_id', $user->id)
+                ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
+                ->with(['item.group', 'item.board'])
+                ->orderBy('started_at')
+                ->get();
+
+            if ($timeTrackings->isEmpty()) {
+                continue; // Skip users with no time tracking data
+            }
+
+            // Group by Day → Board → Group → Task
+            $groupedData = $timeTrackings->groupBy([
+                function ($entry) {
+                    return Carbon::parse($entry->started_at)->format('Y-m-d (l)');
+                },
+                'item.board.name',
+                'item.group.name',
+                'item.name',
+            ]);
+
+            // Generate individual PDF for the user
+            $pdf = Pdf::loadView('pdf.timesheet', compact('groupedData', 'startOfWeek', 'endOfWeek', 'user'));
+            $pdfPath = storage_path("app/timesheets/timesheet_{$user->id}_{$startOfWeek->format('Y-m-d')}.pdf");
+
+            // Save the PDF temporarily
+            $pdf->save($pdfPath);
+
+            // Add to Mpdf merger
+            $pageCount = $mpdf->SetSourceFile($pdfPath);
+
+            // Ensure a new page is added between users
+            if ($index > 0) {
+                $mpdf->AddPage();
+            }
+
+            // Import all pages of the user's PDF
+            for ($i = 1; $i <= $pageCount; $i++) {
+                $tplId = $mpdf->ImportPage($i);
+                $mpdf->UseTemplate($tplId);
+                if ($i < $pageCount) {
+                    $mpdf->AddPage();
+                }
+            }
+
+            // Delete temporary file to free up space
+            unlink($pdfPath);
+        }
+
+        // Return the merged PDF as a response
+        return response($mpdf->Output("timesheet_all_users_{$startOfWeek->format('Y-m-d')}.pdf", Destination::INLINE))
+            ->header('Content-Type', 'application/pdf');
     }
 
     public function dashboard(Request $request): View
