@@ -70,7 +70,6 @@ class AdminController extends Controller
         }
         // Get the selected task IDs
         $taskIds = $request->input('selected_tasks');
-
         $columns = $mondayService->getTimeTrackingColumns($taskIds);
 
         $timeTrackingColumns = array_map(function ($item) {
