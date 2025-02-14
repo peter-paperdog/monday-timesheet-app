@@ -52,6 +52,7 @@ class SociaLoginController extends Controller
 
             // Authenticate user
             auth()->login($user);
+            $user->update(['last_login_at' => now()]);
             Log::info("User successfully logged in: {$user->name} ({$user->email})");
 
             return redirect(route('dashboard'))->with('success', 'Login successful.');
