@@ -187,6 +187,7 @@ GRAPHQL;
         $query = <<<GRAPHQL
         query {
           items (ids: [$itemIds]) {
+            id
             name
             column_values{
                 ...on TimeTrackingValue{
