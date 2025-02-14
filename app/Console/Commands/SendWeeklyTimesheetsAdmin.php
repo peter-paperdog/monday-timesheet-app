@@ -9,7 +9,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use Mpdf\Mpdf;
 use Mpdf\Output\Destination;
 
@@ -45,23 +44,66 @@ class SendWeeklyTimesheetsAdmin extends Command
             'oliver@paperdog.com',
             'amo@paperdog.com',
             'mark@paperdog.com',
-            'peter@paperdog.com',
             'gabriella@paperdog.com',
+            'peter@paperdog.com',
         ];
 
         // Get all users and sort admins last
         $users = User::orderByRaw("
-            CASE
-                WHEN email IN ('" . implode("','", $recipients) . "', 'peter@paperdog.com') THEN 1
-                ELSE 0
-            END, name ASC
-        ")->get();
+        CASE
+            WHEN email IN ('" . implode("','", $recipients) . "') THEN 1
+            ELSE 0
+        END, name ASC
+    ")->get();
 
         // Initialize Mpdf for merging all PDFs
         $mpdf = new Mpdf();
 
+        // **User Total Report**
+        $userTimeRecords = MondayTimeTracking::whereBetween('started_at', [$startOfWeek, $endOfWeek])
+            ->join('users', 'monday_time_trackings.user_id', '=', 'users.id')
+            ->selectRaw('users.id as user_id, users.name as user_name, SUM(TIMESTAMPDIFF(MINUTE, started_at, ended_at)) as total_minutes')
+            ->groupBy('users.id', 'users.name')
+            ->orderByDesc('total_minutes')
+            ->get();
+
+        $loggedUsers = $userTimeRecords->pluck('total_minutes', 'user_id')->toArray();
+
+        $userWeeklyTotals = $users->map(function ($user) use ($loggedUsers) {
+            return (object)[
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'total_minutes' => $loggedUsers[$user->id] ?? 0,
+            ];
+        })->sortByDesc('total_minutes');
+
+        $userTotalsPdf = Pdf::loadView('pdf.usertotal', compact('userWeeklyTotals', 'startOfWeek', 'endOfWeek'));
+        $userTotalsPath = storage_path("app/timesheets/user_totals_{$startOfWeek->format('Y-m-d')}.pdf");
+        $userTotalsPdf->save($userTotalsPath);
+        $mpdf->SetSourceFile($userTotalsPath);
+        $mpdf->AddPage();
+        $tplId = $mpdf->ImportPage(1);
+        $mpdf->UseTemplate($tplId);
+
+        // **Board Total Report**
+        $boardWeeklyTotals = MondayTimeTracking::whereBetween('started_at', [$startOfWeek, $endOfWeek])
+            ->join('monday_items as item', 'monday_time_trackings.item_id', '=', 'item.id')
+            ->join('monday_boards as board', 'item.board_id', '=', 'board.id')
+            ->selectRaw('board.id as board_id, board.name as board_name, SUM(TIMESTAMPDIFF(MINUTE, started_at, ended_at)) as total_minutes')
+            ->groupBy('board.id', 'board.name')
+            ->orderByDesc('total_minutes')
+            ->get();
+
+        $boardTotalsPdf = Pdf::loadView('pdf.boardtotal', compact('boardWeeklyTotals', 'startOfWeek', 'endOfWeek'));
+        $boardTotalsPath = storage_path("app/timesheets/board_totals_{$startOfWeek->format('Y-m-d')}.pdf");
+        $boardTotalsPdf->save($boardTotalsPath);
+        $mpdf->SetSourceFile($boardTotalsPath);
+        $mpdf->AddPage();
+        $tplId = $mpdf->ImportPage(1);
+        $mpdf->UseTemplate($tplId);
+
+        // **User-Specific Timesheets**
         foreach ($users as $index => $user) {
-            // Fetch time tracking data
             $timeTrackings = MondayTimeTracking::where('user_id', $user->id)
                 ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
                 ->with(['item.group', 'item.board'])
@@ -69,10 +111,9 @@ class SendWeeklyTimesheetsAdmin extends Command
                 ->get();
 
             if ($timeTrackings->isEmpty()) {
-                continue; // Skip users with no data
+                continue; // Skip users with no time logged
             }
 
-            // Group data for PDF
             $groupedData = $timeTrackings->groupBy([
                 function ($entry) {
                     return Carbon::parse($entry->started_at)->format('Y-m-d (l)');
@@ -82,18 +123,15 @@ class SendWeeklyTimesheetsAdmin extends Command
                 'item.name',
             ]);
 
-            // Generate individual user PDF
-            $pdf = Pdf::loadView('pdf.timesheet', compact('groupedData', 'startOfWeek', 'endOfWeek', 'user'));
-            $pdfPath = storage_path("app/timesheets/timesheet_{$user->id}_{$startOfWeek->format('Y-m-d')}.pdf");
+            $userPdf = Pdf::loadView('pdf.timesheet', compact('groupedData', 'startOfWeek', 'endOfWeek', 'user'));
+            $userPdfPath = storage_path("app/timesheets/timesheet_{$user->id}_{$startOfWeek->format('Y-m-d')}.pdf");
 
-            // Save temporarily
-            $pdf->save($pdfPath);
+            // Save PDF
+            $userPdf->save($userPdfPath);
 
-            // Add to Mpdf merger
-            $pageCount = $mpdf->SetSourceFile($pdfPath);
-            if ($index > 0) {
-                $mpdf->AddPage();
-            }
+            // Merge into Mpdf
+            $pageCount = $mpdf->SetSourceFile($userPdfPath);
+            $mpdf->AddPage();
             for ($i = 1; $i <= $pageCount; $i++) {
                 $tplId = $mpdf->ImportPage($i);
                 $mpdf->UseTemplate($tplId);
@@ -101,20 +139,20 @@ class SendWeeklyTimesheetsAdmin extends Command
                     $mpdf->AddPage();
                 }
             }
-
-            // Delete temporary file
-            unlink($pdfPath);
+            // Cleanup temporary user file
+            unlink($userPdfPath);
         }
 
         // Save the final merged PDF
         $finalPdfPath = storage_path("app/timesheets/timesheet_all_users_{$startOfWeek->format('Y-m-d')}.pdf");
         $mpdf->Output($finalPdfPath, Destination::FILE);
 
+        // Cleanup temp files
+        unlink($userTotalsPath);
+        unlink($boardTotalsPath);
+
         // Send Email with PDF attachment
         Mail::to($recipients)->send(new WeeklyTimesheetsAdminMail($finalPdfPath, $startOfWeek));
-
-        // Delete final PDF after sending
-        Storage::delete($finalPdfPath);
 
         $this->info("Weekly timesheets PDF sent to admins.");
     }
