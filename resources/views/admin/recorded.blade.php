@@ -6,13 +6,17 @@
     </x-slot>
     <div class="py-5">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                      {{var_export($start_times,true)}}<br>
-                      {{var_export($end_times,true)}}<br>
-                      {{var_export($date,true)}}
-                </div>
-            </div>
+            <strong>Date:</strong> {{ $date }}<br><br>
+            @foreach($tasks as $taskId => $task)
+                <p>
+                    <strong>Task ID:</strong> {{ $taskId }}<br>
+                    <strong>Board ID:</strong> {{ $task->board->id ?? 'N/A' }}<br>
+                    <strong>Time Tracking Column:</strong> {{ $time_tracking_columns[$taskId] ?? 'N/A' }}<br>
+                    <strong>Start Time:</strong> {{ $start_times[$taskId] ?? 'N/A' }}<br>
+                    <strong>End Time:</strong> {{ $end_times[$taskId] ?? 'N/A' }}<br>
+                </p>
+                <hr>
+            @endforeach
         </div>
     </div>
 </x-app-layout>

@@ -207,6 +207,45 @@ GRAPHQL;
     }
 
     /**
+     * Updates the time tracking data for a specific item on a board.
+     *
+     * @param string $boardId The ID of the board.
+     * @param string $itemId The ID of the item to update.
+     * @param string $columnId The ID of the column containing the time tracking data.
+     * @param int $startTimestamp The starting timestamp for the time tracking entry.
+     * @param int $endTimestamp The ending timestamp for the time tracking entry.
+     * @return array The result of the API request to update the time tracking data.
+     */
+    public function updateTimeTracking($boardId, $itemId, $columnId, $startTimestamp, $endTimestamp)
+    {
+        $mutation = <<<'GRAPHQL'
+        mutation ($boardId: ID!, $itemId: ID!, $columnId: String!, $value: JSON!) {
+          change_column_value(
+            board_id: $boardId,
+            item_id: $itemId,
+            column_id: $columnId,
+            value: $value
+          ) {
+            id
+          }
+        }
+    GRAPHQL;
+
+        // Convert times to JSON format
+        $value = json_encode([
+            "started_at" => $startTimestamp,
+            "ended_at" => $endTimestamp
+        ]);
+
+        return $this->makeApiRequest($mutation, [
+            'boardId' => $boardId,
+            'itemId' => $itemId,
+            'columnId' => $columnId,
+            'value' => $value
+        ]);
+    }
+
+    /**
      * Fetches the groups for the board.
      *
      * @param string $boardId The ID of the board.
