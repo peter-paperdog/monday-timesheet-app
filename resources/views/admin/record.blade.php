@@ -25,8 +25,7 @@
                                 <th class="border border-gray-300 px-4 py-2 text-center">Start Time</th>
                                 <th class="border border-gray-300 px-4 py-2 text-center">End Time</th>
                                 <th class="border border-gray-300 px-4 py-2 text-center">Total Time</th>
-                                <th class="border border-gray-300 px-4 py-2 text-left">Board</th>
-                                <th class="border border-gray-300 px-4 py-2 text-left">Group</th>
+                                <th class="border border-gray-300 px-4 py-2 text-left">Time tracker</th>
                                 <th class="border border-gray-300 px-4 py-2 text-left">Task</th>
                             </tr>
                             </thead>
@@ -46,14 +45,16 @@
                                     <td class="border border-gray-300 px-4 py-2">
                                         <span class="total-time" id="total-time-{{ $task->id }}">-</span>
                                     </td>
-
-                                    <td class="border border-gray-300 px-4 py-2">
-                                        {{ $task->board->name }}
-                                    </td>
-                                    <td class="border border-gray-300 px-4 py-2">
-                                        {{ $task->group->name ?? 'No Group' }}
-                                    </td>
-                                    <td class="border border-gray-300 px-4 py-2">
+                                    <td class="border border-gray-300 px-4 py-2 font-bold">
+                                        <select name="time_tracking_column[{{ $task->id }}]" class="w-full px-2 py-1 border rounded">
+                                            @foreach($timeTrackingColumns[$task->id] ?? [] as $column)
+                                                <option value="{{ $column['id'] }}">{{ $column['title'] }}</option>
+                                            @endforeach
+                                        </select>                                    </td>
+                                    <td class="border border-gray-300 px-4 py-2 font-bold">
+                                        <h1 class="text-lg font-extrabold">{{$task->board->name}}</h1>
+                                        {!! $task->group ? e($task->group->name) . '<br>' : '' !!}
+                                        {!! $task->parent ? e($task->parent->name) . '<br>' : '' !!}
                                         {{ $task->name }}
                                     </td>
                                 </tr>
