@@ -214,7 +214,7 @@
                                 @endphp
                             @endforeach
 
-                            <tr class="bg-gray-900 dark:bg-gray-600 font-bold text-xl">
+                            <tr class="font-bold text-xl">
                                 <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">Weekly Total:</td>
                                 <td class="border border-gray-300 px-4 py-2 text-center">
                                     {{ floor($weeklyTotal / 60) }}h {{ $weeklyTotal % 60 }}m
