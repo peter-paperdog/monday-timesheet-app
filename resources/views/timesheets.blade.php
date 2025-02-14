@@ -16,7 +16,6 @@
             </a>
         @endif
     </div>
-
     @if(auth()->user()->admin)
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 py-5">
             <div class="text-gray-900 dark:text-gray-100">
@@ -56,6 +55,16 @@
         <a href="{{ route('timesheets', ['weekStartDate' => $startOfWeek->copy()->addWeek()->toDateString(), 'user_id' => $selectedUserId]) }}"
            class="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white text-2xl px-3">
             →
+        </a>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-3">
+        <!-- Download PDF Button -->
+        <a href="{{ route('timesheet.download.PDF', ['userId' => $selectedUserId, 'weekStartDate' => $startOfWeek->toDateString()]) }}" target="_blank"
+           class="ml-4">
+            <x-primary-button class="px-6 py-2 text-lg whitespace-nowrap">
+                {{ __('Download PDF') }}
+            </x-primary-button>
         </a>
     </div>
 
@@ -161,7 +170,9 @@
 
                                             @if ($taskCount > 1)
                                                 <tr class="bg-gray-100 dark:bg-gray-700 font-semibold">
-                                                    <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">Group Total:</td>
+                                                    <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">
+                                                        Group Total:
+                                                    </td>
                                                     <td class="border border-gray-300 px-4 py-2 text-center">
                                                         {{ floor($groupTotal / 60) }}h {{ $groupTotal % 60 }}m
                                                     </td>
@@ -171,7 +182,9 @@
 
                                         @if ($boardCount > 1)
                                             <tr class="bg-gray-200 dark:bg-gray-800 font-bold">
-                                                <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">Board Total:</td>
+                                                <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">
+                                                    Board Total:
+                                                </td>
                                                 <td class="border border-gray-300 px-4 py-2 text-center">
                                                     {{ floor($boardTotal / 60) }}h {{ $boardTotal % 60 }}m
                                                 </td>
@@ -189,7 +202,8 @@
                                 @endif
 
                                 <tr class="bg-gray-300 dark:bg-gray-700 font-bold text-lg">
-                                    <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">Daily Total:</td>
+                                    <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">Daily Total:
+                                    </td>
                                     <td class="border border-gray-300 px-4 py-2 text-center">
                                         {{ $dailyTotal > 0 ? floor($dailyTotal / 60) . 'h ' . ($dailyTotal % 60) . 'm' : '-' }}
                                     </td>
