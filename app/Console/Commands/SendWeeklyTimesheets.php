@@ -33,7 +33,7 @@ class SendWeeklyTimesheets extends Command
     {
         $startOfWeek = Carbon::now()->subWeek()->startOfWeek(); // Last Monday
         $endOfWeek = $startOfWeek->copy()->endOfWeek(); // Last Sunday
-        $this->error("Sending " . $startOfWeek->format('Y-m-d') . " weekly timesheet PDFs to the users.");
+        $this->info("Sending " . $startOfWeek->format('Y-m-d') . " weekly timesheet PDFs to the users.");
 
         // Get all users
         $users = User::all();
