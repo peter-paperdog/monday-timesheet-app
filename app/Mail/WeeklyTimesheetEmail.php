@@ -2,26 +2,28 @@
 
 namespace App\Mail;
 
-use App\Http\Controllers\TimesheetController;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Attachment;
+use Illuminate\Support\Carbon;
 
-class allUserSummaryEmail extends Mailable
+
+class WeeklyTimesheetEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
     /**
      * Create a new message instance.
      */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(
+        public User $user,
+        public Carbon $startOfWeek,
+        public string $pdfPath
+    ) {}
 
     /**
      * Get the message envelope.
@@ -29,7 +31,7 @@ class allUserSummaryEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'All User Summary Email',
+            subject: "Weekly Timesheet ({$this->startOfWeek->format('d M Y')})"
         );
     }
 
@@ -39,7 +41,7 @@ class allUserSummaryEmail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.allsheet',
+            markdown: 'emails.weekly-timesheet'
         );
     }
 
@@ -50,13 +52,10 @@ class allUserSummaryEmail extends Mailable
      */
     public function attachments(): array
     {
-        $TimesheetController = new TimesheetController();
-
         return [
-            Attachment::fromData(function () use ($TimesheetController) {
-                return $TimesheetController->downloadAllTimeSheet();
-            }, 'allTimeSheetWeeklySummary.pdf')
-                ->withMime('application/pdf'),
+            Attachment::fromPath($this->pdfPath)
+                ->as("Timesheet_{$this->user->name}_{$this->startOfWeek->format('Y-m-d')}.pdf")
+                ->withMime('application/pdf')
         ];
     }
 }
