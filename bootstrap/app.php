@@ -26,6 +26,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
 
         // Send weekly timesheet PDFs to all users.
-        $schedule->command('email:send-weekly-timesheets')->weeklyOn(1, '14:30');
+        $schedule->command('email:send-weekly-timesheets')->weeklyOn(1, '14:15');
     })
     ->create();
