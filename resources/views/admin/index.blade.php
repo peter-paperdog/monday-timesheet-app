@@ -28,7 +28,7 @@
                         </a>
                     </div>
 
-                    <h1 class="text-xl">Total recorded time by users</h1>
+                    <h1 class="text-xl">Total time recorded by users</h1>
                     <table class="w-full border-collapse border border-gray-300 mt-4">
                         <thead>
                         <tr class="bg-gray-100 dark:bg-gray-700">
