@@ -59,4 +59,10 @@ class AdminController extends Controller
             'users' => User::orderBy('name', 'asc')->get()
         ]);
     }
+
+    public function record(Request $request)
+    {
+
+        return view('admin.record', []);
+    }
 }
