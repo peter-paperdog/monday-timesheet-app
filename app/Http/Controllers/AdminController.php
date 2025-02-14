@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MondayItem;
 use App\Models\MondayTimeTracking;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -62,7 +63,20 @@ class AdminController extends Controller
 
     public function record(Request $request)
     {
+        // Ensure at least one task was selected
+        if (!$request->has('selected_tasks')) {
+            return redirect()->back()->with('error', 'No tasks selected.');
+        }
+        // Get the selected task IDs
+        $taskIds = $request->input('selected_tasks');
 
-        return view('admin.record', []);
+        // Fetch the corresponding tasks from the database
+        $tasks = MondayItem::whereIn('id', $taskIds)
+            ->with(['board', 'group'])
+            ->get();
+
+        return view('admin.record', [
+            'tasks'=> $tasks
+            ]);
     }
 }
