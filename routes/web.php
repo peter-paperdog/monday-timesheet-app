@@ -29,9 +29,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/download/timesheet/pdf/{userId}/{weekStartDate}', [TimesheetController::class, 'timesheetPDF'])->name('timesheet.download.PDF');
 });
 
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/download/timesheets/pdf/{weekStartDate}', [TimesheetController::class, 'timesheetsPDF'])->name('timesheet.download.PDFs');
+});
+
 Route::get('/login/google', [SociaLoginController::class, 'redirectToProvider'])->name('google.login');
 Route::get('/login/google/callback', [SociaLoginController::class, 'handleProviderCallback']);
-
-Route::get('/test', [TimesheetController::class, 'downloadAllTimeSheet']);
 
 require __DIR__.'/auth.php';
