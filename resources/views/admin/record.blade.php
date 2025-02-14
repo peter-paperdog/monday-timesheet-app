@@ -46,11 +46,12 @@
                                         <span class="total-time" id="total-time-{{ $task->id }}">-</span>
                                     </td>
                                     <td class="border border-gray-300 px-4 py-2 font-bold">
-                                        <select name="time_tracking_column[{{ $task->id }}]" class="w-full px-2 py-1 border rounded">
+                                        <select name="time_tracking_column[{{ $task->id }}]"
+                                                class="w-full px-2 py-1 border rounded">
                                             @foreach($timeTrackingColumns[$task->id] ?? [] as $column)
                                                 <option value="{{ $column['id'] }}">{{ $column['title'] }}</option>
                                             @endforeach
-                                        </select>                                    </td>
+                                        </select></td>
                                     <td class="border border-gray-300 px-4 py-2 font-bold">
                                         <h1 class="text-lg font-extrabold">{{$task->board->name}}</h1>
                                         {!! $task->group ? e($task->group->name) . '<br>' : '' !!}
