@@ -25,6 +25,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/sync-assignments', [SyncController::class, 'syncMondayAssignments'])->name('sync.assignments');
     Route::get('/sync-boards', [SyncController::class, 'syncMondayBoards'])->name('sync.boards');
+
+    Route::get('/download/timesheet/pdf/{userId}/{weekStartDate}', [TimesheetController::class, 'timesheetPDF'])->name('timesheet.download.PDF');
 });
 
 Route::get('/login/google', [SociaLoginController::class, 'redirectToProvider'])->name('google.login');
