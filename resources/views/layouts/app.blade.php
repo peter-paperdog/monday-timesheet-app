@@ -36,7 +36,19 @@
                     </div>
                 </header>
             @endisset
+            <!-- Success Message -->
+            @if(session('success'))
+                <div class="bg-green-500 text-white p-3 mb-4">
+                    {{ session('success') }}
+                </div>
+            @endif
 
+            <!-- Error Message -->
+            @if(session('error'))
+                <div class="bg-red-400 text-white p-3 mb-4">
+                    {{ session('error') }}
+                </div>
+            @endif
             <!-- Page Content -->
             <main>
                 {{ $slot }}
