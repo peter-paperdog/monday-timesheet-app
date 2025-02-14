@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MondayItem;
 use App\Models\MondayTimeTracking;
 use App\Models\User;
+use App\Services\MondayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -61,7 +62,7 @@ class AdminController extends Controller
         ]);
     }
 
-    public function record(Request $request)
+    public function record(Request $request, MondayService $mondayService)
     {
         // Ensure at least one task was selected
         if (!$request->has('selected_tasks')) {
@@ -70,13 +71,24 @@ class AdminController extends Controller
         // Get the selected task IDs
         $taskIds = $request->input('selected_tasks');
 
+        $columns = $mondayService->getTimeTrackingColumns($taskIds);
+
+        $timeTrackingColumns = array_map(function ($item) {
+            return array_column(
+                array_filter($item['column_values'], fn($col) => isset($col['id'], $col['column']['title'])),
+                'column', 'id'
+            );
+        }, array_column($columns, null, 'id'));
+
+
         // Fetch the corresponding tasks from the database
         $tasks = MondayItem::whereIn('id', $taskIds)
             ->with(['board', 'group'])
             ->get();
 
         return view('admin.record', [
-            'tasks'=> $tasks
-            ]);
+            'tasks' => $tasks,
+            'timeTrackingColumns' => $timeTrackingColumns
+        ]);
     }
 }
