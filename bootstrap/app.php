@@ -27,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('sync:monday-boards')->hourly()->between('08:00', '22:00')->weekdays();
         $schedule->command('sync:monday-assignments')->everyTenMinutes()->between('08:00', '22:00')->weekdays();
 
+        $schedule->command('sync:offices')->hourly()->between('08:00', '22:00');
+
 
         /*
          * Fridays UK 3pm notification
