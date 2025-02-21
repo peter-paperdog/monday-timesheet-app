@@ -32,6 +32,7 @@
                     <table class="w-full border-collapse border border-gray-300 dark:border-gray-700">
                         <thead>
                         <tr class="bg-gray-100 dark:bg-gray-700">
+                            <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left" width="60"></th>
                             <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Username</th>
                             <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center">Monday</th>
                             <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center">Tuesday</th>
@@ -42,7 +43,15 @@
                         </thead>
                         <tbody>
                         @foreach ($structuredData as $username => $days)
+                            @php
+                                $flagPath = "/images/flag-{$locations[$username]}.svg";
+                            @endphp
                             <tr class="border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center">
+                                    @if(file_exists(public_path($flagPath)))
+                                        <img src="{{ asset($flagPath) }}" alt="{{ $locations[$username] }}" class="w-6 h-4">
+                                    @endif
+                                </td>
                                 <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">{{ $username }}</td>
                                 @foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] as $day)
                                     <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center
