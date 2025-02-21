@@ -70,4 +70,12 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(MondayItem::class, 'monday_assignments', 'user_id', 'item_id');
     }
+
+    /**
+     * A user has many time tracking entries.
+     */
+    public function schedules()
+    {
+        return $this->hasMany(UserSchedule::class, 'user_id', 'id');
+    }
 }
