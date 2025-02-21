@@ -16,8 +16,11 @@ class OfficeController extends Controller
         $endOfWeek = $startOfWeek->copy()->addDays(4); // Monday - Friday
 
         // Fetch all schedules and eager load users
-        $schedules = UserSchedule::whereBetween('date', [$startOfWeek, $endOfWeek])
-            ->with('user') // Ensure user relation is loaded
+        $schedules = UserSchedule::whereBetween('user_schedules.date', [$startOfWeek, $endOfWeek])
+            ->join('users', 'user_schedules.user_id', '=', 'users.id') // Join users table
+            ->select('user_schedules.*', 'users.name') // Select all schedule fields + username
+            ->orderBy('users.name', 'asc') // Order by username
+            ->with('user') // Load user relation (optional, for easier access)
             ->get();
 
         // Transform data into a structured format
