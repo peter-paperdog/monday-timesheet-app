@@ -54,7 +54,8 @@ class GoogleSheetsService
 
             $parsedData = [];
             $userColumns = [];
-            $currentMonth = null;
+            $currentMonth = Carbon::createFromFormat('M Y', 'Jan 2025');
+
             $firstDayRow = null;
 
             foreach ($values as $rowIndex => $row) {
