@@ -36,14 +36,18 @@
                                 <thead>
                                 <tr class="bg-gray-100 dark:bg-gray-700">
                                     <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Username</th>
-                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Status</th>
+                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center" width="120">Status</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 @foreach ($entries as $entry)
-                                    <tr class="border border-gray-300 dark:border-gray-700">
+                                    <tr class="border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                                         <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">{{ $entry->username }}</td>
-                                        <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">{{ ucfirst($entry->status) }}</td>
+                                        <td class="border border-gray-300 dark:border-gray-600 px-4 py-2  text-center
+                                            @if(strtoupper($entry->status) == strtoupper('Office')) bg-green-200 dark:bg-green-800
+                                            @elseif(strtoupper($entry->status) == strtoupper('WFH')) bg-blue-200 dark:bg-blue-800
+                                            @elseif(strtoupper($entry->status) == strtoupper('Friday off')) bg-yellow-200 dark:bg-yellow-800
+                                            @endif">{{ ucfirst($entry->status) }}</td>
                                     </tr>
                                 @endforeach
                                 </tbody>
