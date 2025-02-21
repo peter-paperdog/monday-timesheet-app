@@ -13,7 +13,7 @@
         </a>
 
         <!-- Current Week Display -->
-        <span class="font-semibold text-lg">
+        <span class="font-semibold text-lg dark:text-gray-300 dark:hover:text-white">
             {{ $startOfWeek->format('M d, Y') }} - {{ $endOfWeek->format('M d, Y') }}
         </span>
 
