@@ -6,14 +6,16 @@ use App\Models\User;
 use Carbon\Carbon;
 use Google\Client;
 use Google\Service\Sheets;
+use Psr\Log\LoggerInterface;
 
 class GoogleSheetsService
 {
     private Sheets $service;
     private string $sheetId;
 
-    public function __construct()
+    public function __construct(LoggerInterface $logger)
     {
+        $this->logger = $logger;
         $pathToCredentials = storage_path('app/' . env('GOOGLE_SERVICE_ACCOUNT_JSON'));
 
         if (!file_exists($pathToCredentials)) {
@@ -44,6 +46,8 @@ class GoogleSheetsService
         $allOfficeData = [];
 
         foreach ($sheets as $officeKey => $sheetRange) {
+            $this->logger->info('Synchronizing the ' . $officeKey . ' office...');
+
             $data = $this->service->spreadsheets_values->get($this->sheetId, $sheetRange);
             $values = $data->getValues();
             if (empty($values)) continue;
@@ -65,6 +69,7 @@ class GoogleSheetsService
                     foreach ($row as $colIndex => $colName) {
                         if ($colIndex === 0 || empty($colName)) continue;
                         $userColumns[$colIndex] = strtolower(trim($colName)) . "@paperdog.com";
+                        $this->logger->info($colName . "'s schedule...");
                     }
                     continue;
                 }
