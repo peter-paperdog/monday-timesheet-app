@@ -49,7 +49,12 @@ class TimesheetController extends Controller
             'item.name',         // Group by Task Name
         ]);
 
-        $pdf = Pdf::loadView('pdf.timesheet', compact('groupedData', 'startOfWeek', 'endOfWeek', 'user'));
+        // Fetch office schedules for the user for the same week
+        $officeSchedules = UserSchedule::where('user_id', $userId)
+            ->whereBetween('date', [$startOfWeek, $endOfWeek])
+            ->pluck('status', 'date');
+
+        $pdf = Pdf::loadView('pdf.timesheet', compact('officeSchedules', 'groupedData', 'startOfWeek', 'endOfWeek', 'user'));
         return $pdf->stream("timesheet_{$user->name}_{$startOfWeek->format('Y-m-d')}.pdf");
     }
 
@@ -90,8 +95,13 @@ class TimesheetController extends Controller
                 'item.name',
             ]);
 
+            // Fetch office schedules for the user for the same week
+            $officeSchedules = UserSchedule::where('user_id', $user->id)
+                ->whereBetween('date', [$startOfWeek, $endOfWeek])
+                ->pluck('status', 'date');
+
             // Generate individual PDF for the user
-            $pdf = Pdf::loadView('pdf.timesheet', compact('groupedData', 'startOfWeek', 'endOfWeek', 'user'));
+            $pdf = Pdf::loadView('pdf.timesheet', compact('officeSchedules','groupedData', 'startOfWeek', 'endOfWeek', 'user'));
             $pdfPath = storage_path("app/timesheets/timesheet_{$user->id}_{$startOfWeek->format('Y-m-d')}.pdf");
 
             // Save the PDF temporarily
