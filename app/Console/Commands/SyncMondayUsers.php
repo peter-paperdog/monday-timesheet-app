@@ -61,6 +61,7 @@ class SyncMondayUsers extends Command
                     'id' => $userData['id'],
                     'name' => $userData['name'],
                     'email' => $userData['email'],
+                    'location' => $userData['location'],
                     'admin' => $isAdmin,
                     'password' => Hash::make(str()->random(12)), // Set a random password for new users
                 ]

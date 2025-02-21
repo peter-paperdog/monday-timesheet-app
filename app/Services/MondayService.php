@@ -73,6 +73,7 @@ class MondayService
             id
             name
             email
+            location
           }
         }
     GRAPHQL;
