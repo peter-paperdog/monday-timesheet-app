@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\MondayController;
+use App\Http\Controllers\OfficeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SociaLoginController;
 use App\Http\Controllers\SyncController;
@@ -19,6 +20,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [TimesheetController::class, 'dashboard'])->name('dashboard');
     Route::get('/timesheets', [TimesheetController::class, 'timesheets'])->name('timesheets');
+    Route::get('/office-schedule', [OfficeController::class, 'schedule'])->name('office-schedule');
 
     Route::post('download', [TimesheetController::class, 'downloadUserSheet'])
         ->name('download.sheet');
