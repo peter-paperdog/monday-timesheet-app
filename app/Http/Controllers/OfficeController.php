@@ -11,23 +11,41 @@ class OfficeController extends Controller
 {
     public function schedule(Request $request): View
     {
-        // Get the selected week's start date or default to current Monday
         $selectedDate = $request->input('weekStartDate') ?: Carbon::now()->startOfWeek()->toDateString();
         $startOfWeek = Carbon::parse($selectedDate)->startOfWeek();
-        $endOfWeek = $startOfWeek->copy()->endOfWeek(); // Get Sunday of that week
+        $endOfWeek = $startOfWeek->copy()->addDays(4); // Monday - Friday
 
-        // Fetch schedules and join with users table
-        $schedules = UserSchedule::whereBetween('date', [$startOfWeek, $endOfWeek])
-            ->join('users', 'user_schedules.user_id', '=', 'users.id') // Ensure users table exists
-            ->select('user_schedules.*', 'users.name as username') // Select username instead of user_id
-            ->orderBy('date')
-            ->get()
-            ->groupBy('date'); // Group by date for easy display
+        // Fetch all schedules and eager load users
+        $schedules = UserSchedule::whereBetween('user_schedules.date', [$startOfWeek, $endOfWeek])
+            ->join('users', 'user_schedules.user_id', '=', 'users.id') // Join users table
+            ->select('user_schedules.*', 'users.name') // Select all schedule fields + username
+            ->orderBy('users.name', 'asc') // Order by username
+            ->with('user') // Load user relation (optional, for easier access)
+            ->get();
 
-        return view('office-schedule', [
-            'startOfWeek' => $startOfWeek,
-            'endOfWeek' => $endOfWeek,
-            'schedules' => $schedules
-        ]);
+        // Transform data into a structured format
+        $structuredData = [];
+
+        foreach ($schedules as $schedule) {
+            $username = $schedule->user->name ?? 'Unknown';
+
+            if (!isset($structuredData[$username])) {
+                $structuredData[$username] = [
+                    'Monday' => '-',
+                    'Tuesday' => '-',
+                    'Wednesday' => '-',
+                    'Thursday' => '-',
+                    'Friday' => '-',
+                ];
+            }
+
+            // Get the weekday from the date
+            $dayOfWeek = Carbon::parse($schedule->date)->format('l'); // e.g., "Monday"
+
+            // Assign the status
+            $structuredData[$username][$dayOfWeek] = $schedule->status;
+        }
+
+        return view('office-schedule', compact('structuredData', 'startOfWeek', 'endOfWeek'));
     }
 }
