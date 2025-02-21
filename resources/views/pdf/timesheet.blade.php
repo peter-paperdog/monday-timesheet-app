@@ -106,6 +106,7 @@
             $previousBoard = null;
             $previousGroup = null;
             $boardCount = isset($groupedData[$dateKey]) ? count($groupedData[$dateKey]) : 0;
+            $officeStatus = isset($officeSchedules[$date->format('Y-m-d')])?$officeSchedules[$date->format('Y-m-d')]:null;
         @endphp
 
         @if ($date->isFuture())
@@ -123,6 +124,9 @@
 
         <tr class="day-header">
             <td colspan="5"><strong style="font-size: 1.5em">{{ $date->format('l') }}</strong>
+                @if ($officeStatus)
+                    <i>({{ strtolower($officeStatus) }})</i>
+                @endif
                 <div
                     style="font-style: normal; padding-top: 5px; font-style: italic;">{{ $date->format('M d, Y') }}</div>
             </td>
