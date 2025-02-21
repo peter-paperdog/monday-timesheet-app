@@ -25,7 +25,7 @@
                             class="px-4 py-2 border rounded-lg shadow-sm text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600">
                         @foreach($users as $userOption)
                             <option
-                                value="{{ $userOption->id }}" {{ $selectedUserId == $userOption->id ? 'selected' : '' }}>
+                                    value="{{ $userOption->id }}" {{ $selectedUserId == $userOption->id ? 'selected' : '' }}>
                                 {{ $userOption->name }}
                             </option>
                         @endforeach
@@ -60,7 +60,8 @@
 
     <div class="max-w-7xl mx-auto px-3">
         <!-- Download PDF Button -->
-        <a href="{{ route('timesheet.download.PDF', ['userId' => $selectedUserId, 'weekStartDate' => $startOfWeek->toDateString()]) }}" target="_blank"
+        <a href="{{ route('timesheet.download.PDF', ['userId' => $selectedUserId, 'weekStartDate' => $startOfWeek->toDateString()]) }}"
+           target="_blank"
            class="ml-4">
             <x-primary-button class="px-6 py-2 text-lg whitespace-nowrap">
                 {{ __('Download PDF') }}
@@ -100,6 +101,7 @@
                                     $dailyTotal = 0;
                                     $previousBoard = null;
                                     $previousGroup = null;
+                                    $officeStatus = isset($officeSchedules[$date->format('Y-m-d')])?$officeSchedules[$date->format('Y-m-d')]:null;
                                     $boardCount = isset($groupedData[$dateKey]) ? count($groupedData[$dateKey]) : 0;
                                 @endphp
 
@@ -114,6 +116,14 @@
                                 <tr class="bg-gray-200 dark:bg-gray-700 font-bold">
                                     <td class="border border-gray-300 px-4 py-2 text-lg" colspan="5">
                                         {{ $dateKey }}
+                                        @if ($officeStatus)
+                                        <span class="px-2 py-1 ml-2 rounded text-sm
+                        @if(strtolower($officeStatus) === 'office') bg-green-200 dark:bg-green-800 text-green-900 dark:text-green-200
+                        @elseif(strtolower($officeStatus) === 'wfh') bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-200
+                        @elseif(strtolower($officeStatus) === 'friday off') bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-200
+                        @endif">
+                        {{ ucfirst($officeStatus) }}
+                    </span>@endif
                                     </td>
                                 </tr>
 

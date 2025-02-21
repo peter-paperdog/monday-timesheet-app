@@ -6,6 +6,7 @@ use App\Models\MondayItem;
 use App\Models\MondayTimeTracking;
 use App\Models\SyncStatus;
 use App\Models\User;
+use App\Models\UserSchedule;
 use Illuminate\Support\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -179,8 +180,13 @@ class TimesheetController extends Controller
             'item.name',         // Group by Task Name
         ]);
 
+        // Fetch office schedules for the user for the same week
+        $officeSchedules = UserSchedule::where('user_id', $selectedUserId)
+            ->whereBetween('date', [$startOfWeek, $endOfWeek])
+            ->pluck('status', 'date'); // Get as key-value pair [date => status]
 
         return view('timesheets', [
+            'officeSchedules' => $officeSchedules,
             'groupedData' => $groupedData,
             'selectedUserId' => $selectedUserId,
             'selectedDate' => $startOfWeek->toDateString(),
