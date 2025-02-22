@@ -60,7 +60,7 @@ class SyncMondayBoards extends Command
             $g = 0;
             foreach ($groups as $groupData) {
                 if ($groupData['title'] !== "Subitems") {
-                    MondayGroup::updateOrCreate(
+                    $MondayGroup = MondayGroup::updateOrCreate(
                         ['id' => $board->id . '_' . $groupData['id']],
                         [
                             'id' => $board->id . '_' . $groupData['id'],
@@ -69,9 +69,10 @@ class SyncMondayBoards extends Command
                         ]
                     );
                     $g++;
+                    $MondayGroup->touch();
                 }
             }
-            if ($g===0) {
+            if ($g === 0) {
                 $this->warn("No group found.");
             } else {
                 $this->info("Added " . $g . " groups.");
@@ -86,7 +87,7 @@ class SyncMondayBoards extends Command
             }
 
             foreach ($items as $itemData) {
-                MondayItem::updateOrCreate(
+                $MondayItem = MondayItem::updateOrCreate(
                     ['id' => $itemData['id']],
                     [
                         'name' => $itemData['name'],
@@ -95,6 +96,7 @@ class SyncMondayBoards extends Command
                         'parent_id' => $itemData['parent_item']['id'] ?? null
                     ]
                 );
+                $MondayItem->touch();
             }
 
             // Fetch time tracking data for this board
@@ -107,7 +109,7 @@ class SyncMondayBoards extends Command
             }
 
             foreach ($items as $trackingData) {
-                MondayTimeTracking::updateOrCreate(
+                $MondayTimeTracking = MondayTimeTracking::updateOrCreate(
                     ['id' => $trackingData['id']],
                     [
                         'item_id' => $trackingData['item_id'],
@@ -116,6 +118,7 @@ class SyncMondayBoards extends Command
                         'ended_at' => !empty($trackingData['ended_at']) ? Carbon::parse($trackingData['ended_at'])->toDateTimeString() : null,
                     ]
                 );
+                $MondayTimeTracking->touch();
             }
             $this->info("Successfully updated board '{$board->name}' ({$board->id})" . PHP_EOL . PHP_EOL);
         }

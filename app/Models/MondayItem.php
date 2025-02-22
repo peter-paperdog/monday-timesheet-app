@@ -12,11 +12,21 @@ class MondayItem extends Model
     public $incrementing = false;
     protected $keyType = 'int';
     public $timestamps = false;
-    protected $fillable = ['id', 'board_id', 'group_id', 'parent_id', 'name'];
+    protected $fillable = [
+        'id',
+        'board_id',
+        'group_id',
+        'parent_id',
+        'name',
+        'created_at',
+        'updated_at'
+    ];
     protected $casts = [
         'id' => 'integer',
         'board_id' => 'string',
         'parent_id' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -45,6 +55,7 @@ class MondayItem extends Model
     {
         return $this->hasMany(MondayTimeTracking::class, 'item_id', 'id');
     }
+
     public function assignedUsers()
     {
         return $this->belongsToMany(User::class, 'monday_assignments', 'item_id', 'user_id');
