@@ -10,7 +10,7 @@ class MondayGroup extends Model
     use HasFactory;
     public $incrementing = false;
     protected $keyType = 'string';
-    public $timestamps = false; // No timestamps
+    public $timestamps = true; // No timestamps
 
     protected $fillable = [
         'id',
