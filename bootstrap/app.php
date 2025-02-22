@@ -8,9 +8,9 @@ use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        api: __DIR__ . '/../routes/api.php',
-        commands: __DIR__ . '/../routes/console.php',
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
+        commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -42,5 +42,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('email:send-weekly-timesheets')->weeklyOn(1, '15:15');
         $schedule->command('email:send-time-record-notification')->weeklyOn(5, '15:00');
         $schedule->command('email:send-weekly-timesheets-admin')->weeklyOn(1, '17:00');
+
+        /*
+         * All weekday UK 9am notification to UK users
+         * All weekday UK 8am notification to HUN users
+         */
+
+        // Send daily status on Slack to all user
+        $schedule->command('slack:send-daily-status-to-hungarians')->weekdays()->at('08:00');
     })
     ->create();
