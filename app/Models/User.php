@@ -24,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'location',
+        'slack_id',
         'password',
         'admin',
         'last_login_at'
