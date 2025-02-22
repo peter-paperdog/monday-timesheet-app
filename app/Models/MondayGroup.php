@@ -12,11 +12,19 @@ class MondayGroup extends Model
     protected $keyType = 'string';
     public $timestamps = false; // No timestamps
 
-    protected $fillable = ['id', 'name', 'board_id'];
+    protected $fillable = [
+        'id',
+        'name',
+        'board_id',
+        'created_at',
+        'updated_at'
+    ];
 
     protected $casts = [
         'id' => 'string', // Cast group_id as string
         'board_id' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // A group belongs to a board
