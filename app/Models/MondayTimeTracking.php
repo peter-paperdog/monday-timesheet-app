@@ -18,12 +18,16 @@ class MondayTimeTracking extends Model
         'item_id',
         'user_id',
         'started_at',
-        'ended_at'
+        'ended_at',
+        'created_at',
+        'updated_at'
     ];
 
     protected $casts = [
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
         'id' => 'integer',
         'item_id' => 'integer',
         'user_id' => 'integer'
