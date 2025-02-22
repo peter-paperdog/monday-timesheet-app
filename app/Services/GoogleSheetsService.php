@@ -16,10 +16,29 @@ class GoogleSheetsService
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
-        $pathToCredentials = storage_path('app/' . env('GOOGLE_SERVICE_ACCOUNT_JSON'));
 
+        // Get the environment variable
+        $envValue = trim(env('GOOGLE_SERVICE_ACCOUNT_JSON'));
+
+    // Check if it's not set
+    if ($envValue === null) {
+        $this->logger->error("Error: GOOGLE_SERVICE_ACCOUNT_JSON is NOT set in .env file.");
+        throw new \Exception("Error: GOOGLE_SERVICE_ACCOUNT_JSON is NOT set in .env file.");
+    }
+
+    // Check if it's empty
+    if (trim($envValue) === '') {
+        $this->logger->error("Error: GOOGLE_SERVICE_ACCOUNT_JSON is SET but EMPTY.");
+        throw new \Exception("Error: GOOGLE_SERVICE_ACCOUNT_JSON is SET but EMPTY.");
+    }
+
+        // Build the full path
+        $pathToCredentials = storage_path('app/' . $envValue);
+
+        // Debugging: Log the resolved path
         if (!file_exists($pathToCredentials)) {
-            throw new \Exception('Google service account JSON file not found.');
+            $this->logger->error("Error: Google service account JSON file not found at: " . $pathToCredentials);
+            throw new \Exception("Error: Google service account JSON file not found at: " . $pathToCredentials);
         }
 
         // Initialize Google Client
