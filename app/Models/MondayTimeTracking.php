@@ -11,7 +11,7 @@ class MondayTimeTracking extends Model
     use HasFactory;
     public $incrementing = false;
     protected $keyType = 'int';
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'id',
