@@ -63,6 +63,35 @@ class SlackService
         return $this->handleResponse($response);
     }
 
+    /**
+     * Egy adott felhasználó adatainak lekérése Slack ID alapján.
+     * @throws ConnectionException
+     */
+    public function getUserByEmail(string $email): array
+    {
+        $response = Http::withToken($this->token)
+            ->get('https://slack.com/api/users.lookupByEmail', [
+                'email' => $email,
+            ]);
+
+        return $this->handleResponse($response);
+    }
+
+    public function getRateLimitStatus(): array
+    {
+        $response = Http::withToken($this->token)
+            ->get('https://slack.com/api/auth.test');
+
+        $resetTimestamp = $response->header('X-RateLimit-Reset');
+        $resetTime = $resetTimestamp ? date('Y-m-d H:i:s', $resetTimestamp) : null;
+
+        return [
+            'limit' => $response->header('X-RateLimit-Limit') ?? 'Unknown',
+            'remaining' => $response->header('X-RateLimit-Remaining') ?? 'Unknown',
+            'reset_time' => $resetTime ?? 'Unknown',
+        ];
+    }
+
     protected function handleResponse($response): array
     {
         $result = $response->json();
