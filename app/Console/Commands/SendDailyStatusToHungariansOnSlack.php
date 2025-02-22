@@ -58,7 +58,7 @@ class SendDailyStatusToHungariansOnSlack extends Command
                 ->first();
 
             if ($todaySchedule) {
-                $message = $user->name." - ".$todaySchedule->status;
+                $message = "A mai napi státuszod: ".$todaySchedule->status.", amennyiben nem tükrözi a valóságot, kérlet módosítsd!";
                 $slackService->sendPrivateMessage($user->slack_id, $message);
             }
 
