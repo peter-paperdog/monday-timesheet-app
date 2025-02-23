@@ -50,5 +50,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Send daily status on Slack to all user
         $schedule->command('slack:send-daily-status-to-hungarians')->weekdays()->at('08:00');
+
+        // Send daily statuses on Slack to Gabi
+        $schedule->command('slack:send-daily-statuses-to-gabi')->weekdays()->at('10:00');
     })
     ->create();
