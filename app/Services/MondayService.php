@@ -92,7 +92,7 @@ class MondayService
     {
         $query = <<<'GRAPHQL'
     query {
-      boards(limit: 999, workspace_ids: 5096840){
+      boards(limit: 999, workspace_ids: 5096840, order_by: used_at){
             id
             name
             type
