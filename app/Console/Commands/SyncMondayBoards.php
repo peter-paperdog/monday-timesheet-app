@@ -37,6 +37,7 @@ class SyncMondayBoards extends Command
      */
     public function handle()
     {
+        $startTime = microtime(true);
         $this->info('Fetching boards from Monday.com...');
         $boards = $this->mondayService->getBoards();
         $this->info('Updating ' . count($boards) . ' items.' . PHP_EOL);
@@ -122,8 +123,9 @@ class SyncMondayBoards extends Command
             }
             $this->info("Successfully updated board '{$board->name}' ({$board->id})" . PHP_EOL . PHP_EOL);
         }
+        $totalTime = round(microtime(true) - $startTime, 2);
 
-        $this->info('Monday synchronization complete.');
+        $this->info('Monday synchronization complete in ' . $totalTime . ' seconds.');
         SyncStatus::recordSync('monday-boards'); // Record sync time
     }
 }
