@@ -40,12 +40,6 @@ class SendDailyStatusToHungariansOnSlack extends Command
             "morwenna@paperdog.com",
             "mark@paperdog.com",
             "amo@paperdog.com",
-
-            "bianka@paperdog.com",
-            "barbara@paperdog.com",
-            "vivien@paperdog.com",
-            "kata@paperdog.com",
-            "gergo@paperdog.com",
         ];
 
         $users = User::where('location', 'Hungary')
