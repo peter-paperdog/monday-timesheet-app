@@ -8,6 +8,7 @@ use App\Http\Controllers\SociaLoginController;
 use App\Http\Controllers\SyncController;
 use App\Http\Controllers\TimesheetController;
 use App\Models\MondayTimeTracking;
+use App\Models\UserSchedule;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -64,7 +65,25 @@ Route::middleware('auth')->group(function () {
                 ];
             });
 
-        return response()->json($events);
+        // Fetch office schedules
+        $schedules = UserSchedule::where('user_id', $userId)
+            ->whereBetween('date', [$startOfWeek, $endOfWeek])
+            ->get()
+            ->map(function ($schedule) {
+                return [
+                    'title' => ucfirst($schedule->status), // Example: "Office", "WFH"
+                    'start' => Carbon::parse($schedule->date)->toDateString(), // Only YYYY-MM-DD
+                    'allDay' => true, // Mark as full-day event
+                    'color' => match(strtolower($schedule->status)) {
+                        'office' => '#28a745', // Green for office
+                        'wfh' => '#007bff', // Blue for work from home
+                        'friday off' => '#ffc107', // Yellow for Friday off
+                        default => '#6c757d' // Gray for others
+                    }
+                ];
+            });
+
+        return response()->json(array_merge($events->toArray(), $schedules->toArray()));
     });
 });
 
