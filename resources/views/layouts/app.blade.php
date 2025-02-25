@@ -19,6 +19,12 @@
         <!-- jQuery UI -->
         <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+        <!-- FullCalendar -->
+        <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6/main.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6/main.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6/main.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6/main.min.js"></script>
     </head>
 
         <!-- Scripts -->
