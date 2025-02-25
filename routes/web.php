@@ -40,27 +40,30 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/timesheet-events', function (Request $request) {
+        // Parse start & end dates with proper timezone handling
+        $startOfWeek = Carbon::parse(substr($request->query('start', now()->startOfWeek()), 0, 10))->startOfDay();
+        $endOfWeek = Carbon::parse(substr($request->query('end', now()->endOfWeek()), 0, 10))->endOfDay();
 
-        // Convert dates
-        $startDate = Carbon::parse($request->query('start', now()->startOfWeek()))->setTimezone('UTC');
-        $endDate = Carbon::parse($request->query('end', now()->endOfWeek()))->setTimezone('UTC');
-        $userId = Auth::id(); // Ensure Auth facade is used
+        // Get user ID from the request (fallback to authenticated user if missing)
+        $userId = auth()->user()->admin ? $request->query('user_id', auth()->id()) : auth()->id();
 
-        // Get events
+        if (!$userId) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         $events = MondayTimeTracking::where('user_id', $userId)
-            ->whereBetween('started_at', [$startDate, $endDate])
-            ->with('item') // Ensure relation is loaded
+            ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
+            ->with('item')
             ->get()
             ->map(function ($entry) {
                 return [
-                    'title' => optional($entry->item)->name ?? 'Unnamed Task',
+                    'title' => $entry->item->name ?? 'Unknown Task',
                     'start' => $entry->started_at->toIso8601String(),
-                    'end' => optional($entry->ended_at)->toIso8601String() ?? now()->toIso8601String(),
+                    'end' => $entry->ended_at ? $entry->ended_at->toIso8601String() : null,
                     'color' => '#007bff',
                 ];
             });
 
-        // Debugging response
         return response()->json($events);
     });
 });
