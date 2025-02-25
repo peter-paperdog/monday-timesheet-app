@@ -13,11 +13,24 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
+
+Route::get('slack/office-answer', function (Request $request) {
+    $payload = json_decode($request->payload, true);
+    $user = $payload['user']['name'];
+    $status = $payload['actions'][0]['value'];
+
+    // Válasz küldése Slack-re
+    return response()->json([
+        'text' => "Köszönjük, $user! A státuszod: $status."
+    ]);
+});
+
+
 Route::get('/test', function (Request $request) {
     // Fetch all users from the database and create a name-to-ID mapping
     $users = User::pluck('id', 'email')->toArray();
 
-    $pathToCredentials = storage_path('app/' . env('GOOGLE_SERVICE_ACCOUNT_JSON'));
+    $pathToCredentials = storage_path('app/'.env('GOOGLE_SERVICE_ACCOUNT_JSON'));
 
     // Check if credentials file exists
     if (!file_exists($pathToCredentials)) {
@@ -61,15 +74,17 @@ Route::get('/test', function (Request $request) {
         foreach ($values as $rowIndex => $row) {
             // Detect the month row (contains "Jan 2025" etc.)
             if (!$currentMonth && isset($row[1]) && preg_match('/([A-Za-z]+)\s(\d{4})/', $row[1], $matches)) {
-                $currentMonth = Carbon::createFromFormat('M Y', $matches[1] . ' ' . $matches[2]);
+                $currentMonth = Carbon::createFromFormat('M Y', $matches[1].' '.$matches[2]);
                 continue;
             }
 
             // Detect header row with user names (Only done once)
             if (empty($userColumns) && isset($row[0]) && strtoupper(trim($row[0])) === 'DAY') {
                 foreach ($row as $colIndex => $colName) {
-                    if ($colIndex === 0 || empty($colName)) continue; // Skip first column & empty columns
-                    $userColumns[$colIndex] = strtolower(trim($colName)) . "@paperdog.com"; // Store column index → Name mapping
+                    if ($colIndex === 0 || empty($colName)) {
+                        continue;
+                    } // Skip first column & empty columns
+                    $userColumns[$colIndex] = strtolower(trim($colName))."@paperdog.com"; // Store column index → Name mapping
                 }
                 continue;
             }
@@ -98,7 +113,9 @@ Route::get('/test', function (Request $request) {
                 // Iterate over recorded columns and statuses
                 foreach ($userColumns as $colIndex => $email) {
                     $userId = $users[$email] ?? null;
-                    if (!$userId) continue;
+                    if (!$userId) {
+                        continue;
+                    }
 
                     $status = $row[$colIndex] ?? ''; // Fetch from the correct column
                     if (!empty($status)) {
