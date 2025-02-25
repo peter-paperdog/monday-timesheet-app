@@ -207,8 +207,14 @@ class TimesheetController extends Controller
         ]);
     }
 
-    public function calendar()
+    public function calendar(Request $request)
     {
-        return view('calendar');
+        $selectedUserId = auth()->user()->admin ? $request->input('user_id', auth()->id()) : auth()->id();
+
+        return view('calendar',[
+            'users' => User::orderBy('name', 'asc')->get(),
+            'selectedUserId' => $selectedUserId,
+            'lastupdated' => $this->getLastUpdated('monday-boards')
+        ]);
     }
 }
