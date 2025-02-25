@@ -18,6 +18,9 @@
                     <x-nav-link :href="route('timesheets')" :active="request()->routeIs('timesheets')">
                         Weekly timesheets
                     </x-nav-link>
+                    <x-nav-link :href="route('timesheets.calendar')" :active="request()->routeIs('timesheets.calendar')">
+                        Calendar
+                    </x-nav-link>
                     <x-nav-link :href="route('office-schedule')" :active="request()->routeIs('office-schedule')">
                         Office schedule
                     </x-nav-link>
@@ -88,6 +91,9 @@
             <x-responsive-nav-link :href="route('timesheets')" :active="request()->routeIs('timesheets')">
                 {{ __('Timesheets') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('timesheets.calendar')" :active="request()->routeIs('timesheets.calendar')">
+                {{ __('Timesheets') }}
+            </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('office-schedule')" :active="request()->routeIs('office-schedule')">
                 {{ __('Office schedule') }}
             </x-responsive-nav-link>
@@ -111,6 +117,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('timesheets')">
                     {{ __('Timesheets') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('timesheets.calendar')">
+                    {{ __('Calendar') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('office-schedule')">
                     {{ __('Office schedule') }}
