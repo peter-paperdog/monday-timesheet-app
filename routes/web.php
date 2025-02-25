@@ -52,13 +52,19 @@ Route::middleware('auth')->group(function () {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
+        // Fetch time tracking data
         $events = MondayTimeTracking::where('user_id', $userId)
             ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
-            ->with('item')
+            ->with(['item.board', 'item.group']) // Eager load board and group
             ->get()
             ->map(function ($entry) {
                 return [
-                    'title' => $entry->item->name ?? 'Unknown Task',
+                    'title' => sprintf(
+                        "%s - %s - %s",
+                        $entry->item->board->name ?? 'No Board',
+                        $entry->item->group->name ?? 'No Group',
+                        $entry->item->name ?? 'Unknown Task'
+                    ),
                     'start' => $entry->started_at->toIso8601String(),
                     'end' => $entry->ended_at ? $entry->ended_at->toIso8601String() : null,
                     'color' => '#007bff',
