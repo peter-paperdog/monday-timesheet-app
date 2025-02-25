@@ -8,6 +8,7 @@ use App\Http\Controllers\SociaLoginController;
 use App\Http\Controllers\SyncController;
 use App\Http\Controllers\TimesheetController;
 use App\Models\MondayTimeTracking;
+use App\Models\UserSchedule;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -40,28 +41,55 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/timesheet-events', function (Request $request) {
+        // Parse start & end dates with proper timezone handling
+        $startOfWeek = Carbon::parse(substr($request->query('start', now()->startOfWeek()), 0, 10))->startOfDay();
+        $endOfWeek = Carbon::parse(substr($request->query('end', now()->endOfWeek()), 0, 10))->endOfDay();
 
-        // Convert dates
-        $startDate = Carbon::parse($request->query('start', now()->startOfWeek()))->setTimezone('UTC');
-        $endDate = Carbon::parse($request->query('end', now()->endOfWeek()))->setTimezone('UTC');
-        $userId = Auth::id(); // Ensure Auth facade is used
+        // Get user ID from the request (fallback to authenticated user if missing)
+        $userId = auth()->user()->admin ? $request->query('user_id', auth()->id()) : auth()->id();
 
-        // Get events
+        if (!$userId) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // Fetch time tracking data
         $events = MondayTimeTracking::where('user_id', $userId)
-            ->whereBetween('started_at', [$startDate, $endDate])
-            ->with('item') // Ensure relation is loaded
+            ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
+            ->with(['item.board', 'item.group']) // Eager load board and group
             ->get()
             ->map(function ($entry) {
                 return [
-                    'title' => optional($entry->item)->name ?? 'Unnamed Task',
+                    'title' => sprintf(
+                        "%s - %s - %s",
+                        $entry->item->board->name ?? 'No Board',
+                        $entry->item->group->name ?? 'No Group',
+                        $entry->item->name ?? 'Unknown Task'
+                    ),
                     'start' => $entry->started_at->toIso8601String(),
-                    'end' => optional($entry->ended_at)->toIso8601String() ?? now()->toIso8601String(),
+                    'end' => $entry->ended_at ? $entry->ended_at->toIso8601String() : null,
                     'color' => '#007bff',
                 ];
             });
 
-        // Debugging response
-        return response()->json($events);
+        // Fetch office schedules
+        $schedules = UserSchedule::where('user_id', $userId)
+            ->whereBetween('date', [$startOfWeek, $endOfWeek])
+            ->get()
+            ->map(function ($schedule) {
+                return [
+                    'title' => ucfirst($schedule->status), // Example: "Office", "WFH"
+                    'start' => Carbon::parse($schedule->date)->toDateString(), // Only YYYY-MM-DD
+                    'allDay' => true, // Mark as full-day event
+                    'color' => match(strtolower($schedule->status)) {
+                        'office' => '#28a745', // Green for office
+                        'wfh' => '#007bff', // Blue for work from home
+                        'friday off' => '#ffc107', // Yellow for Friday off
+                        default => '#6c757d' // Gray for others
+                    }
+                ];
+            });
+
+        return response()->json(array_merge($events->toArray(), $schedules->toArray()));
     });
 });
 
