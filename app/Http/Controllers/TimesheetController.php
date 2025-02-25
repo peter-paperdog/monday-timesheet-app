@@ -101,7 +101,7 @@ class TimesheetController extends Controller
                 ->pluck('status', 'date');
 
             // Generate individual PDF for the user
-            $pdf = Pdf::loadView('pdf.timesheet', compact('officeSchedules','groupedData', 'startOfWeek', 'endOfWeek', 'user'));
+            $pdf = Pdf::loadView('pdf.timesheet', compact('officeSchedules', 'groupedData', 'startOfWeek', 'endOfWeek', 'user'));
             $pdfPath = storage_path("app/timesheets/timesheet_{$user->id}_{$startOfWeek->format('Y-m-d')}.pdf");
 
             // Save the PDF temporarily
@@ -205,5 +205,10 @@ class TimesheetController extends Controller
             'lastupdated' => $this->getLastUpdated('monday-boards'),
             'users' => User::orderBy('name', 'asc')->get()
         ]);
+    }
+
+    public function calendar()
+    {
+        return view('calendar');
     }
 }
