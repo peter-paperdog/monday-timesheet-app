@@ -15,7 +15,12 @@ document.addEventListener('DOMContentLoaded', function () {
         var calendar = new Calendar(calendarEl, {
             plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
             initialView: 'timeGridWeek',
-            slotDuration: '00:30:00',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'timeGridWeek,timeGridDay,listWeek' // Added daily & list view
+            },
+            slotDuration: '00:15:00',
             firstDay: 1, // Start the week on Monday
             slotMinTime: '06:00:00', // Start day at 6 AM
             slotMaxTime: '24:00:00', // End day at midnight
