@@ -36,6 +36,7 @@ class SyncMondayUsers extends Command
         'oliver@paperdog.com',
         'mark@paperdog.com',
         'gabriella@paperdog.com',
+        'bence@paperdog.com',
     ];
 
     public function __construct(private MondayService $mondayService)
