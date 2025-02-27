@@ -30,9 +30,7 @@ Route::post('slack/office-answer', function (Request $request) {
     Log::info("User {$userId} selected: {$selectedOption}");
 
     // Válasz küldése Slack-re
-    return response()->json([
-        'text' => "Köszönjük, ".$payload['user']."! A státuszod: $selectedOption."
-    ]);
+    return $selectedOption;
 });
 
 
