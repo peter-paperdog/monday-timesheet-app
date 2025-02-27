@@ -77,6 +77,67 @@ class SlackService
         return $this->handleResponse($response);
     }
 
+    public function sendInteractiveMessage(string $userId, string $question, array $options): array
+    {
+        // Gombok összeállítása
+        $actions = [];
+        foreach ($options as $index => $option) {
+            $cleanValue = preg_replace('/[^\p{L}\p{N}_]+/u', '', $option);
+            $actions[] = [
+                'type' => 'button',
+                'text' => [
+                    'type' => 'plain_text',
+                    'text' => $option
+                ],
+                'value' => strtolower(str_replace(' ', '_', $cleanValue))
+            ];
+        }
+
+        // Slack üzenet formázása Block Kit segítségével
+        $payload = [
+            'channel' => $userId,
+            'text' => $question,
+            'blocks' => [
+                [
+                    'type' => 'section',
+                    'text' => [
+                        'type' => 'mrkdwn',
+                        'text' => "*$question*"
+                    ]
+                ],
+                [
+                    'type' => 'actions',
+                    'elements' => $actions
+                ]
+            ]
+        ];
+
+        $response = Http::withToken($this->token)
+            ->post('https://slack.com/api/chat.postMessage', $payload);
+
+        return $this->handleResponse($response);
+    }
+
+    protected function updateSlackMessage(string $responseUrl, string $status)
+    {
+        $statusEmojis = [
+            'office' => '🏢 Office',
+            'wfh' => '🏠 WFH',
+            'off' => '🛑 Off',
+            'sick' => '🤒 Sick'
+        ];
+
+        $selectedStatus = $statusEmojis[$status] ?? $status;
+
+        $message = "✅ A státuszod mostantól: *{$selectedStatus}*";
+
+        // Slack API hívás az üzenet frissítésére
+        \Illuminate\Support\Facades\Http::post($responseUrl, [
+            'replace_original' => true, // Eredeti üzenet módosítása
+            'text' => $message
+        ]);
+    }
+
     public function getRateLimitStatus(): array
     {
         $response = Http::withToken($this->token)
