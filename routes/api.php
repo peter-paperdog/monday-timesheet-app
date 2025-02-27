@@ -14,7 +14,7 @@ Route::get('/user', function (Request $request) {
 
 
 
-Route::get('slack/office-answer', function (Request $request) {
+Route::post('slack/office-answer', function (Request $request) {
     $payload = json_decode($request->payload, true);
     $user = $payload['user']['name'];
     $status = $payload['actions'][0]['value'];
