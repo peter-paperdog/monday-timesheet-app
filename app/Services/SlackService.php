@@ -118,7 +118,7 @@ class SlackService
         return $this->handleResponse($response);
     }
 
-    protected function updateSlackMessage(string $responseUrl, string $status)
+    public function updateSlackMessage(string $responseUrl, string $status): void
     {
         $statusEmojis = [
             'office' => '🏢 Office',

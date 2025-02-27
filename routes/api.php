@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Services\SlackService;
 use Carbon\Carbon;
 use Google\Client;
 
@@ -30,7 +31,9 @@ Route::post('slack/office-answer', function (Request $request) {
     Log::info("User {$userId} selected: {$selectedOption}");
 
     // ✅ Frissítjük az üzenetet a választás után
-    $this->updateSlackMessage($responseUrl, $selectedOption);
+
+    $slackService = new SlackService();
+    $slackService->updateSlackMessage($responseUrl, $selectedOption);
 
     return response()->json(['success' => true]);
 });
