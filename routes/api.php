@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Services\GoogleSheetsService;
 use App\Services\SlackService;
 use Carbon\Carbon;
 use Google\Client;
@@ -23,17 +24,24 @@ Route::post('slack/office-answer', function (Request $request) {
         return response()->json(['error' => 'Invalid interaction data'], 400);
     }
 
-    $userId = $payload['user']['id']; // Slack User ID
-    $selectedOption = $payload['actions'][0]['value']; // Pl.: "office", "wfh"
-    $responseUrl = $payload['response_url']; // Az üzenet frissítéséhez
+    $selectedOption = $payload['actions'][0]['value'];
+    $responseUrl = $payload['response_url'];
+    $user = User::where('slack_id', $payload['user']['id'])->first();
 
-    // Naplózás
-    Log::info("User {$userId} selected: {$selectedOption}");
+    Log::info("{$user->name} selected: {$selectedOption}");
 
-    // ✅ Frissítjük az üzenetet a választás után
+    $tsDate = Carbon::createFromTimestamp((int) $payload['message']['ts'])->toDateString();
 
-    $slackService = new SlackService();
-    $slackService->updateSlackMessage($responseUrl, $selectedOption);
+    $user->schedules()
+        ->where('date', $tsDate)
+        ->update(['status' => $selectedOption]);
+
+    $googlesheetservice = app(GoogleSheetsService::class);
+
+    $googlesheetservice->updateHUOfficeSchedule($user->email, $tsDate, $selectedOption);
+
+    //$slackService = new SlackService();
+    //$slackService->updateSlackMessage($responseUrl, $selectedOption);
 
     return response()->json(['success' => true]);
 });
