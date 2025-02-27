@@ -40,6 +40,11 @@ class SendDailyStatusToHungariansOnSlack extends Command
             "morwenna@paperdog.com",
             "mark@paperdog.com",
             "amo@paperdog.com",
+            "vivien@paperdog.com",
+            "barbara@paperdog.com",
+            "bianka@paperdog.com",
+            "kata@paperdog.com",
+            "gergo@paperdog.com",
         ];
 
         $users = User::where('location', 'Hungary')
@@ -47,15 +52,25 @@ class SendDailyStatusToHungariansOnSlack extends Command
             ->get();
 
         foreach ($users as $user) {
-            $todaySchedule = $user->schedules()
-                ->whereDate('date', now()->toDateString())
-                ->first();
+            if ($user->slack_id == 'U01LW4C2K4Z') {
+                $todaySchedule = $user->schedules()
+                    ->whereDate('date', now()->toDateString())
+                    ->first();
 
-            if ($todaySchedule) {
-                $message = "A mai napi státuszod: ".$todaySchedule->status.", amennyiben nem tükrözi a valóságot, kérlet itt: https://docs.google.com/spreadsheets/d/17QdRh2S3-1qFk1YWd63B6UTcRGkDkZzCfQtL8ebADiw/edit?gid=523709850#gid=523709850 módosítsd!";
-                $slackService->sendPrivateMessage($user->slack_id, $message);
+                if ($todaySchedule) {
+                    $question = "A mai státuszod ".$todaySchedule->status."? Ha nem módosítsd a gombok megnyomávsával!";
+                    $options = [
+                        "🏢 Office",
+                        "🏠 WFH",
+                        "🛑 Off",
+                        "🤒 Sick"
+                    ];
+                    if (Carbon::now()->format('l') === 'Friday') {
+                        $options[] = "🌞 Friday off";
+                    }
+                    $slackService->sendInteractiveMessage($user->slack_id, $question, $options);
+                }
             }
-
         }
 
         $this->info('Daily office status sent successfully!');
