@@ -6,6 +6,7 @@ use Google\Client;
 
 use Google\Service\Sheets;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
@@ -13,15 +14,24 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-
 Route::post('slack/office-answer', function (Request $request) {
-    $payload = json_decode($request->payload, true);
-    $user = $payload['user']['name'];
-    $status = $payload['actions'][0]['value'];
+
+    $payload = json_decode($request->input('payload'), true);
+
+    if (!isset($payload['actions'][0])) {
+        return response()->json(['error' => 'Invalid interaction'], 400);
+    }
+
+    $userId = $payload['user']['id']; // Slack user ID
+    $selectedOption = $payload['actions'][0]['value']; // A kiválasztott opció (pl. "office", "WFH")
+    $responseUrl = $payload['response_url']; // Slack válasz URL
+
+    // Naplózzuk a választ
+    Log::info("User {$userId} selected: {$selectedOption}");
 
     // Válasz küldése Slack-re
     return response()->json([
-        'text' => "Köszönjük, $user! A státuszod: $status."
+        'text' => "Köszönjük, ".$payload['user']."! A státuszod: $selectedOption."
     ]);
 });
 
