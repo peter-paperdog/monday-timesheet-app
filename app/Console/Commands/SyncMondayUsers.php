@@ -6,6 +6,7 @@ use App\Models\SyncStatus;
 use App\Models\User;
 use App\Services\MondayService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
 
 class SyncMondayUsers extends Command
@@ -73,5 +74,7 @@ class SyncMondayUsers extends Command
 
         $this->info('User synchronization complete.');
         SyncStatus::recordSync('monday-users'); // Record sync time
+
+        Artisan::call('sync:users-slack-ids');
     }
 }
