@@ -89,7 +89,7 @@ class SlackService
                     'type' => 'plain_text',
                     'text' => $option
                 ],
-                'value' => strtolower(str_replace(' ', '_', $cleanValue))
+                'value' => str_replace(' ', '_', $cleanValue)
             ];
         }
 
