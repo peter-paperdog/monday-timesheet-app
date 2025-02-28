@@ -40,8 +40,8 @@ Route::post('slack/office-answer', function (Request $request) {
 
     $googlesheetservice->updateHUOfficeSchedule($user->email, $tsDate, $selectedOption);
 
-    //$slackService = new SlackService();
-    //$slackService->updateSlackMessage($responseUrl, $selectedOption);
+    $slackService = new SlackService();
+    $slackService->updateSlackMessage($responseUrl, $selectedOption);
 
     return response()->json(['success' => true]);
 });
