@@ -25,8 +25,6 @@ Route::post('slack/office-answer', function (Request $request) {
     }
 
     $selectedOption = str_replace('_', ' ', $payload['actions'][0]['value']);
-    var_dump($selectedOption);
-    die();
     $responseUrl = $payload['response_url'];
     $user = User::where('slack_id', $payload['user']['id'])->first();
 
