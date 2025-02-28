@@ -59,16 +59,7 @@ class SendDailyStatusToHungariansOnSlack extends Command
 
                 if ($todaySchedule) {
                     $question = "A mai státuszod ".$todaySchedule->status."? Ha nem módosítsd a gombok megnyomávsával!";
-                    $options = [
-                        "🏢 Office",
-                        "🏠 WFH",
-                        "🛑 Off",
-                        "🤒 Sick"
-                    ];
-                    if (Carbon::now()->format('l') === 'Friday') {
-                        $options[] = "🌞 Friday off";
-                    }
-                    $slackService->sendInteractiveMessage($user->slack_id, $question, $options);
+                    $slackService->sendInteractiveMessage($user->slack_id, $question);
                 }
             }
         }

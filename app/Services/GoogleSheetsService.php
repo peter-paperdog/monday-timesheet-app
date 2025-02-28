@@ -203,13 +203,12 @@ class GoogleSheetsService
                 ['valueInputOption' => 'USER_ENTERED']
             );
 
-
             $statusColors = [
-                'office' => ['red' => 182, 'green' => 215, 'blue' => 168],
-                'WFH' => ['red' => 213, 'green' => 166, 'blue' => 189],
-                'Friday off' => ['red' => 252, 'green' => 229, 'blue' => 153],
-                'off' => ['red' => 230, 'green' => 184, 'blue' => 175],
-                'sick' => ['red' => 204, 'green' => 0, 'blue' => 0],
+                'office' => ['red' => 182 / 255, 'green' => 215 / 255, 'blue' => 168 / 255],
+                'WFH' => ['red' => 213 / 255, 'green' => 166 / 255, 'blue' => 189 / 255],
+                'Friday off' => ['red' => 252 / 255, 'green' => 229 / 255, 'blue' => 153 / 255],
+                'off' => ['red' => 230 / 255, 'green' => 184 / 255, 'blue' => 175 / 255],
+                'sick' => ['red' => 204 / 255, 'green' => 0, 'blue' => 0],
             ];
 
             if (!isset($statusColors[$status])) {
@@ -236,7 +235,11 @@ class GoogleSheetsService
                                     'values' => [
                                         [
                                             'userEnteredFormat' => [
-                                                'backgroundColor' => $color
+                                                'backgroundColor' => [
+                                                    'red' => $color['red'],
+                                                    'green' => $color['green'],
+                                                    'blue' => $color['blue']
+                                                ]
                                             ]
                                         ]
                                     ]
