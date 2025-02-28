@@ -82,14 +82,14 @@ class SlackService
         // Gombok összeállítása
         $actions = [];
         foreach ($options as $index => $option) {
-            $cleanValue = preg_replace('/[^\p{L}\p{N}_]+/u', '', $option);
+            $cleanValue = preg_replace('/[^\p{L}\p{N}_ ]+/u', '', $option);
             $actions[] = [
                 'type' => 'button',
                 'text' => [
                     'type' => 'plain_text',
                     'text' => $option
                 ],
-                'value' => str_replace(' ', '_', $cleanValue)
+                'value' => str_replace(' ', '_', $cleanValue) // Szóköz helyett aláhúzás
             ];
         }
 
