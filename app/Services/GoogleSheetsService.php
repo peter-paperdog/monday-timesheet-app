@@ -205,11 +205,11 @@ class GoogleSheetsService
 
 
             $statusColors = [
-                'office' => ['red' => 0.8, 'green' => 1, 'blue' => 0.8], // Zöld
-                'WFH' => ['red' => 1, 'green' => 0.8, 'blue' => 1], // Rózsaszín
-                'Friday off' => ['red' => 1, 'green' => 1, 'blue' => 0.6], // Sárga
-                'off' => ['red' => 1, 'green' => 0.7, 'blue' => 0.7], // Világos piros
-                'sick' => ['red' => 1, 'green' => 0, 'blue' => 0], // Erős piros
+                'office' => ['red' => 182, 'green' => 215, 'blue' => 168],
+                'WFH' => ['red' => 213, 'green' => 166, 'blue' => 189],
+                'Friday off' => ['red' => 252, 'green' => 229, 'blue' => 153],
+                'off' => ['red' => 230, 'green' => 184, 'blue' => 175],
+                'sick' => ['red' => 204, 'green' => 0, 'blue' => 0],
             ];
 
             if (!isset($statusColors[$status])) {
