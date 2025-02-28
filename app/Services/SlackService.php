@@ -77,21 +77,54 @@ class SlackService
         return $this->handleResponse($response);
     }
 
-    public function sendInteractiveMessage(string $userId, string $question, array $options): array
+    public function sendInteractiveMessage(string $userId, string $question): array
     {
         // Gombok összeállítása
         $actions = [];
-        foreach ($options as $index => $option) {
-            $cleanValue = preg_replace('/[^\p{L}\p{N}_ ]+/u', '', $option);
-            $actions[] = [
-                'type' => 'button',
-                'text' => [
-                    'type' => 'plain_text',
-                    'text' => $option
-                ],
-                'value' => str_replace(' ', '_', $cleanValue) // Szóköz helyett aláhúzás
-            ];
-        }
+        $actions[] = [
+            'type' => 'button',
+            'text' => [
+                'type' => 'plain_text',
+                'text' => "🏢 Office"
+            ],
+            'value' => "office"
+        ];
+
+        $actions[] = [
+            'type' => 'button',
+            'text' => [
+                'type' => 'plain_text',
+                'text' => "🏠 WFH"
+            ],
+            'value' => "WFH"
+        ];
+
+        $actions[] = [
+            'type' => 'button',
+            'text' => [
+                'type' => 'plain_text',
+                'text' => "🌞 Friday off"
+            ],
+            'value' => "Friday off"
+        ];
+
+        $actions[] = [
+            'type' => 'button',
+            'text' => [
+                'type' => 'plain_text',
+                'text' => "🛑 Off"
+            ],
+            'value' => "off"
+        ];
+
+        $actions[] = [
+            'type' => 'button',
+            'text' => [
+                'type' => 'plain_text',
+                'text' => "🤒 Sick"
+            ],
+            'value' => "sick"
+        ];
 
         // Slack üzenet formázása Block Kit segítségével
         $payload = [
