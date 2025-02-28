@@ -24,7 +24,9 @@ Route::post('slack/office-answer', function (Request $request) {
         return response()->json(['error' => 'Invalid interaction data'], 400);
     }
 
-    $selectedOption = $payload['actions'][0]['value'];
+    $selectedOption = str_replace('_', ' ', $payload['actions'][0]['value']);
+    var_dump($selectedOption);
+    die();
     $responseUrl = $payload['response_url'];
     $user = User::where('slack_id', $payload['user']['id'])->first();
 
