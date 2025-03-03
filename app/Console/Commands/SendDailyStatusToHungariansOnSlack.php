@@ -52,7 +52,7 @@ class SendDailyStatusToHungariansOnSlack extends Command
                 ->first();
 
             if ($todaySchedule) {
-                $question = "A mai státuszod ".$todaySchedule->status."? Ha nem módosítsd a gombok megnyomávsával!";
+                $question = "A mai státuszod ".$todaySchedule->status."? Ha nem módosítsd a gombok megnyomásával!";
                 $slackService->sendInteractiveMessage($user->slack_id, $question);
             }
         }
