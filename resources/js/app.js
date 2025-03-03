@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
             slotDuration: '00:15:00',
             firstDay: 1, // Start the week on Monday
             slotMinTime: '06:00:00', // Start day at 6 AM
-            slotMaxTime: '24:00:00', // End day at midnight
+            slotMaxTime: '23:59:59', // End day at midnight
             events: function(fetchInfo, successCallback, failureCallback) {
                 const userId = selectedUserId ? selectedUserId : 'default'; // Handle undefined case
 
