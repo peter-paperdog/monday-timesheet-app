@@ -47,15 +47,13 @@ class SendDailyStatusToHungariansOnSlack extends Command
             ->get();
 
         foreach ($users as $user) {
-            if ($user->slack_id == 'U01LW4C2K4Z') {
-                $todaySchedule = $user->schedules()
-                    ->whereDate('date', now()->toDateString())
-                    ->first();
+            $todaySchedule = $user->schedules()
+                ->whereDate('date', now()->toDateString())
+                ->first();
 
-                if ($todaySchedule) {
-                    $question = "A mai státuszod ".$todaySchedule->status."? Ha nem módosítsd a gombok megnyomávsával!";
-                    $slackService->sendInteractiveMessage($user->slack_id, $question);
-                }
+            if ($todaySchedule) {
+                $question = "A mai státuszod ".$todaySchedule->status."? Ha nem módosítsd a gombok megnyomávsával!";
+                $slackService->sendInteractiveMessage($user->slack_id, $question);
             }
         }
 
