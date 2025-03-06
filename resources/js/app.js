@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 right: 'timeGridWeek,timeGridDay,listWeek' // Added daily & list view
             },
             slotDuration: '00:15:00',
+            allDaySlot: true,
             firstDay: 1, // Start the week on Monday
             slotMinTime: '06:00:00', // Start day at 6 AM
             slotMaxTime: '23:59:59', // End day at midnight
