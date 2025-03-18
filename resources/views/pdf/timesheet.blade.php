@@ -172,14 +172,12 @@
                         </tr>
                     @endforeach
 
-                    @if ($taskCount > 1)
-                        <tr class="bg-gray-100 font-bold">
-                            <td colspan="4" class="text-right" style="font-size: 1.2em">Group Total:</td>
-                            <td class="text-right" style="font-size: 1.2em">
-                                {{ floor($groupTotal / 60) }}h {{ $groupTotal % 60 }}m
-                            </td>
-                        </tr>
-                    @endif
+                    <tr class="bg-gray-100 font-bold">
+                        <td colspan="4" class="text-right" style="font-size: 1.2em">Group Total:</td>
+                        <td class="text-right" style="font-size: 1.2em">
+                            {{ floor($groupTotal / 60) }}h {{ $groupTotal % 60 }}m
+                        </td>
+                    </tr>
                 @endforeach
 
                 @if ($boardCount > 1)
