@@ -84,7 +84,7 @@ class SyncOfficeSchedules extends Command
                 // Check for new records or changes
                 if (!isset($existingSchedules[$key])) {
                     $newSchedule['old_status'] = 'N/A';
-                    $changedSchedules[] = $newSchedule;
+                    //$changedSchedules[] = $newSchedule;  //do not send new record notifications
                 } elseif ($existingSchedules[$key]['status'] !== $newSchedule['status']) {
                     $newSchedule['old_status'] = $existingSchedules[$key]['status'];
                     $changedSchedules[] = $newSchedule;
