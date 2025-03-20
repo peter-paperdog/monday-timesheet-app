@@ -1,31 +1,18 @@
 <x-mail::message>
-    <h1>Office Schedules Updated</h1>
-    <p>The following user schedules have been changed:</p>
+    # Office Schedules Updated
 
-    <table>
-        <thead>
-        <tr>
-            <th>User</th>
-            <th>Date</th>
-            <th>Old Status</th>
-            <th>New Status</th>
-        </tr>
-        </thead>
-        <tbody>
+    The following user schedules have been changed:
+
+    <x-mail::table>
+        | User | Date | Old Status | New Status |
+        |------|------|-----------|------------|
         @foreach($changedSchedules as $schedule)
-            <tr>
-                <td>{{ $schedule['user_name'] }}</td>
-                <td>{{ $schedule['date'] }}</td>
-                <td>{{ $schedule['old_status'] }}</td>
-                <td>{{ $schedule['status'] }}</td>
-            </tr>
+            | {{ $schedule['user_name'] }} | {{ $schedule['date'] }} | {{ $schedule['old_status'] }} | {{ $schedule['status'] }} |
         @endforeach
-        </tbody>
-    </table>
+    </x-mail::table>
 
-    <p>Check the system for more details.</p>
-     Thanks,
-     the PD Monday team
+    Check the system for more details.
 
-
+    Thanks,
+    **The PD Monday Team**
 </x-mail::message>
