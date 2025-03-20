@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Mail\ScheduleUpdatedMail;
+use App\Models\User;
 use App\Models\UserSchedule;
 use App\Services\GoogleSheetsService;
 use Illuminate\Console\Command;
