@@ -37,7 +37,7 @@ class ScheduleUpdatedMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.schedule-updated', // Ensure this view exists
+            markdown: 'emails.schedule-updated',
             with: ['changedSchedules' => $this->changedSchedules]
         );
     }
