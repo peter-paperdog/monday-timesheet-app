@@ -4,8 +4,8 @@
     The following user schedules have been changed:
 
     <x-mail::table>
-        | User | Date | Old Status | New Status |
-        |------|------|-----------|------------|
+        | User          | Date       | Old Status | New Status |
+        |--------------|------------|------------|------------|
         @foreach($changedSchedules as $schedule)
             | {{ $schedule['user_name'] }} | {{ $schedule['date'] }} | {{ $schedule['old_status'] }} | {{ $schedule['status'] }} |
         @endforeach
