@@ -1,33 +1,59 @@
-<x-mail::message>
-    # Office Schedules Updated
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Office Schedules Updated</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
 
-    The following user schedules have been changed:
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-    @component('mail::html')
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-            <tr>
-                <th style="border: 1px solid #ddd; padding: 8px; background: #f2f2f2;">User</th>
-                <th style="border: 1px solid #ddd; padding: 8px; background: #f2f2f2;">Date</th>
-                <th style="border: 1px solid #ddd; padding: 8px; background: #f2f2f2;">Old Status</th>
-                <th style="border: 1px solid #ddd; padding: 8px; background: #f2f2f2;">New Status</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach($changedSchedules as $schedule)
-                <tr>
-                    <td style="border: 1px solid #ddd; padding: 8px;">{{ $schedule['user_name'] }}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">{{ $schedule['date'] }}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">{{ $schedule['old_status'] }}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">{{ $schedule['status'] }}</td>
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
-    @endcomponent
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
 
-    Check the system for more details.
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
 
-    Thanks,
-    **The PD Monday Team**
-</x-mail::message>
+<h1>Office Schedules Updated</h1>
+
+<p>The following user schedules have been changed:</p>
+
+<table>
+    <thead>
+    <tr>
+        <th>User</th>
+        <th>Date</th>
+        <th>Old Status</th>
+        <th>New Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach($changedSchedules as $schedule)
+        <tr>
+            <td>{{ $schedule['user_name'] }}</td>
+            <td>{{ $schedule['date'] }}</td>
+            <td>{{ $schedule['old_status'] }}</td>
+            <td>{{ $schedule['status'] }}</td>
+        </tr>
+    @endforeach
+    </tbody>
+</table>
+
+<p>Check the system for more details.</p>
+
+<p>Thanks,<br>
+    <strong>The PD Monday Team</strong></p>
+
+</body>
+</html>
