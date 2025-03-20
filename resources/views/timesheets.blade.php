@@ -25,7 +25,7 @@
                             class="px-4 py-2 border rounded-lg shadow-sm text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600">
                         @foreach($users as $userOption)
                             <option
-                                    value="{{ $userOption->id }}" {{ $selectedUserId == $userOption->id ? 'selected' : '' }}>
+                                value="{{ $userOption->id }}" {{ $selectedUserId == $userOption->id ? 'selected' : '' }}>
                                 {{ $userOption->name }}
                             </option>
                         @endforeach
@@ -117,13 +117,14 @@
                                     <td class="border border-gray-300 px-4 py-2 text-lg" colspan="5">
                                         {{ $dateKey }}
                                         @if ($officeStatus)
-                                        <span class="px-2 py-1 ml-2 rounded text-sm
+                                            <span class="px-2 py-1 ml-2 rounded text-sm
                         @if(strtolower($officeStatus) === 'office') bg-green-200 dark:bg-green-800 text-green-900 dark:text-green-200
                         @elseif(strtolower($officeStatus) === 'wfh') bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-200
                         @elseif(strtolower($officeStatus) === 'friday off') bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-200
                         @endif">
                         {{ ucfirst($officeStatus) }}
-                    </span>@endif
+                    </span>
+                                        @endif
                                     </td>
                                 </tr>
 
@@ -178,16 +179,14 @@
                                                 </tr>
                                             @endforeach
 
-                                            @if ($taskCount > 1)
-                                                <tr class="bg-gray-100 dark:bg-gray-700 font-semibold">
-                                                    <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">
-                                                        Group Total:
-                                                    </td>
-                                                    <td class="border border-gray-300 px-4 py-2 text-center">
-                                                        {{ floor($groupTotal / 60) }}h {{ $groupTotal % 60 }}m
-                                                    </td>
-                                                </tr>
-                                            @endif
+                                            <tr class="bg-gray-100 dark:bg-gray-700 font-semibold">
+                                                <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">
+                                                    Group Total:
+                                                </td>
+                                                <td class="border border-gray-300 px-4 py-2 text-center">
+                                                    {{ floor($groupTotal / 60) }}h {{ $groupTotal % 60 }}m
+                                                </td>
+                                            </tr>
                                         @endforeach
 
                                         @if ($boardCount > 1)
