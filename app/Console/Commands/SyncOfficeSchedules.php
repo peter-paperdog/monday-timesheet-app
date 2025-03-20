@@ -76,6 +76,11 @@ class SyncOfficeSchedules extends Command
                 $newSchedule['user_name'] = $user ? $user->name : 'Unknown User';
                 $newSchedule['user_email'] = $user ? $user->email : 'N/A';
 
+                // ✅ Exclude Oliver's email
+                if ($newSchedule['user_email'] === 'oliver@paperdog.com') {
+                    continue; // Skip this entry
+                }
+
                 // Check for new records or changes
                 if (!isset($existingSchedules[$key])) {
                     $newSchedule['old_status'] = 'N/A';
