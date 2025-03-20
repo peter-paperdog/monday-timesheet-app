@@ -100,7 +100,8 @@ class SyncOfficeSchedules extends Command
 
             // 🔹 STEP 4: Update DB AFTER sending email
             if (!empty($changedSchedules)) {
-                Mail::to('peter@paperdog.com')->send(new ScheduleUpdatedMail($changedSchedules));
+                $recipients = ['peter@paperdog.com', 'mark@paperdog.com', 'bence@paperdog.com', 'gabriella@paperdog.com'];
+                Mail::to($recipients)->send(new ScheduleUpdatedMail($changedSchedules));
                 $this->info('Email notification sent.');
             }
 
