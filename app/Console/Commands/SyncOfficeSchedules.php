@@ -2,9 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\ScheduleUpdatedMail;
 use App\Models\UserSchedule;
 use App\Services\GoogleSheetsService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
 
 class SyncOfficeSchedules extends Command
 {
@@ -53,7 +55,45 @@ class SyncOfficeSchedules extends Command
                 ];
             }, $data);
 
-            // Insert into database
+            // Fetch existing schedules
+            $existingSchedules = UserSchedule::whereIn('user_id', array_column($data, 'user_id'))
+                ->whereIn('date', array_column($data, 'date'))
+                ->with('user') // Fetch user details
+                ->get()
+                ->keyBy(fn($item) => $item->user_id . '_' . $item->date)
+                ->toArray();
+
+            // Find schedules that need to be included in the email
+            $changedSchedules = [];
+            foreach ($data as $newSchedule) {
+                $key = $newSchedule['user_id'] . '_' . $newSchedule['date'];
+
+                // Get user details
+                $user = User::find($newSchedule['user_id']);
+
+                // If user exists, add name and email
+                $newSchedule['user_name'] = $user ? $user->name : 'Unknown User';
+                $newSchedule['user_email'] = $user ? $user->email : null;
+
+                // Schedule does not exist in the database (new record)
+                if (!isset($existingSchedules[$key])) {
+                    $newSchedule['old_status'] = 'N/A'; // No previous record
+                    $changedSchedules[] = $newSchedule;
+                }
+                // Schedule exists but status has changed
+                elseif (isset($existingSchedules[$key]) && $existingSchedules[$key]['status'] !== $newSchedule['status']) {
+                    $newSchedule['old_status'] = $existingSchedules[$key]['status'] ?? 'N/A';
+                    $changedSchedules[] = $newSchedule;
+                }
+            }
+
+            // Send email if relevant changes occurred
+            if (!empty($changedSchedules)) {
+                Mail::to('peter@paperdog.com')->send(new ScheduleUpdatedMail($changedSchedules));
+                $this->info('Email notification sent for updated schedules.');
+            }
+
+            // Insert/update database records
             UserSchedule::upsert($data, ['user_id', 'date'], ['status']);
 
             $this->info('Schedules synchronized successfully.');
