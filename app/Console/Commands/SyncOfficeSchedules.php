@@ -69,13 +69,18 @@ class SyncOfficeSchedules extends Command
             foreach ($data as $newSchedule) {
                 $key = $newSchedule['user_id'] . '_' . $newSchedule['date'];
 
-                // Check if record already exists
+                // Ensure user exists before accessing properties
+                $user = User::find($newSchedule['user_id']);
+
+                // ✅ Ensure 'user_name' and 'user_email' are always set
+                $newSchedule['user_name'] = $user ? $user->name : 'Unknown User';
+                $newSchedule['user_email'] = $user ? $user->email : 'N/A';
+
+                // Check for new records or changes
                 if (!isset($existingSchedules[$key])) {
-                    // 🔹 New record (should be updated correctly)
                     $newSchedule['old_status'] = 'N/A';
                     $changedSchedules[] = $newSchedule;
                 } elseif ($existingSchedules[$key]['status'] !== $newSchedule['status']) {
-                    // 🔹 Status has changed
                     $newSchedule['old_status'] = $existingSchedules[$key]['status'];
                     $changedSchedules[] = $newSchedule;
                 }
