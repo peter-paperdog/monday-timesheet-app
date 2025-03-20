@@ -37,7 +37,7 @@ class ScheduleUpdatedMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.schedule-updated',
+            html: 'emails.schedule-updated',
             with: ['changedSchedules' => $this->changedSchedules]
         );
     }
