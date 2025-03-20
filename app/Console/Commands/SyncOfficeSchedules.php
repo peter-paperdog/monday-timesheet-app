@@ -50,51 +50,51 @@ class SyncOfficeSchedules extends Command
             $data = array_map(function ($item) {
                 // Return only the columns that exist in user_schedules
                 return [
-                    'user_id' => $item['user_id'],
+                    'user_id' => (int) $item['user_id'],
                     'date'    => $item['date'],
                     'status'  => $item['status'],
                 ];
             }, $data);
 
-            // Fetch existing schedules
+            // 🔹 STEP 1: Fetch unique existing schedules from DB
             $existingSchedules = UserSchedule::whereIn('user_id', array_column($data, 'user_id'))
                 ->whereIn('date', array_column($data, 'date'))
-                ->with('user') // Fetch user details
                 ->get()
+                ->unique(fn($item) => $item->user_id . '_' . $item->date) // Ensure uniqueness
                 ->keyBy(fn($item) => $item->user_id . '_' . $item->date)
                 ->toArray();
 
-            // Find schedules that need to be included in the email
+            // 🔹 STEP 2: Identify real changes
             $changedSchedules = [];
             foreach ($data as $newSchedule) {
                 $key = $newSchedule['user_id'] . '_' . $newSchedule['date'];
 
-                // Get user details
-                $user = User::find($newSchedule['user_id']);
-
-                // If user exists, add name and email
-                $newSchedule['user_name'] = $user ? $user->name : 'Unknown User';
-                $newSchedule['user_email'] = $user ? $user->email : null;
-
-                // Schedule does not exist in the database (new record)
+                // Check if record already exists
                 if (!isset($existingSchedules[$key])) {
-                    $newSchedule['old_status'] = 'N/A'; // No previous record
+                    // 🔹 New record (should be updated correctly)
+                    $newSchedule['old_status'] = 'N/A';
                     $changedSchedules[] = $newSchedule;
-                }
-                // Schedule exists but status has changed
-                elseif (isset($existingSchedules[$key]) && $existingSchedules[$key]['status'] !== $newSchedule['status']) {
-                    $newSchedule['old_status'] = $existingSchedules[$key]['status'] ?? 'N/A';
+                } elseif ($existingSchedules[$key]['status'] !== $newSchedule['status']) {
+                    // 🔹 Status has changed
+                    $newSchedule['old_status'] = $existingSchedules[$key]['status'];
                     $changedSchedules[] = $newSchedule;
                 }
             }
 
-            // Send email if relevant changes occurred
+            // 🔹 STEP 3: Debug existing records if issues persist
+            if (empty($changedSchedules)) {
+                $this->info('No real changes detected.');
+            } else {
+                $this->info('Changes detected: ' . json_encode($changedSchedules, JSON_PRETTY_PRINT));
+            }
+
+            // 🔹 STEP 4: Update DB AFTER sending email
             if (!empty($changedSchedules)) {
                 Mail::to('peter@paperdog.com')->send(new ScheduleUpdatedMail($changedSchedules));
-                $this->info('Email notification sent for updated schedules.');
+                $this->info('Email notification sent.');
             }
 
-            // Insert/update database records
+            // ✅ Fix: Ensure `upsert()` properly updates (Matching by `user_id` + `date`)
             UserSchedule::upsert($data, ['user_id', 'date'], ['status']);
 
             $this->info('Schedules synchronized successfully.');
