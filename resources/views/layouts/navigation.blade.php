@@ -28,6 +28,9 @@
                         <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.index')">
                             Admin
                         </x-nav-link>
+                        <x-nav-link :href="route('billing.index')" :active="request()->routeIs('billing.index')">
+                            Billing
+                        </x-nav-link>
                     @endif
                 </div>
             </div>
