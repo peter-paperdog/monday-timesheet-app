@@ -61,9 +61,9 @@ class GoogleSheetsService
     public function getOfficeSchedules(): array
     {
         $sheets = [
-            'uk' => '2025_PD UK!A:Z',
-            'hu' => '2025_HU_office/Friday offs!A:Z',
-            'other' => 'Allison_Mike 2025!A:Z'
+            'uk' => '2025_PD UK!A:P',
+            'hu' => '2025_HU_office/Friday offs!A:N',
+            'other' => 'Allison_Mike 2025!A:D'
         ];
 
         $users = User::pluck('id', 'email')->toArray();
@@ -80,16 +80,10 @@ class GoogleSheetsService
 
             $parsedData = [];
             $userColumns = [];
-            $currentMonth = Carbon::createFromFormat('M Y', 'Jan 2025');
-
+            $currentMonth = Carbon::createFromFormat('M Y', 'Jan 2025')->startOfMonth();
             $firstDayRow = null;
 
             foreach ($values as $rowIndex => $row) {
-                // Detect month row (e.g., "Jan 2025")
-                if (!$currentMonth && isset($row[1]) && preg_match('/([A-Za-z]+)\s(\d{4})/', $row[1], $matches)) {
-                    $currentMonth = Carbon::createFromFormat('M Y', $matches[1].' '.$matches[2]);
-                    continue;
-                }
 
                 // Detect header row with user names
                 if (empty($userColumns) && isset($row[0]) && strtoupper(trim($row[0])) === 'DAY') {
@@ -98,7 +92,6 @@ class GoogleSheetsService
                             continue;
                         }
                         $userColumns[$colIndex] = strtolower(trim($colName))."@paperdog.com";
-                        $this->logger->info($colName."'s schedule...");
                     }
                     continue;
                 }

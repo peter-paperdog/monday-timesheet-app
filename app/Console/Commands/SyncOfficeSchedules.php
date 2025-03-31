@@ -42,6 +42,7 @@ class SyncOfficeSchedules extends Command
         try {
             $data = $this->sheetsService->getOfficeSchedules();
 
+           // $this->warn(var_export($data,true));
             if (empty($data)) {
                 $this->warn('No data received.');
                 return;
