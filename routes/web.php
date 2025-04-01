@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\OfficeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SociaLoginController;
@@ -96,6 +97,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/download/timesheets/pdf/{weekStartDate}', [TimesheetController::class, 'timesheetsPDF'])->name('timesheet.download.PDFs');
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+    Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
 });
 
 Route::get('/login/google', [SociaLoginController::class, 'redirectToProvider'])->name('google.login');
