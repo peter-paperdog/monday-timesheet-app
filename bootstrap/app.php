@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $schedule->command('sync:office-schedules')->hourly()->between('08:00', '22:00');
 
-        $schedule->command('sync:monday-contact-board')->daily();
+        $schedule->command('sync:monday-contact-board')->hourly()->between('08:00', '22:00');
 
 
         /*
