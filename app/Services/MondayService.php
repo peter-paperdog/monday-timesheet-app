@@ -326,4 +326,35 @@ GRAPHQL;
         }
         return $items;
     }
+
+
+    /**
+     * Fetches the items for the board.
+     *
+     * @param string $boardId The ID of the board.
+     * @return array The array of items with time tracking data.
+     */
+    public function getContactItems(string $boardId)
+    {
+        $query = <<<GRAPHQL
+    query {
+      boards (ids:"$boardId"){
+        items_page(limit:500){
+            items{
+                id
+                name
+                column_values {
+                    text
+                }
+            }
+        }
+      }
+    }
+GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+
+        return $response['data']['boards'][0]['items_page']['items'];
+    }
 }
