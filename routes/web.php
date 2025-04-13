@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\BillingController;
+use App\Http\Controllers\InvoicingController;
 use App\Http\Controllers\OfficeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SociaLoginController;
@@ -38,7 +38,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/sync-boards', [SyncController::class, 'syncMondayBoards'])->name('sync.boards');
 
     Route::get('/download/timesheet/pdf/{userId}/{weekStartDate}', [TimesheetController::class, 'timesheetPDF'])->name('timesheet.download.PDF');
-
 
 
     Route::get('/timesheet-events', function (Request $request) {
@@ -81,7 +80,7 @@ Route::middleware('auth')->group(function () {
                     'title' => ucfirst($schedule->status), // Example: "Office", "WFH"
                     'start' => Carbon::parse($schedule->date)->toDateString(), // Only YYYY-MM-DD
                     'allDay' => true, // Mark as full-day event
-                    'color' => match(strtolower($schedule->status)) {
+                    'color' => match (strtolower($schedule->status)) {
                         'office' => '#28a745', // Green for office
                         'wfh' => '#007bff', // Blue for work from home
                         'friday off' => '#ffc107', // Yellow for Friday off
@@ -97,7 +96,16 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/download/timesheets/pdf/{weekStartDate}', [TimesheetController::class, 'timesheetsPDF'])->name('timesheet.download.PDFs');
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
-    Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
+
+
+    /*
+     * INVOICING FUNCTIONS
+     */
+    // Invoicing index page
+    Route::get('/invoicing', [InvoicingController::class, 'index'])->name('invoicing.index');
+
+    // Handle the form submission (POST)
+    Route::post('/invoicing', [InvoicingController::class, 'store'])->name('invoicing.store');
 });
 
 Route::get('/login/google', [SociaLoginController::class, 'redirectToProvider'])->name('google.login');
