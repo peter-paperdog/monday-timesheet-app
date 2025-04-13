@@ -13,12 +13,13 @@
 
                         <form method="POST" action="{{ route('invoicing.store') }}">
                             @csrf
-                            <!-- Contacts Dropdown -->
+
+                            <!-- Clients Dropdown -->
                             <div>
-                                <label for="contact-dropdown" class="block mb-1 text-sm font-medium text-gray-800 dark:text-gray-200">Contacts</label>
+                                <label for="contact-dropdown" class="block mb-1 text-sm font-medium text-gray-800 dark:text-gray-200">Clients</label>
                                 <select id="contact-dropdown" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                                    @foreach($contacts as $contact)
-                                        <option>{{ $contact }}</option>
+                                    @foreach($clients as $client)
+                                        <option>{{ $client }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -29,6 +30,16 @@
                                 <select id="project-dropdown" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                     @foreach($projects as $project)
                                         <option>{{ $project }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Contacts Dropdown -->
+                            <div>
+                                <label for="contact-dropdown" class="block mb-1 text-sm font-medium text-gray-800 dark:text-gray-200">Contacts</label>
+                                <select id="contact-dropdown" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    @foreach($contacts as $contact)
+                                        <option>{{ $contact }}</option>
                                     @endforeach
                                 </select>
                             </div>

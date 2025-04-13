@@ -357,4 +357,40 @@ GRAPHQL;
 
         return $response['data']['boards'][0]['items_page']['items'];
     }
+
+
+    /**
+     * Fetches the list of users from the Monday.com API.
+     *
+     * @return array The array of user objects.
+     */
+    public function getContacts(string $boardId)
+    {
+        $query = <<<'GRAPHQL'
+        query {
+          users {
+            id
+            name
+            email
+            location
+          }
+        }
+    GRAPHQL;
+
+        $cursorQuery = <<<GRAPHQL
+query {
+  next_items_page (limit: 2 cursor: "MSw4NDUxMDA2NTYxLDM2MjgxUHBQSTVURkFOR241Ym45LSw1LDQsfDU5MzMxMjkwMQ") {
+    cursor
+    items {
+      id
+      name
+    }
+  }
+}
+GRAPHQL;
+
+        $response = $this->makeApiRequest($query);
+
+        return $response['data']['users'];
+    }
 }
