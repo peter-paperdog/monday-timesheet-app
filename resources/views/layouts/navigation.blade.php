@@ -28,6 +28,9 @@
                         <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.index')">
                             Admin
                         </x-nav-link>
+                        <x-nav-link :href="route('invoicing.index')" :active="request()->routeIs('invoicing.index')">
+                            Invoicing
+                        </x-nav-link>
                     @endif
                 </div>
             </div>
@@ -101,6 +104,9 @@
                 <x-responsive-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.index')">
                     {{ __('Admin') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('invoicing.index')" :active="request()->routeIs('invoicing.index')">
+                    {{ __('Invoicing') }}
+                </x-responsive-nav-link>
             @endif
         </div>
 
@@ -127,6 +133,9 @@
                 @if(auth()->user()->admin)
                     <x-responsive-nav-link :href="route('admin.index')">
                         {{ __('Admin') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('invoicing.index')">
+                        {{ __('Invoicing') }}
                     </x-responsive-nav-link>
                 @endif
 
