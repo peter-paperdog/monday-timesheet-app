@@ -40,7 +40,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/download/timesheet/pdf/{userId}/{weekStartDate}', [TimesheetController::class, 'timesheetPDF'])->name('timesheet.download.PDF');
 
 
-
     Route::get('/timesheet-events', function (Request $request) {
         // Parse start & end dates with proper timezone handling
         $startOfWeek = Carbon::parse(substr($request->query('start', now()->startOfWeek()), 0, 10))->startOfDay();
@@ -81,7 +80,7 @@ Route::middleware('auth')->group(function () {
                     'title' => ucfirst($schedule->status), // Example: "Office", "WFH"
                     'start' => Carbon::parse($schedule->date)->toDateString(), // Only YYYY-MM-DD
                     'allDay' => true, // Mark as full-day event
-                    'color' => match(strtolower($schedule->status)) {
+                    'color' => match (strtolower($schedule->status)) {
                         'office' => '#28a745', // Green for office
                         'wfh' => '#007bff', // Blue for work from home
                         'friday off' => '#ffc107', // Yellow for Friday off
@@ -98,7 +97,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/download/timesheets/pdf/{weekStartDate}', [TimesheetController::class, 'timesheetsPDF'])->name('timesheet.download.PDFs');
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
 
+
+    /*
+     * INVOICING FUNCTIONS
+     */
+    // Invoicing index page
     Route::get('/invoicing', [InvoicingController::class, 'index'])->name('invoicing.index');
+
+    // Handle the form submission (POST)
+    Route::post('/invoicing', [InvoicingController::class, 'store'])->name('invoicing.store');
 });
 
 Route::get('/login/google', [SociaLoginController::class, 'redirectToProvider'])->name('google.login');
