@@ -18,6 +18,6 @@ class InvoicingController extends Controller
     {
 
         // Redirect back to the index with a success message
-        return redirect()->route('invoicing.index')->with('message', 'Invoice created successfully!');
+        return redirect()->route('invoicing.index')->with('success', 'Invoice created successfully!');
     }
 }
