@@ -421,14 +421,20 @@ GRAPHQL;
                 return !is_null($item['parent']) && !empty($item['children']);
             });
 
-            foreach ($filtered_projects as $item) {
+            foreach ($filtered_folders as $item) {
                 foreach ($item['children'] as $child) {
-                    $folder = new \stdClass();
-                    $folder->id = $child['id'];
-                    $folder->name = $child['name'];
-                    $folder->client_id =$item['parent']['id'];
-                    $folder->project_id = $item['id'];
-                    $folders[$child['id']] = $folder;
+                    $client_id = $item['parent']['id'];
+                    $project_id = $item['id'];
+                    $folder_id = $child['id'];
+
+                    if (!isset($folders[$client_id])) {
+                        $folders[$client_id] = [];
+                    }
+
+                    if (!isset($folders[$client_id][$project_id])) {
+                        $folders[$client_id][$project_id] = [];
+                    }
+                    $folders[$client_id][$project_id][] = $folder_id;
                 }
             }
             $page++;
