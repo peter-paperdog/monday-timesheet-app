@@ -398,6 +398,11 @@ GRAPHQL;
             $page++;
         } while (!empty($data));
 
+        // Sort the data by 'name' ascending
+        usort($clients, function ($a, $b) {
+            return strcmp($a->name, $b->name);
+        });
+
         return $clients;
     }
 }
