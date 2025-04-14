@@ -368,6 +368,7 @@ GRAPHQL;
     {
         $clients = [];
         $projects = [];
+        $folders = [];
 
         $page = 1;
         do {
@@ -390,6 +391,7 @@ GRAPHQL;
             $response = $this->makeApiRequest($query);
             $data = $response['data']['folders'];
 
+            //CLIENTS
             $filtered_clients = array_filter($data, function ($item) {
                 return is_null($item['parent']);
             });
@@ -398,7 +400,36 @@ GRAPHQL;
                 $client = new \stdClass();
                 $client->id = $item['id'];
                 $client->name = $item['name'];
-                $clients[] = $client;
+                $clients[$item['id']] = $client;
+            }
+
+            //PROJECTS
+            $filtered_projects = array_filter($data, function ($item) {
+                return !is_null($item['parent']) && !empty($item['children']);
+            });
+
+            foreach ($filtered_projects as $item) {
+                $project = new \stdClass();
+                $project->id = $item['id'];
+                $project->name = $item['name'];
+                $project->client_id = $item['parent']['id'];
+                $projects[$item['id']] = $project;
+            }
+
+            //FOLDERS
+            $filtered_folders = array_filter($data, function ($item) {
+                return !is_null($item['parent']) && !empty($item['children']);
+            });
+
+            foreach ($filtered_projects as $item) {
+                foreach ($item['children'] as $child) {
+                    $folder = new \stdClass();
+                    $folder->id = $child['id'];
+                    $folder->name = $child['name'];
+                    $folder->client_id =$item['parent']['id'];
+                    $folder->project_id = $item['id'];
+                    $folders[$child['id']] = $folder;
+                }
             }
             $page++;
         } while (!empty($data));
@@ -408,9 +439,15 @@ GRAPHQL;
             return strcmp($a->name, $b->name);
         });
 
+        // Sort the data by 'name' ascending
+        usort($projects, function ($a, $b) {
+            return strcmp($a->name, $b->name);
+        });
+
         $data = new \stdClass();
         $data->clients = $clients;
         $data->projects = $projects;
+        $data->folders = $folders;
         return $data;
     }
 }
