@@ -458,10 +458,10 @@ GRAPHQL;
     }
 
     /**
-     * Fetches the groups for the board.
+     * Fetches the folders name
      *
-     * @param string $boardId The ID of the board.
-     * @return array The array of groups.
+     * @param string $folderId The ID of the Folder.
+     * @return string
      */
     public function getFoldername(string $folderId)
     {
@@ -477,5 +477,35 @@ GRAPHQL;
         $response = $this->makeApiRequest($query);
 
         return $response['data']['folders'][0]['name'];
+    }
+
+
+    /**
+     * Fetches the details of a specific board
+     *
+     * @return array The array of the board objects.
+     */
+    public function getBoard(string $boardId)
+    {
+        $query = <<<GRAPHQL
+    query {
+      boards(ids:"$boardId"){
+          id
+          name
+          groups{
+            title
+            items_page(limit:500){
+                items{
+                    name
+                }
+            }
+          }
+      }
+    }
+GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+        return $response['data']['boards'][0];
     }
 }
