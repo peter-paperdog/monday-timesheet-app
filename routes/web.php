@@ -103,9 +103,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
      */
     // Invoicing index page
     Route::get('/invoicing', [InvoicingController::class, 'index'])->name('invoicing.index');
-
-    // Handle the form submission (POST)
-    Route::post('/invoicing', [InvoicingController::class, 'store'])->name('invoicing.store');
+    Route::get('/invoicing/create', [InvoicingController::class, 'create'])->name('invoicing.create');
 });
 
 Route::get('/login/google', [SociaLoginController::class, 'redirectToProvider'])->name('google.login');
