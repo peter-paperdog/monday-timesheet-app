@@ -15,12 +15,11 @@ class InvoicingController extends Controller
     {
         $data = $this->mondayService->getFolders();
 
-        $contacts = ['John Doe', 'Jane Smith', 'Alice Johnson'];
         $clients = $data->clients;
         $projects = $data->projects;
         $folders = $data->folders;
 
-        return view('invoicing.index', compact('contacts','clients', 'projects', 'folders'));
+        return view('invoicing.index', compact('clients', 'projects', 'folders'));
     }
 
     public function store(Request $request)
