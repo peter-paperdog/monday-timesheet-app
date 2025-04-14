@@ -13,13 +13,14 @@ class InvoicingController extends Controller
 
     public function index()
     {
-        $folders = $this->mondayService->getFolders();
+        $data = $this->mondayService->getFolders();
 
         $contacts = ['John Doe', 'Jane Smith', 'Alice Johnson'];
-        $clients = $folders->clients;
-        $projects = ['Project Alpha', 'Project Beta', 'Project Gamma'];
+        $clients = $data->clients;
+        $projects = $data->projects;
+        $folders = $data->folders;
 
-        return view('invoicing.index', compact('contacts','clients', 'projects'));
+        return view('invoicing.index', compact('contacts','clients', 'projects', 'folders'));
     }
 
     public function store(Request $request)

@@ -29,7 +29,17 @@
                                 <label for="project-dropdown" class="block mb-1 text-sm font-medium text-gray-800 dark:text-gray-200">Project</label>
                                 <select id="project-dropdown" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                     @foreach($projects as $project)
-                                        <option>{{ $project }}</option>
+                                        <option value="{{ $project->id }}">{{ $project->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Folders Dropdown -->
+                            <div class="my-3">
+                                <label for="project-dropdown" class="block mb-1 text-sm font-medium text-gray-800 dark:text-gray-200">Folder</label>
+                                <select id="project-dropdown" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    @foreach($folders as $folder)
+                                        <option value="{{ $folder->id }}">{{ $folder->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
