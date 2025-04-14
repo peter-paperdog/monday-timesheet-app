@@ -360,13 +360,14 @@ GRAPHQL;
 
 
     /**
-     * Fetches the list of clients from the Monday.com API.
+     * Fetches the list of clients, projects from the Monday.com API.
      *
-     * @return array The array of user objects.
+     * @return object The object of clients,projects.
      */
-    public function getClients(): array
+    public function getFolders(): object
     {
         $clients = [];
+        $projects = [];
 
         $page = 1;
         do {
@@ -378,6 +379,10 @@ GRAPHQL;
           parent{
             id
           }
+          children{
+            id
+            name
+          }
         }
     }
 GRAPHQL;
@@ -385,11 +390,11 @@ GRAPHQL;
             $response = $this->makeApiRequest($query);
             $data = $response['data']['folders'];
 
-            $filtered = array_filter($data, function ($item) {
+            $filtered_clients = array_filter($data, function ($item) {
                 return is_null($item['parent']);
             });
 
-            foreach ($filtered as $item) {
+            foreach ($filtered_clients as $item) {
                 $client = new \stdClass();
                 $client->id = $item['id'];
                 $client->name = $item['name'];
@@ -403,6 +408,9 @@ GRAPHQL;
             return strcmp($a->name, $b->name);
         });
 
-        return $clients;
+        $data = new \stdClass();
+        $data->clients = $clients;
+        $data->projects = $projects;
+        return $data;
     }
 }
