@@ -360,37 +360,44 @@ GRAPHQL;
 
 
     /**
-     * Fetches the list of users from the Monday.com API.
+     * Fetches the list of clients from the Monday.com API.
      *
      * @return array The array of user objects.
      */
-    public function getContacts(string $boardId)
+    public function getClients(): array
     {
-        $query = <<<'GRAPHQL'
-        query {
-          users {
+        $clients = [];
+
+        $page = 1;
+        do {
+            $query = <<<GRAPHQL
+    query {
+      folders(workspace_ids: "9147845" limit:100 page:$page){
+          id
+          name
+          parent{
             id
-            name
-            email
-            location
           }
         }
-    GRAPHQL;
-
-        $cursorQuery = <<<GRAPHQL
-query {
-  next_items_page (limit: 2 cursor: "MSw4NDUxMDA2NTYxLDM2MjgxUHBQSTVURkFOR241Ym45LSw1LDQsfDU5MzMxMjkwMQ") {
-    cursor
-    items {
-      id
-      name
     }
-  }
-}
 GRAPHQL;
 
-        $response = $this->makeApiRequest($query);
+            $response = $this->makeApiRequest($query);
+            $data = $response['data']['folders'];
 
-        return $response['data']['users'];
+            $filtered = array_filter($data, function ($item) {
+                return is_null($item['parent']);
+            });
+
+            foreach ($filtered as $item) {
+                $client = new \stdClass();
+                $client->id = $item['id'];
+                $client->name = $item['name'];
+                $clients[] = $client;
+            }
+            $page++;
+        } while (!empty($data));
+
+        return $clients;
     }
 }
