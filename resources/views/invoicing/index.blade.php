@@ -16,17 +16,17 @@
 
                             <!-- Clients Dropdown -->
                             <div>
-                                <label for="contact-dropdown" class="block mb-1 text-sm font-medium text-gray-800 dark:text-gray-200">Clients</label>
+                                <label for="contact-dropdown" class="block mb-1 text-sm font-medium text-gray-800 dark:text-gray-200">Client</label>
                                 <select id="contact-dropdown" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                     @foreach($clients as $client)
-                                        <option>{{ $client }}</option>
+                                        <option value="{{ $client->id }}">{{ $client->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <!-- Projects Dropdown -->
                             <div class="my-3">
-                                <label for="project-dropdown" class="block mb-1 text-sm font-medium text-gray-800 dark:text-gray-200">Projects</label>
+                                <label for="project-dropdown" class="block mb-1 text-sm font-medium text-gray-800 dark:text-gray-200">Project</label>
                                 <select id="project-dropdown" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                     @foreach($projects as $project)
                                         <option>{{ $project }}</option>
@@ -36,7 +36,7 @@
 
                             <!-- Contacts Dropdown -->
                             <div>
-                                <label for="contact-dropdown" class="block mb-1 text-sm font-medium text-gray-800 dark:text-gray-200">Contacts</label>
+                                <label for="contact-dropdown" class="block mb-1 text-sm font-medium text-gray-800 dark:text-gray-200">Contact</label>
                                 <select id="contact-dropdown" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                     @foreach($contacts as $contact)
                                         <option>{{ $contact }}</option>
