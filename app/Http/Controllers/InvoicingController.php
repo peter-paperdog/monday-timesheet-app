@@ -11,6 +11,10 @@ class InvoicingController extends Controller
 
     }
 
+    public function create()
+    {
+        return view('invoicing.create');
+    }
     public function index()
     {
         $data = $this->mondayService->getFolders();
