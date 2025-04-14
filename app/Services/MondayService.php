@@ -49,7 +49,7 @@ class MondayService
                 'body' => $response->body(),
             ]);
 
-            return null;
+            die($response->body());
         } catch (\Exception $e) {
             // Log the exception for debugging purposes
             logger()->error('API request encountered an error', [
@@ -505,7 +505,12 @@ GRAPHQL;
 GRAPHQL;
 
         // Define the variables to pass into the query
-        $response = $this->makeApiRequest($query);
+        try{
+            $response = $this->makeApiRequest($query);
+        }catch (\Exception $exception){
+            die($exception->getMessage());
+        }
+
         return $response['data']['boards'][0];
     }
 }

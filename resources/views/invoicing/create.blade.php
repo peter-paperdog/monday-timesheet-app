@@ -18,6 +18,13 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100 pt-3 my-3">
                     @foreach ($boards as $board)
                         <h1>{{ $board['name'] }}</h1>
+                        @foreach ($board['groups'] as $group)
+                            <div>{{ $group['title'] }}</div>
+
+                            @foreach ($group['items_page']['items'] as $item)
+                                <div>{{ $item['name'] }}</div>
+                            @endforeach
+                        @endforeach
                     @endforeach
                 </div>
             </div>
