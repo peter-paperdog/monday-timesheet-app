@@ -456,4 +456,26 @@ GRAPHQL;
         $data->folders = $folders;
         return $data;
     }
+
+    /**
+     * Fetches the groups for the board.
+     *
+     * @param string $boardId The ID of the board.
+     * @return array The array of groups.
+     */
+    public function getFoldername(string $folderId)
+    {
+        $query = <<<GRAPHQL
+    query {
+      folders (ids:"$folderId"){
+            name
+      }
+    }
+GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+
+        return $response['data']['folders'][0]['name'];
+    }
 }
