@@ -292,52 +292,60 @@ GRAPHQL;
      */
     public function getTimeTrackingItems(string $boardId): array
     {
-        // Define the GraphQL query
-        $query = <<<GRAPHQL
-                {
-                  boards (ids:"$boardId"){
-                    items_page(limit:500){
-                        items{
-                            id
-                            column_values {
-                                ... on TimeTrackingValue {
-                                    history {
-                                        id
-                                        started_user_id
-                                        started_at
-                                        ended_at
-                                    }
+        $allItems = [];
+        $cursor = null;
+
+        do {
+            $cursorPart = $cursor ? "cursor: \"$cursor\"" : '';
+
+            $query = <<<GRAPHQL
+        {
+            boards(ids: "$boardId") {
+                items_page(limit: 500, $cursorPart) {
+                    cursor
+                    items {
+                        id
+                        column_values {
+                            ... on TimeTrackingValue {
+                                history {
+                                    id
+                                    started_user_id
+                                    started_at
+                                    ended_at
                                 }
-                            }
-                        }
-                    }
-                  }
-                }
-GRAPHQL;
-
-        // Make the API request and return the result
-        $timeTrackingData = $this->makeApiRequest($query);
-
-        $items = [];
-        if ($timeTrackingData != null) {
-            foreach ($timeTrackingData['data']['boards'] as $item) {
-                foreach ($item['items_page']['items'] as $_item) {
-                    foreach ($_item['column_values'] as $column_value) {
-                        if (!empty($column_value)) {
-                            foreach ($column_value['history'] as $history) {
-                                $history['id'] = intval($history['id']);
-                                $history['started_user_id'] = intval($history['started_user_id']);
-                                $items[] = array_merge(
-                                    ['item_id' => intval($_item['id'])],
-                                    $history
-                                );
                             }
                         }
                     }
                 }
             }
         }
-        return $items;
+        GRAPHQL;
+
+            $response = $this->makeApiRequest($query);
+            $page = $response['data']['boards'][0]['items_page'];
+
+            foreach ($page['items'] as $_item) {
+                foreach ($_item['column_values'] as $column_value) {
+                    if (!empty($column_value) && isset($column_value['history'])) {
+                        foreach ($column_value['history'] as $history) {
+                            $allItems[] = array_merge(
+                                [
+                                    'item_id' => intval($_item['id']),
+                                    'id' => intval($history['id']),
+                                    'started_user_id' => intval($history['started_user_id']),
+                                    'started_at' => $history['started_at'],
+                                    'ended_at' => $history['ended_at'],
+                                ]
+                            );
+                        }
+                    }
+                }
+            }
+
+            $cursor = $page['cursor'] ?? null;
+        } while ($cursor);
+
+        return $allItems;
     }
 
 
