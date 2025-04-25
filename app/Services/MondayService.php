@@ -16,7 +16,7 @@ class MondayService
     /**
      * Makes a request to the Monday.com API with the given GraphQL query.
      *
-     * @param string $query The GraphQL query string.
+     * @param  string  $query  The GraphQL query string.
      * @return array The JSON response from the API.
      */
     private function makeApiRequest(string $query, array $variables = []): array|null
@@ -49,7 +49,7 @@ class MondayService
                 'body' => $response->body(),
             ]);
 
-            return null;
+            die($response->body());
         } catch (\Exception $e) {
             // Log the exception for debugging purposes
             logger()->error('API request encountered an error', [
@@ -144,40 +144,53 @@ class MondayService
     /**
      * Fetches the items for the board.
      *
-     * @param string $boardId The ID of the board.
+     * @param  string  $boardId  The ID of the board.
      * @return array The array of items with time tracking data.
      */
-    public function getItems(string $boardId)
+    public function getItems(string $boardId): array
     {
-        $query = <<<GRAPHQL
-    query {
-      boards (ids:"$boardId"){
-        items_page(limit:500){
-            items{
+        $allItems = [];
+        $cursor = null;
+
+        do {
+            $cursorPart = $cursor ? "cursor: \"$cursor\"" : '';
+
+            $query = <<<GRAPHQL
+        query {
+          boards(ids: "$boardId") {
+            items_page(limit: 500, $cursorPart) {
+              cursor
+              items {
                 id
                 name
-                group{
-                    id
+                group {
+                  id
                 }
-                parent_item{
-                    id
+                parent_item {
+                  id
                 }
+              }
             }
+          }
         }
-      }
-    }
-GRAPHQL;
+        GRAPHQL;
 
-        // Define the variables to pass into the query
-        $response = $this->makeApiRequest($query);
+            $response = $this->makeApiRequest($query);
+            $page = $response['data']['boards'][0]['items_page'];
 
-        return $response['data']['boards'][0]['items_page']['items'];
+            $items = $page['items'] ?? [];
+            $allItems = array_merge($allItems, $items);
+            $cursor = $page['cursor'] ?? null;
+
+        } while ($cursor); // Amíg van még lap, folytatjuk
+
+        return $allItems;
     }
 
     /**
      * Fetches the groups for the board.
      *
-     * @param string | array $itemId The ID(s) of the item(s).
+     * @param  string | array  $itemId  The ID(s) of the item(s).
      * @return array The array of TimeTrackingValue columns.
      */
     public function getTimeTrackingColumns(array|string $itemIds)
@@ -210,11 +223,11 @@ GRAPHQL;
     /**
      * Updates the time tracking data for a specific item on a board.
      *
-     * @param string $boardId The ID of the board.
-     * @param string $itemId The ID of the item to update.
-     * @param string $columnId The ID of the column containing the time tracking data.
-     * @param int $startTimestamp The starting timestamp for the time tracking entry.
-     * @param int $endTimestamp The ending timestamp for the time tracking entry.
+     * @param  string  $boardId  The ID of the board.
+     * @param  string  $itemId  The ID of the item to update.
+     * @param  string  $columnId  The ID of the column containing the time tracking data.
+     * @param  int  $startTimestamp  The starting timestamp for the time tracking entry.
+     * @param  int  $endTimestamp  The ending timestamp for the time tracking entry.
      * @return array The result of the API request to update the time tracking data.
      */
     public function updateTimeTracking($boardId, $itemId, $columnId, $startTimestamp, $endTimestamp)
@@ -249,7 +262,7 @@ GRAPHQL;
     /**
      * Fetches the groups for the board.
      *
-     * @param string $boardId The ID of the board.
+     * @param  string  $boardId  The ID of the board.
      * @return array The array of groups.
      */
     public function getGroups(string $boardId)
@@ -274,64 +287,72 @@ GRAPHQL;
     /**
      * Fetches the time tracking data for the board.
      *
-     * @param string $boardId The ID of the board.
+     * @param  string  $boardId  The ID of the board.
      * @return array The array of items with time tracking data.
      */
     public function getTimeTrackingItems(string $boardId): array
     {
-        // Define the GraphQL query
-        $query = <<<GRAPHQL
-                {
-                  boards (ids:"$boardId"){
-                    items_page(limit:500){
-                        items{
-                            id
-                            column_values {
-                                ... on TimeTrackingValue {
-                                    history {
-                                        id
-                                        started_user_id
-                                        started_at
-                                        ended_at
-                                    }
+        $allItems = [];
+        $cursor = null;
+
+        do {
+            $cursorPart = $cursor ? "cursor: \"$cursor\"" : '';
+
+            $query = <<<GRAPHQL
+        {
+            boards(ids: "$boardId") {
+                items_page(limit: 500, $cursorPart) {
+                    cursor
+                    items {
+                        id
+                        column_values {
+                            ... on TimeTrackingValue {
+                                history {
+                                    id
+                                    started_user_id
+                                    started_at
+                                    ended_at
                                 }
-                            }
-                        }
-                    }
-                  }
-                }
-GRAPHQL;
-
-        // Make the API request and return the result
-        $timeTrackingData = $this->makeApiRequest($query);
-
-        $items = [];
-        if ($timeTrackingData != null) {
-            foreach ($timeTrackingData['data']['boards'] as $item) {
-                foreach ($item['items_page']['items'] as $_item) {
-                    foreach ($_item['column_values'] as $column_value) {
-                        if (!empty($column_value)) {
-                            foreach ($column_value['history'] as $history) {
-                                $history['id'] = intval($history['id']);
-                                $history['started_user_id'] = intval($history['started_user_id']);
-                                $items[] = array_merge(
-                                    ['item_id' => intval($_item['id'])],
-                                    $history
-                                );
                             }
                         }
                     }
                 }
             }
         }
-        return $items;
+        GRAPHQL;
+
+            $response = $this->makeApiRequest($query);
+            $page = $response['data']['boards'][0]['items_page'];
+
+            foreach ($page['items'] as $_item) {
+                foreach ($_item['column_values'] as $column_value) {
+                    if (!empty($column_value) && isset($column_value['history'])) {
+                        foreach ($column_value['history'] as $history) {
+                            $allItems[] = array_merge(
+                                [
+                                    'item_id' => intval($_item['id']),
+                                    'id' => intval($history['id']),
+                                    'started_user_id' => intval($history['started_user_id']),
+                                    'started_at' => $history['started_at'],
+                                    'ended_at' => $history['ended_at'],
+                                ]
+                            );
+                        }
+                    }
+                }
+            }
+
+            $cursor = $page['cursor'] ?? null;
+        } while ($cursor);
+
+        return $allItems;
     }
 
 
     /**
      * Fetches the items for the board.
      *
-     * @param string $boardId The ID of the board.
+     * @param  string  $boardId  The ID of the board.
      * @return array The array of items with time tracking data.
      */
     public function getContactItems(string $boardId)
@@ -360,37 +381,157 @@ GRAPHQL;
 
 
     /**
-     * Fetches the list of users from the Monday.com API.
+     * Fetches the list of clients, projects from the Monday.com API.
      *
-     * @return array The array of user objects.
+     * @return object The object of clients,projects.
      */
-    public function getContacts(string $boardId)
+    public function getFolders(): object
     {
-        $query = <<<'GRAPHQL'
-        query {
-          users {
+        $clients = [];
+        $projects = [];
+        $folders = [];
+
+        $page = 1;
+        do {
+            $query = <<<GRAPHQL
+    query {
+      folders(workspace_ids: "9147845" limit:100 page:$page){
+          id
+          name
+          parent{
+            id
+          }
+          children{
             id
             name
-            email
-            location
           }
         }
-    GRAPHQL;
-
-        $cursorQuery = <<<GRAPHQL
-query {
-  next_items_page (limit: 2 cursor: "MSw4NDUxMDA2NTYxLDM2MjgxUHBQSTVURkFOR241Ym45LSw1LDQsfDU5MzMxMjkwMQ") {
-    cursor
-    items {
-      id
-      name
     }
-  }
-}
 GRAPHQL;
 
+            $response = $this->makeApiRequest($query);
+            $data = $response['data']['folders'];
+
+            //CLIENTS
+            $filtered_clients = array_filter($data, function ($item) {
+                return is_null($item['parent']);
+            });
+
+            foreach ($filtered_clients as $item) {
+                $client = new \stdClass();
+                $client->id = $item['id'];
+                $client->name = $item['name'];
+                $clients[$item['id']] = $client;
+            }
+
+            //PROJECTS
+            $filtered_projects = array_filter($data, function ($item) {
+                return !is_null($item['parent']) && !empty($item['children']);
+            });
+
+            foreach ($filtered_projects as $item) {
+                $project = new \stdClass();
+                $project->id = $item['id'];
+                $project->name = $item['name'];
+                $project->client_id = $item['parent']['id'];
+                $projects[$item['id']] = $project;
+            }
+
+            //FOLDERS
+            $filtered_folders = array_filter($data, function ($item) {
+                return !is_null($item['parent']) && !empty($item['children']);
+            });
+
+            foreach ($filtered_folders as $item) {
+                foreach ($item['children'] as $child) {
+                    $client_id = $item['parent']['id'];
+                    $project_id = $item['id'];
+                    $folder_id = $child['id'];
+
+                    if (!isset($folders[$client_id])) {
+                        $folders[$client_id] = [];
+                    }
+
+                    if (!isset($folders[$client_id][$project_id])) {
+                        $folders[$client_id][$project_id] = [];
+                    }
+                    $folders[$client_id][$project_id][] = $folder_id;
+                }
+            }
+            $page++;
+        } while (!empty($data));
+
+        // Sort the data by 'name' ascending
+        usort($clients, function ($a, $b) {
+            return strcmp($a->name, $b->name);
+        });
+
+        // Sort the data by 'name' ascending
+        usort($projects, function ($a, $b) {
+            return strcmp($a->name, $b->name);
+        });
+
+        $data = new \stdClass();
+        $data->clients = $clients;
+        $data->projects = $projects;
+        $data->folders = $folders;
+        return $data;
+    }
+
+    /**
+     * Fetches the folders name
+     *
+     * @param  string  $folderId  The ID of the Folder.
+     * @return string
+     */
+    public function getFoldername(string $folderId)
+    {
+        $query = <<<GRAPHQL
+    query {
+      folders (ids:"$folderId"){
+            name
+      }
+    }
+GRAPHQL;
+
+        // Define the variables to pass into the query
         $response = $this->makeApiRequest($query);
 
-        return $response['data']['users'];
+        return $response['data']['folders'][0]['name'];
+    }
+
+
+    /**
+     * Fetches the details of a specific board
+     *
+     * @return array The array of the board objects.
+     */
+    public function getBoard(string $boardId)
+    {
+        $query = <<<GRAPHQL
+    query {
+      boards(ids:"$boardId"){
+          id
+          name
+          groups{
+            title
+            items_page(limit:500){
+                items{
+                    name
+                }
+            }
+          }
+      }
+    }
+GRAPHQL;
+
+        // Define the variables to pass into the query
+        try {
+            $response = $this->makeApiRequest($query);
+        } catch (\Exception $exception) {
+            die($exception->getMessage());
+        }
+
+        return $response['data']['boards'][0];
     }
 }

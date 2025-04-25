@@ -7,22 +7,43 @@ use Illuminate\Http\Request;
 
 class InvoicingController extends Controller
 {
-    public function __construct(private MondayService $mondayService){
+    public function __construct(private MondayService $mondayService)
+    {
 
+    }
+
+    public function create(Request $request)
+    {
+        $clientId = $request->input('client');
+        $projectId = $request->input('project');
+        $boardIds = explode(',', $request->input('folders', ''));
+
+        $clientName = $this->mondayService->getFoldername($clientId);
+
+        if (!empty($projectId) && $projectId !== '-1') {
+            $projectName = $this->mondayService->getFoldername($projectId);
+        } else {
+            $projectName = null;
+        }
+
+        $boards = [];
+
+        foreach($boardIds as $boardId) {
+            $boards[] = $this->mondayService->getBoard($boardId);
+        }
+
+        return view('invoicing.create', compact('clientName', 'projectName', 'boards'));
     }
 
     public function index()
     {
+        $data = $this->mondayService->getFolders();
 
-        $users = $this->mondayService->getUsers();
+        $clients = $data->clients;
+        $projects = $data->projects;
+        $folders = $data->folders;
 
-
-
-        $contacts = ['John Doe', 'Jane Smith', 'Alice Johnson'];
-        $clients = ['Jane Smith', 'Alice Johnson'];
-        $projects = ['Project Alpha', 'Project Beta', 'Project Gamma'];
-
-        return view('invoicing.index', compact('contacts','clients', 'projects'));
+        return view('invoicing.index', compact('clients', 'projects', 'folders'));
     }
 
     public function store(Request $request)
