@@ -176,9 +176,16 @@ class TimesheetController extends Controller
         // Fetch time tracking records for the selected user & week
         $timeTrackings = MondayTimeTracking::where('user_id', $selectedUserId)
             ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
-            ->with(['item.group', 'item.board'])
+            ->with(['item.group', 'item.board', 'item.parent.group'])
             ->orderBy('started_at')
             ->get();
+
+        // Fill missing group from parent if it's a subitem
+        $timeTrackings->each(function ($tracking) {
+            if (!$tracking->item->group && $tracking->item->parent) {
+                $tracking->item->group = $tracking->item->parent->group;
+            }
+        });
 
         // Group by Day → Board → Group → Task
         $groupedData = $timeTrackings->groupBy([
