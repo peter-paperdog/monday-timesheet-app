@@ -55,14 +55,17 @@ Route::middleware('auth')->group(function () {
         // Fetch time tracking data
         $events = MondayTimeTracking::where('user_id', $userId)
             ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
-            ->with(['item.board', 'item.group']) // Eager load board and group
+            ->with(['item.board', 'item.group', 'item.parent.group']) // <-- hozzáadva a parent.group betöltése
             ->get()
             ->map(function ($entry) {
+                // if no group, but has parent, use parent's group
+                $group = $entry->item->group ?? $entry->item->parent->group ?? null;
+
                 return [
                     'title' => sprintf(
                         "%s - %s - %s",
                         $entry->item->board->name ?? 'No Board',
-                        $entry->item->group->name ?? 'No Group',
+                        $group->name ?? 'No Group',
                         $entry->item->name ?? 'Unknown Task'
                     ),
                     'start' => $entry->started_at->toIso8601String(),
