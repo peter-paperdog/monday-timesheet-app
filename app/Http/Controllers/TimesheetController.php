@@ -39,6 +39,13 @@ class TimesheetController extends Controller
             ->orderBy('started_at')
             ->get();
 
+        // SUBITEM GROUP FIX ITT
+        $timeTrackings->each(function ($tracking) {
+            if (!$tracking->item->group && $tracking->item->parent) {
+                $tracking->item->group = $tracking->item->parent->group;
+            }
+        });
+
         // Group by Day → Board → Group → Task
         $groupedData = $timeTrackings->groupBy([
             function ($entry) {
@@ -80,6 +87,13 @@ class TimesheetController extends Controller
                 ->with(['item.group', 'item.board'])
                 ->orderBy('started_at')
                 ->get();
+
+            // SUBITEM GROUP FIX ITT
+            $timeTrackings->each(function ($tracking) {
+                if (!$tracking->item->group && $tracking->item->parent) {
+                    $tracking->item->group = $tracking->item->parent->group;
+                }
+            });
 
             if ($timeTrackings->isEmpty()) {
                 continue; // Skip users with no time tracking data
