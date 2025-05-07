@@ -38,6 +38,7 @@ class SyncMondayUsers extends Command
         'mark@paperdog.com',
         'gabriella@paperdog.com',
         'bence@paperdog.com',
+        'blanka@paperdog.com',
     ];
 
     /**
