@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GoogleAuthController;
 use App\Models\User;
 use App\Services\GoogleSheetsService;
 use App\Services\MondayService;
@@ -12,9 +13,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
+
+// ---------------Publikus routes--------------------
+Route::post('/auth/google-login', [GoogleAuthController::class, 'login']);
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
 
 Route::get('/init', function (Request $request, MondayService $mondayService) {
     $data = $mondayService->getFolders();
