@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Models\User;
 use App\Services\GoogleSheetsService;
@@ -16,6 +17,15 @@ use Illuminate\Support\Facades\Route;
 
 // ---------------Publikus routes--------------------
 Route::post('/auth/google-login', [GoogleAuthController::class, 'login']);
+
+//---------------olyan műveletek,amik nem frissítik a token élettartamát, de bejelentkezést követelnek---------------
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/auth/status', function (Request $request) {
+        return response()->json([], 204);
+    });
+    Route::post('/logout', [AuthenticatedSessionController::class, 'apiLogout']);
+});
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();

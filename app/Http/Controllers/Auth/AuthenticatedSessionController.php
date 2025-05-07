@@ -48,7 +48,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle API logout request.
      */
-    public function logout(Request $request): \Illuminate\Http\JsonResponse
+    public function apiLogout(Request $request): \Illuminate\Http\JsonResponse
     {
         auth()->user()->currentAccessToken()->delete();
 
