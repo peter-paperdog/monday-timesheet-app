@@ -40,6 +40,15 @@ class SyncMondayUsers extends Command
         'bence@paperdog.com',
     ];
 
+    /**
+     * List of exception emails.
+     *
+     * @var array
+     */
+    private array $exceptionEmails = [
+        'hannah@paperdog.com',
+    ];
+
     public function __construct(private MondayService $mondayService)
     {
         parent::__construct();
@@ -54,22 +63,25 @@ class SyncMondayUsers extends Command
         $users = $this->mondayService->getUsers();
 
         foreach ($users as $userData) {
-            // Check if the user's email is in the admin list
-            $isAdmin = in_array($userData['email'], $this->adminEmails);
+            if (!in_array($userData['email'], $this->exceptionEmails)) {
+                // Check if the user's email is in the admin list
+                $isAdmin = in_array($userData['email'], $this->adminEmails);
 
-            $user = User::updateOrCreate(
-                ['id' => $userData['id']],
-                [
-                    'id' => $userData['id'],
-                    'name' => $userData['name'],
-                    'email' => $userData['email'],
-                    'location' => $userData['location'],
-                    'admin' => $isAdmin,
-                    'password' => Hash::make(str()->random(12)), // Set a random password for new users
-                ]
-            );
 
-            $this->info("User {$user->name} synced with Monday ID: {$user->id}");
+                $user = User::updateOrCreate(
+                    ['id' => $userData['id']],
+                    [
+                        'id' => $userData['id'],
+                        'name' => $userData['name'],
+                        'email' => $userData['email'],
+                        'location' => $userData['location'],
+                        'admin' => $isAdmin,
+                        'password' => Hash::make(str()->random(12)), // Set a random password for new users
+                    ]
+                );
+
+                $this->info("User {$user->name} synced with Monday ID: {$user->id}");
+            }
         }
 
         $this->info('User synchronization complete.');
