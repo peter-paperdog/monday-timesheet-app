@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Services\GoogleSheetsService;
+use App\Services\MondayService;
 use App\Services\SlackService;
 use Carbon\Carbon;
 use Google\Client;
@@ -14,6 +15,19 @@ use Illuminate\Support\Facades\Route;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+Route::get('/init', function (Request $request, MondayService $mondayService) {
+    $data = $mondayService->getFolders();
+    $clients = $data->clients;
+    $projects = $data->projects;
+    $folders = $data->folders;
+
+    return response()->json([
+        "clients" => $data->clients,
+        "projects" => $data->projects,
+        "folders" => $data->folders
+    ]);
+});
 
 
 Route::post('slack/office-answer', function (Request $request) {
@@ -30,7 +44,7 @@ Route::post('slack/office-answer', function (Request $request) {
 
     Log::info("{$user->name} selected: {$selectedOption}");
 
-    $tsDate = Carbon::createFromTimestamp((int) $payload['message']['ts'])->toDateString();
+    $tsDate = Carbon::createFromTimestamp((int)$payload['message']['ts'])->toDateString();
 
     $user->schedules()
         ->where('date', $tsDate)
