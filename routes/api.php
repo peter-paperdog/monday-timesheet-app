@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 // ---------------Publikus routes--------------------
 Route::post('/auth/google-login', [GoogleAuthController::class, 'login']);
 
-//---------------olyan műveletek,amik nem frissítik a token élettartamát, de bejelentkezést követelnek---------------
+//---protected routes, but do not increase token lifetime---
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/auth/status', function (Request $request) {
         return response()->json([], 204);
@@ -26,25 +26,24 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'apiLogout']);
 });
 
+//---------------Bejelentkezett felhasználók (minden autentikált user számára) (frissíti a token élettartamot)---------------
+Route::middleware(['auth:sanctum', 'refresh-token'])->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+    Route::get('/init', function (Request $request, MondayService $mondayService) {
+        $data = $mondayService->getFolders();
+        $clients = $data->clients;
+        $projects = $data->projects;
+        $folders = $data->folders;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-
-Route::get('/init', function (Request $request, MondayService $mondayService) {
-    $data = $mondayService->getFolders();
-    $clients = $data->clients;
-    $projects = $data->projects;
-    $folders = $data->folders;
-
-    return response()->json([
-        "clients" => $data->clients,
-        "projects" => $data->projects,
-        "folders" => $data->folders
-    ]);
+        return response()->json([
+            "clients" => $data->clients,
+            "projects" => $data->projects,
+            "folders" => $data->folders
+        ]);
+    });
 });
-
 
 Route::post('slack/office-answer', function (Request $request) {
 
@@ -60,7 +59,7 @@ Route::post('slack/office-answer', function (Request $request) {
 
     Log::info("{$user->name} selected: {$selectedOption}");
 
-    $tsDate = Carbon::createFromTimestamp((int)$payload['message']['ts'])->toDateString();
+    $tsDate = Carbon::createFromTimestamp((int) $payload['message']['ts'])->toDateString();
 
     $user->schedules()
         ->where('date', $tsDate)
