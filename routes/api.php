@@ -15,8 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 
-// ---------------Publikus routes--------------------
-Route::post('/auth/google-login', [GoogleAuthController::class, 'login']);
+
 
 //---protected routes, but do not increase token lifetime---
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -26,11 +25,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'apiLogout']);
 });
 
-//---------------Bejelentkezett felhasználók (minden autentikált user számára) (frissíti a token élettartamot)---------------
+//---------------protected routes, increase token lifetime---------------
 Route::middleware(['auth:sanctum', 'refresh-token'])->group(function () {
+    //return with logged-in user
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    //return with dropdown inits
     Route::get('/init', function (Request $request, MondayService $mondayService) {
         $data = $mondayService->getFolders();
         $clients = $data->clients;
@@ -45,6 +47,10 @@ Route::middleware(['auth:sanctum', 'refresh-token'])->group(function () {
     });
 });
 
+// ---------------Public routes--------------------
+//google login
+Route::post('/auth/google-login', [GoogleAuthController::class, 'login']);
+//slack answer processing
 Route::post('slack/office-answer', function (Request $request) {
 
     $payload = json_decode($request->input('payload'), true);
