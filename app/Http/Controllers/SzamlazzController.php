@@ -28,9 +28,20 @@ class SzamlazzController extends Controller
     {
         Log::info('Számla KI:', $this->logData($request));
 
-        return response('<?xml version="1.0" encoding="UTF-8"?>' .
-            '<szamlakivalasz xmlns="http://www.szamlazz.hu/szamlakivalasz" />', 200)
-            ->header('Content-Type', 'application/xml');
+        // (Opcionálisan: itt XML-ből kiolvashatod az <id>-t)
+        $id = 12345678; // vagy extractáld a request bodyból
+
+        $body = '<?xml version="1.0" encoding="UTF-8"?>' .
+            '<szamlavalasz xmlns="http://www.szamlazz.hu/szamlavalasz" ' .
+            'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' .
+            'xsi:schemaLocation="http://www.szamlazz.hu/szamlavalasz https://www.szamlazz.hu/szamla/docs/xsds/szamla/szamlavalasz.xsd">' .
+            '<alap>' .
+            '<id>' . $id . '</id>' .
+            '<iktatoszam>IKT-20250508-' . $id . '</iktatoszam>' .
+            '</alap>' .
+            '</szamlavalasz>';
+
+        return response($body, 200)->header('Content-Type', 'application/xml');
     }
 
     public function handleBanktranz(Request $request, $key = null)
