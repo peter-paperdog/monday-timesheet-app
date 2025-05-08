@@ -59,3 +59,19 @@ Route::post('slack/office-answer', function (Request $request) {
 
     return response()->json(['success' => true]);
 });
+
+Route::any('/log-request', function (Request $request) {
+    $logData = [
+        'timestamp' => now()->toDateTimeString(),
+        'ip' => $request->ip(),
+        'method' => $request->method(),
+        'url' => $request->fullUrl(),
+        'headers' => $request->headers->all(),
+        'body' => $request->all(),
+    ];
+
+    Storage::append('request_log.json', json_encode($logData, JSON_PRETTY_PRINT));
+
+    return response('<?xml version="1.0" encoding="UTF-8"?><banktranzvalasz xmlns="http://www.szamlazz.hu/banktranzvalasz" />', 200)
+        ->header('Content-Type', 'application/xml');
+});
