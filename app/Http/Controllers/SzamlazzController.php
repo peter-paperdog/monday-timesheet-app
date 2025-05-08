@@ -17,8 +17,11 @@ class SzamlazzController extends Controller
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' .
             '<szamlabevalasz xmlns="http://www.szamlazz.hu/szamlabevalasz" ' .
             'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' .
-            'xsi:schemaLocation="http://www.szamlazz.hu/szamlabevalasz https://www.szamlazz.hu/szamla/docs/xsds/szamlabe/szamlabevalasz.xsd">' .
-            "<alap><id>$id</id><iktatoszam>$iktatoszam</iktatoszam></alap>" .
+            'xsi:schemaLocation="http://www.szamlazz.hu/szamlabevalasz">' .
+            '<alap>' .
+            '<id>' . $id . '</id>' .
+            '<iktatoszam>' . $iktatoszam . '</iktatoszam>' .
+            '</alap>' .
             '</szamlabevalasz>';
 
         return response($xml, 200)->header('Content-Type', 'application/xml');
@@ -28,29 +31,33 @@ class SzamlazzController extends Controller
     {
         Log::info('Számla KI:', $this->logData($request));
 
-        // (Opcionálisan: itt XML-ből kiolvashatod az <id>-t)
-        $id = 12345678; // vagy extractáld a request bodyból
+        $id = 12345678; // vagy vedd ki XML-ből
+        $iktatoszam = 'IKT-' . now()->format('Ymd') . '-' . $id;
 
-        $body = '<?xml version="1.0" encoding="UTF-8"?>' .
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' .
             '<szamlavalasz xmlns="http://www.szamlazz.hu/szamlavalasz" ' .
             'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' .
-            'xsi:schemaLocation="http://www.szamlazz.hu/szamlavalasz https://www.szamlazz.hu/szamla/docs/xsds/szamla/szamlavalasz.xsd">' .
+            'xsi:schemaLocation="http://www.szamlazz.hu/szamlavalasz">' .
             '<alap>' .
             '<id>' . $id . '</id>' .
-            '<iktatoszam>IKT-20250508-' . $id . '</iktatoszam>' .
+            '<iktatoszam>' . $iktatoszam . '</iktatoszam>' .
             '</alap>' .
             '</szamlavalasz>';
 
-        return response($body, 200)->header('Content-Type', 'application/xml');
+        return response($xml, 200)->header('Content-Type', 'application/xml');
     }
 
     public function handleBanktranz(Request $request, $key = null)
     {
         Log::info('Banktranz:', $this->logData($request));
 
-        return response('<?xml version="1.0" encoding="UTF-8"?>' .
-            '<banktranzvalasz xmlns="http://www.szamlazz.hu/banktranzvalasz" />', 200)
-            ->header('Content-Type', 'application/xml');
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' .
+            '<banktranzvalasz xmlns="http://www.szamlazz.hu/banktranzvalasz" ' .
+            'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' .
+            'xsi:schemaLocation="http://www.szamlazz.hu/banktranzvalasz">' .
+            '</banktranzvalasz>';
+
+        return response($xml, 200)->header('Content-Type', 'application/xml');
     }
 
     private function logData(Request $request): array
