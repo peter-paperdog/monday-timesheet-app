@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SzamlazzInvoice;
+use App\Models\SzamlazzTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -93,13 +94,38 @@ class SzamlazzController extends Controller
     {
         Log::info('Banktranz:', $this->logData($request));
 
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>' .
+        Log::info('Banktranz:', $this->logData($request));
+
+        $xml = simplexml_load_string($request->getContent());
+        $xml->registerXPathNamespace('ns', 'http://www.szamlazz.hu/banktranz');
+
+        $id = (int) ($xml->xpath('//ns:id')[0] ?? 0);
+        $bankszamla = (string) ($xml->xpath('//ns:bankszamla')[0] ?? '');
+        $erteknap = (string) ($xml->xpath('//ns:erteknap')[0] ?? '');
+        $irany = (string) ($xml->xpath('//ns:irany')[0] ?? '');
+        $tipus = (string) ($xml->xpath('//ns:tipus')[0] ?? null);
+        $technikai = (string) ($xml->xpath('//ns:technikai')[0] ?? 'false') === 'true';
+        $osszeg = (float) ($xml->xpath('//ns:osszeg')[0] ?? 0);
+        $devizanem = (string) ($xml->xpath('//ns:devizanem')[0] ?? '');
+        $partnerNev = (string) ($xml->xpath('//ns:partner/ns:nev')[0] ?? null);
+        $partnerBankszamla = (string) ($xml->xpath('//ns:partner/ns:bankszamla')[0] ?? null);
+        $kozlemeny = (string) ($xml->xpath('//ns:kozlemeny')[0] ?? null);
+
+        SzamlazzTransaction::updateOrCreate(
+            ['id' => $id],
+            compact(
+                'bankszamla', 'erteknap', 'irany', 'tipus', 'technikai',
+                'osszeg', 'devizanem', 'partnerNev', 'partnerBankszamla', 'kozlemeny'
+            )
+        );
+
+        $responseXml = '<?xml version="1.0" encoding="UTF-8"?>' .
             '<banktranzvalasz xmlns="http://www.szamlazz.hu/banktranzvalasz" ' .
             'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' .
             'xsi:schemaLocation="http://www.szamlazz.hu/banktranzvalasz">' .
             '</banktranzvalasz>';
 
-        return response($xml, 200)->header('Content-Type', 'application/xml');
+        return response($responseXml, 200)->header('Content-Type', 'application/xml');
     }
 
     private function logData(Request $request): array
