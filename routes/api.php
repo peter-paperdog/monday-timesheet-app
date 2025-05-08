@@ -104,7 +104,8 @@ Route::any('/szamlazz/webhook-szamlabe', function (Request $request) {
         'body' => $request->getContent()
     ]);
 
-    return response('<?xml version="1.0" encoding="UTF-8"?><banktranzvalasz xmlns="http://www.szamlazz.hu/banktranzvalasz" />', 200)
+    return response('<?xml version="1.0" encoding="UTF-8"?>' .
+        '<szamlabevalasz xmlns="http://www.szamlazz.hu/szamlabevalasz"/>', 200)
         ->header('Content-Type', 'application/xml');
 });
 
@@ -117,6 +118,7 @@ Route::any('/szamlazz/webhook-szamlaki', function (Request $request) {
         'headers' => $request->headers->all(),
         'body' => $request->getContent()
     ]);
-    return response('<?xml version="1.0" encoding="UTF-8"?><banktranzvalasz xmlns="http://www.szamlazz.hu/banktranzvalasz" />', 200)
+    return response('<?xml version="1.0" encoding="UTF-8"?>' .
+        '<szamlabevalasz xmlns="http://www.szamlazz.hu/szamlakivalasz"/>', 200)
         ->header('Content-Type', 'application/xml');
 });
