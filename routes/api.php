@@ -81,7 +81,7 @@ Route::post('slack/office-answer', function (Request $request) {
     return response()->json(['success' => true]);
 });
 
-Route::any('/szamlazz/webhook-banktranz', function (Request $request) {
+Route::any('/szamlazz/webhook-banktranz/{key?}', function (Request $request, $key = null) {
     Log::info('webhook-banktranz:', [
         'timestamp' => now()->toDateTimeString(),
         'ip' => $request->ip(),
@@ -94,7 +94,7 @@ Route::any('/szamlazz/webhook-banktranz', function (Request $request) {
     return response('<?xml version="1.0" encoding="UTF-8"?><banktranzvalasz xmlns="http://www.szamlazz.hu/banktranzvalasz" />', 200)
         ->header('Content-Type', 'application/xml');
 });
-Route::any('/szamlazz/webhook-szamlabe', function (Request $request) {
+Route::any('/szamlazz/webhook-szamlabe/{key?}', function (Request $request, $key = null) {
     Log::info('webhook-szamlabe:', [
         'timestamp' => now()->toDateTimeString(),
         'ip' => $request->ip(),
@@ -109,7 +109,7 @@ Route::any('/szamlazz/webhook-szamlabe', function (Request $request) {
         ->header('Content-Type', 'application/xml');
 });
 
-Route::any('/szamlazz/webhook-szamlaki', function (Request $request) {
+Route::any('/szamlazz/webhook-szamlaki/{key?}', function (Request $request, $key = null) {
     Log::info('webhook-szamlaki:', [
         'timestamp' => now()->toDateTimeString(),
         'ip' => $request->ip(),
