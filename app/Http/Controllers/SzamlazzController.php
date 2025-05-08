@@ -15,11 +15,11 @@ class SzamlazzController extends Controller
         $iktatoszam = 'IKT-' . now()->format('Ymd') . '-' . $id;
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' .
-            '<szamlavalasz xmlns="http://www.szamlazz.hu/szamlavalasz" ' .
+            '<szamlabevalasz xmlns="http://www.szamlazz.hu/szamlabevalasz" ' .
             'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' .
-            'xsi:schemaLocation="http://www.szamlazz.hu/szamlavalasz">' .
+            'xsi:schemaLocation="http://www.szamlazz.hu/szamlabevalasz">' .
             "<alap><id>$id</id><iktatoszam>$iktatoszam</iktatoszam></alap>" .
-            '</szamlavalasz>';
+            '</szamlabevalasz>';
 
         return response($xml, 200)->header('Content-Type', 'application/xml');
     }
