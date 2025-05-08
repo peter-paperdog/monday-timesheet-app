@@ -81,7 +81,7 @@ Route::post('slack/office-answer', function (Request $request) {
     return response()->json(['success' => true]);
 });
 
-Route::any('/bank-incoming-webhook', function (Request $request) {
+Route::any('/szamlazz/webhook-banktranz', function (Request $request) {
     $logData = [
         'timestamp' => now()->toDateTimeString(),
         'ip' => $request->ip(),
@@ -91,7 +91,38 @@ Route::any('/bank-incoming-webhook', function (Request $request) {
         'body' => $request->all(),
     ];
 
-    Log::info('Incoming BANKING XML:', ['body' => $request->getContent()]);
+    Log::info('webhook-banktranz:', ['body' => $request->getContent()]);
+
+    return response('<?xml version="1.0" encoding="UTF-8"?><banktranzvalasz xmlns="http://www.szamlazz.hu/banktranzvalasz" />', 200)
+        ->header('Content-Type', 'application/xml');
+});
+Route::any('/szamlazz/webhook-szamlabe', function (Request $request) {
+    $logData = [
+        'timestamp' => now()->toDateTimeString(),
+        'ip' => $request->ip(),
+        'method' => $request->method(),
+        'url' => $request->fullUrl(),
+        'headers' => $request->headers->all(),
+        'body' => $request->all(),
+    ];
+
+    Log::info('webhook-szamlabe:', ['body' => $request->getContent()]);
+
+    return response('<?xml version="1.0" encoding="UTF-8"?><banktranzvalasz xmlns="http://www.szamlazz.hu/banktranzvalasz" />', 200)
+        ->header('Content-Type', 'application/xml');
+});
+
+Route::any('/szamlazz/webhook-szamlaki', function (Request $request) {
+    $logData = [
+        'timestamp' => now()->toDateTimeString(),
+        'ip' => $request->ip(),
+        'method' => $request->method(),
+        'url' => $request->fullUrl(),
+        'headers' => $request->headers->all(),
+        'body' => $request->all(),
+    ];
+
+    Log::info('webhook-szamlaki:', ['body' => $request->getContent()]);
 
     return response('<?xml version="1.0" encoding="UTF-8"?><banktranzvalasz xmlns="http://www.szamlazz.hu/banktranzvalasz" />', 200)
         ->header('Content-Type', 'application/xml');
