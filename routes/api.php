@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\SzamlazzController;
 use App\Models\User;
 use App\Services\GoogleSheetsService;
 use App\Services\MondayService;
@@ -81,67 +82,11 @@ Route::post('slack/office-answer', function (Request $request) {
     return response()->json(['success' => true]);
 });
 
-Route::any('/szamlazz/webhook-banktranz/{key?}', function (Request $request, $key = null) {
-    Log::info('webhook-banktranz:', [
-        'timestamp' => now()->toDateTimeString(),
-        'ip' => $request->ip(),
-        'method' => $request->method(),
-        'url' => $request->fullUrl(),
-        'headers' => $request->headers->all(),
-        'body' => $request->getContent()
-    ]);
+// Banki tranzakciók (banktranz)
+Route::any('/szamlazz/webhook-banktranz/{key?}', [SzamlazzController::class, 'handleBanktranz']);
 
-    return response('<?xml version="1.0" encoding="UTF-8"?>' .
-        '<banktranzvalasz xmlns="http://www.szamlazz.hu/banktranzvalasz" />', 200)
-        ->header('Content-Type', 'application/xml');
-});
-Route::any('/szamlazz/webhook-szamlabe/{key?}', function (Request $request, $key = null) {
-    Log::info('webhook-szamlabe:', [
-        'timestamp' => now()->toDateTimeString(),
-        'ip' => $request->ip(),
-        'method' => $request->method(),
-        'url' => $request->fullUrl(),
-        'headers' => $request->headers->all(),
-        'body' => $request->getContent()
-    ]);
+// Kimenő számlák (szamlaki)
+Route::any('/szamlazz/webhook-szamlaki/{key?}', [SzamlazzController::class, 'handleSzamlaKi']);
 
-    $randomId = rand(1000, 9999);
-    $iktatoszam = 'IKT-' . now()->format('Ymd') . '-' . rand(100, 999);
-
-    $xml = '<?xml version="1.0" encoding="UTF-8"?>' .
-        '<szamlavalasz xmlns="http://www.szamlazz.hu/szamlavalasz" ' .
-        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' .
-        'xsi:schemaLocation="http://www.szamlazz.hu/szamlavalasz">' .
-        '<alap>' .
-        '<id>' . $randomId . '</id>' .
-        '<iktatoszam>' . $iktatoszam . '</iktatoszam>' .
-        '</alap>' .
-        '</szamlavalasz>';
-
-    return response($xml, 200)->header('Content-Type', 'application/xml');
-});
-
-Route::any('/szamlazz/webhook-szamlaki/{key?}', function (Request $request, $key = null) {
-    Log::info('webhook-szamlaki:', [
-        'timestamp' => now()->toDateTimeString(),
-        'ip' => $request->ip(),
-        'method' => $request->method(),
-        'url' => $request->fullUrl(),
-        'headers' => $request->headers->all(),
-        'body' => $request->getContent()
-    ]);
-    $randomId = rand(1000, 9999);
-    $iktatoszam = 'IKT-' . now()->format('Ymd') . '-' . rand(100, 999);
-
-    $xml = '<?xml version="1.0" encoding="UTF-8"?>' .
-        '<szamlavalasz xmlns="http://www.szamlazz.hu/szamlavalasz" ' .
-        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' .
-        'xsi:schemaLocation="http://www.szamlazz.hu/szamlavalasz">' .
-        '<alap>' .
-        '<id>' . $randomId . '</id>' .
-        '<iktatoszam>' . $iktatoszam . '</iktatoszam>' .
-        '</alap>' .
-        '</szamlavalasz>';
-
-    return response($xml, 200)->header('Content-Type', 'application/xml');
-});
+// Bejövő számlák (szamlabe)
+Route::any('/szamlazz/webhook-szamlabe/{key?}', [SzamlazzController::class, 'handleSzamlaBe']);
