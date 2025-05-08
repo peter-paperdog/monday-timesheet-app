@@ -81,7 +81,7 @@ Route::post('slack/office-answer', function (Request $request) {
     return response()->json(['success' => true]);
 });
 
-Route::any('/log-request', function (Request $request) {
+Route::any('/bank-incoming-webhook', function (Request $request) {
     $logData = [
         'timestamp' => now()->toDateTimeString(),
         'ip' => $request->ip(),
