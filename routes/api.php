@@ -91,7 +91,7 @@ Route::any('/log-request', function (Request $request) {
         'body' => $request->all(),
     ];
 
-    Storage::append('request_log.json', json_encode($logData, JSON_PRETTY_PRINT));
+    Log::info('Incoming BANKING XML:', ['body' => $request->getContent()]);
 
     return response('<?xml version="1.0" encoding="UTF-8"?><banktranzvalasz xmlns="http://www.szamlazz.hu/banktranzvalasz" />', 200)
         ->header('Content-Type', 'application/xml');
