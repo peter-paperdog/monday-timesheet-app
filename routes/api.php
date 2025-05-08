@@ -91,20 +91,9 @@ Route::any('/szamlazz/webhook-banktranz/{key?}', function (Request $request, $ke
         'body' => $request->getContent()
     ]);
 
-    $randomId = rand(1000, 9999);
-    $iktatoszam = 'IKT-' . now()->format('Ymd') . '-' . rand(100, 999);
-
-    $xml = '<?xml version="1.0" encoding="UTF-8"?>' .
-        '<szamlavalasz xmlns="http://www.szamlazz.hu/szamlavalasz" ' .
-        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' .
-        'xsi:schemaLocation="http://www.szamlazz.hu/szamlavalasz">' .
-        '<alap>' .
-        '<id>' . $randomId . '</id>' .
-        '<iktatoszam>' . $iktatoszam . '</iktatoszam>' .
-        '</alap>' .
-        '</szamlavalasz>';
-
-    return response($xml, 200)->header('Content-Type', 'application/xml');
+    return response('<?xml version="1.0" encoding="UTF-8"?>' .
+        '<banktranzvalasz xmlns="http://www.szamlazz.hu/banktranzvalasz" />', 200)
+        ->header('Content-Type', 'application/xml');
 });
 Route::any('/szamlazz/webhook-szamlabe/{key?}', function (Request $request, $key = null) {
     Log::info('webhook-szamlabe:', [
