@@ -31,7 +31,24 @@ class SzamlazzController extends Controller
     {
         Log::info('Számla KI:', $this->logData($request));
 
-        $id = 12345678; // vagy vedd ki XML-ből
+        // XML feldolgozás
+        $xmlContent = $request->getContent();
+        $xml = simplexml_load_string($xmlContent);
+        $namespaces = $xml->getNamespaces(true);
+
+        // Navigálás a namespace szerint
+        $szamla = $xml;
+        if (isset($namespaces[''])) {
+            $szamla->registerXPathNamespace('ns', $namespaces['']);
+            $idNode = $szamla->xpath('//ns:alap/ns:id');
+        } else {
+            $idNode = $szamla->xpath('//alap/id');
+        }
+
+        $id = isset($idNode[0]) ? (int)$idNode[0] : random_int(1000, 9999);
+
+
+
         $iktatoszam = 'IKT-' . now()->format('Ymd') . '-' . $id;
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' .
