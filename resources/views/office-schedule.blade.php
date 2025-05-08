@@ -42,7 +42,7 @@
                         <thead>
                         <tr class="bg-gray-100 dark:bg-gray-700">
                             <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left" width="60"></th>
-                            <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Username</th>
+                            <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Name</th>
                             <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center">Monday</th>
                             <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center">Tuesday</th>
                             <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center">Wednesday</th>
