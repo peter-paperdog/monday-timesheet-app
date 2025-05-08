@@ -17,7 +17,7 @@ class SzamlazzController extends Controller
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' .
             '<szamlabevalasz xmlns="http://www.szamlazz.hu/szamlabevalasz" ' .
             'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' .
-            'xsi:schemaLocation="http://www.szamlazz.hu/szamlabevalasz">' .
+            'xsi:schemaLocation="http://www.szamlazz.hu/szamlabevalasz https://www.szamlazz.hu/szamla/docs/xsds/szamlabe/szamlabevalasz.xsd">' .
             "<alap><id>$id</id><iktatoszam>$iktatoszam</iktatoszam></alap>" .
             '</szamlabevalasz>';
 
