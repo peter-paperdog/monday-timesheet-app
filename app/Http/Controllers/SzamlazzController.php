@@ -144,15 +144,15 @@ class SzamlazzController extends Controller
         $technikai = (string) ($xml->xpath('//ns:technikai')[0] ?? 'false') === 'true';
         $osszeg = (float) ($xml->xpath('//ns:osszeg')[0] ?? 0);
         $devizanem = (string) ($xml->xpath('//ns:devizanem')[0] ?? '');
-        $partnerNev = (string) ($xml->xpath('//ns:partner/ns:nev')[0] ?? null);
-        $partnerBankszamla = (string) ($xml->xpath('//ns:partner/ns:bankszamla')[0] ?? null);
+        $partner_nev = (string) ($xml->xpath('//ns:partner/ns:nev')[0] ?? null);
+        $partner_bankszamla = (string) ($xml->xpath('//ns:partner/ns:bankszamla')[0] ?? null);
         $kozlemeny = (string) ($xml->xpath('//ns:kozlemeny')[0] ?? null);
 
         SzamlazzTransaction::updateOrCreate(
             ['id' => $id],
             compact(
                 'bankszamla', 'erteknap', 'irany', 'tipus', 'technikai',
-                'osszeg', 'devizanem', 'partnerNev', 'partnerBankszamla', 'kozlemeny'
+                'osszeg', 'devizanem', 'partner_nev', 'partner_bankszamla', 'kozlemeny'
             )
         );
 
