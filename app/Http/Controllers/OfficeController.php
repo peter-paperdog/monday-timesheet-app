@@ -19,8 +19,8 @@ class OfficeController extends Controller
         $schedules = UserSchedule::whereBetween('user_schedules.date', [$startOfWeek, $endOfWeek])
             ->join('users', 'user_schedules.user_id', '=', 'users.id') // Join users table
             ->select('user_schedules.*', 'users.name', 'users.location') // Select all schedule fields + username
+            ->orderBy('users.location', 'asc') // Order by location
             ->orderBy('users.name', 'asc') // Order by username
-            ->with('user') // Load user relation (optional, for easier access)
             ->get();
 
         // Transform data into a structured format
