@@ -14,10 +14,10 @@ class GoogleAuthController extends Controller
     public function login(Request $request)
     {
         dd([
-        'all' => $request->all(),
-        'raw' => file_get_contents('php://input'),
-        'content_type' => $request->header('Content-Type')
-    ]);
+            'raw_input' => file_get_contents('php://input'),
+            'json_error' => json_last_error_msg(),
+            'parsed' => json_decode(file_get_contents('php://input'), true),
+        ]);
 
         $request->validate([
             'id_token' => 'required|string',
