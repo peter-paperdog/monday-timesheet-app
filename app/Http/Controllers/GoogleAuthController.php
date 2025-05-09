@@ -13,8 +13,9 @@ class GoogleAuthController extends Controller
 {
     public function login(Request $request)
     {
-        var_dump($request->id_token);
-        die();
+        dd($request->input('id_token'));
+
+
         $request->validate([
             'id_token' => 'required|string',
         ]);
