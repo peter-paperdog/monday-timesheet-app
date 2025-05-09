@@ -81,12 +81,3 @@ Route::post('slack/office-answer', function (Request $request) {
 
     return response()->json(['success' => true]);
 });
-
-// Banki tranzakciók (banktranz)
-Route::any('/szamlazz/webhook-banktranz/{key?}', [SzamlazzController::class, 'handleBanktranz']);
-
-// Kimenő számlák (szamlaki)
-Route::any('/szamlazz/webhook-szamlaki/{key?}', [SzamlazzController::class, 'handleSzamlaKi']);
-
-// Bejövő számlák (szamlabe)
-Route::any('/szamlazz/webhook-szamlabe/{key?}', [SzamlazzController::class, 'handleSzamlaBe']);
