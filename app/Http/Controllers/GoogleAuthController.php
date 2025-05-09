@@ -13,9 +13,10 @@ class GoogleAuthController extends Controller
 {
     public function login(Request $request)
     {
-        $request->validate([
-            'id_token' => 'required|string',
-        ]);
+        $data = json_decode(file_get_contents('php://input'), true);
+        $idToken = $data['id_token'] ?? null;
+        var_dump($idToken);
+        die();
 
         // 1. Google token ellenőrzése
         $client = new Client(['client_id' => env('GOOGLE_CLIENT_ID_ANGULAR')]);
