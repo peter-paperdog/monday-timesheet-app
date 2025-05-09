@@ -13,8 +13,11 @@ class GoogleAuthController extends Controller
 {
     public function login(Request $request)
     {
-        dd($request->input('id_token'));
-
+        dd([
+        'all' => $request->all(),
+        'raw' => file_get_contents('php://input'),
+        'content_type' => $request->header('Content-Type')
+    ]);
 
         $request->validate([
             'id_token' => 'required|string',
