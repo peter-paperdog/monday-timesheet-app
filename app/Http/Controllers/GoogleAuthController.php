@@ -55,9 +55,12 @@ class GoogleAuthController extends Controller
 
         $token = $user->createToken('google-login')->plainTextToken;
 
+        $userData = new \stdClass();
+        $userData->name = $user->name;
+
         return response()->json([
             'token' => $token,
-            'user' => $user,
+            'user' => $userData,
         ]);
     }
 }
