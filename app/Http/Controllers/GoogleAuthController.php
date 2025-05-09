@@ -8,15 +8,19 @@ use App\Models\SociaLogin;
 use Google\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class GoogleAuthController extends Controller
 {
     public function login(Request $request)
     {
-        $data = json_decode(file_get_contents('php://input'), true);
-        $idToken = $data['id_token'] ?? null;
-        var_dump($idToken);
-        die();
+        Log::info('Headers:', $request->headers->all());
+        Log::info('Laravel input():', $request->input());
+        Log::info('Raw content:', [$request->getContent()]);
+
+        $request->validate([
+            'id_token' => 'required|string',
+        ]);
 
         // 1. Google token ellenőrzése
         $client = new Client(['client_id' => env('GOOGLE_CLIENT_ID_ANGULAR')]);
