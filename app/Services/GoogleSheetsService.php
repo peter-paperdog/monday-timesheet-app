@@ -12,7 +12,7 @@ use Google_Service_Sheets_ValueRange;
 use Illuminate\Support\Facades\Log;
 use Psr\Log\LoggerInterface;
 
-class GoogleSheetsService_
+class GoogleSheetsService
 {
     private Sheets $service;
     private string $sheetId;
