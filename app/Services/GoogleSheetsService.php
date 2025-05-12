@@ -28,13 +28,13 @@ class GoogleSheetsService
     // Check if it's not set
     if ($envValue === null) {
         $this->logger->error("Error: GOOGLE_SERVICE_ACCOUNT_JSON is NOT set in .env file.");
-        throw new \Exception("Error: GOOGLE_SERVICE_ACCOUNT_JSON is NOT set in .env file.");
+        //throw new \Exception("Error: GOOGLE_SERVICE_ACCOUNT_JSON is NOT set in .env file.");
     }
 
     // Check if it's empty
     if (trim($envValue) === '') {
         $this->logger->error("Error: GOOGLE_SERVICE_ACCOUNT_JSON is SET but EMPTY.");
-        throw new \Exception("Error: GOOGLE_SERVICE_ACCOUNT_JSON is SET but EMPTY.");
+        //throw new \Exception("Error: GOOGLE_SERVICE_ACCOUNT_JSON is SET but EMPTY.");
     }
 
         // Build the full path
@@ -43,12 +43,12 @@ class GoogleSheetsService
         // Debugging: Log the resolved path
         if (!file_exists($pathToCredentials)) {
             $this->logger->error("Error: Google service account JSON file not found at: " . $pathToCredentials);
-            throw new \Exception("Error: Google service account JSON file not found at: " . $pathToCredentials);
+            //throw new \Exception("Error: Google service account JSON file not found at: " . $pathToCredentials);
         }
 
         // Initialize Google Client
         $client = new Client();
-        $client->setAuthConfig($pathToCredentials);
+        //$client->setAuthConfig($pathToCredentials);
         $client->addScope(Sheets::SPREADSHEETS);
 
         $this->service = new Sheets($client);
