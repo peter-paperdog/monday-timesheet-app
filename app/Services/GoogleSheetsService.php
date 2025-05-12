@@ -52,7 +52,7 @@ class GoogleSheetsService
         $client->addScope(Sheets::SPREADSHEETS);
 
         $this->service = new Sheets($client);
-        $this->sheetId = env('GOOGLE_SHEET_ID_OFFICEDAYS');
+        //$this->sheetId = env('GOOGLE_SHEET_ID_OFFICEDAYS');
     }
 
     /**
