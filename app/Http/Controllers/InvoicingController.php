@@ -53,7 +53,7 @@ class InvoicingController extends Controller
         return redirect()->route('invoicing.index')->with('success', 'Invoice created successfully!');
     }
 
-    public function init()
+    public function init(): \Illuminate\Http\JsonResponse
     {
         $mondayService = new MondayService();
         $data = $mondayService->getFolders();
