@@ -71,16 +71,15 @@ class InvoicingController extends Controller
             'board_ids' => 'required|array',
         ]);
 
+        $data = array();
         $mondayService = new MondayService();
-        $data = $mondayService->getFolders();
-        $clients = $data->clients;
-        $projects = $data->projects;
-        $folders = $data->folders;
 
-        return response()->json([
-            "clients" => $data->clients,
-            "projects" => $data->projects,
-            "boards" => $data->folders
-        ]);
+        foreach ($request->board_ids as $board_id) {
+            $data[$board_id] = $mondayService->getItems($board_id);
+        }
+
+        return response()->json(
+            $data
+        );
     }
 }
