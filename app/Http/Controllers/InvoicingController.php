@@ -53,7 +53,7 @@ class InvoicingController extends Controller
         return redirect()->route('invoicing.index')->with('success', 'Invoice created successfully!');
     }
 
-    public function init(Request $request)
+    public function init()
     {
         $mondayService = new MondayService();
         $data = $mondayService->getFolders();
