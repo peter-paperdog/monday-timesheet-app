@@ -49,8 +49,11 @@ Route::middleware(['auth:sanctum', 'refresh-token'])->group(function () {
         return response()->json([
             "clients" => $data->clients,
             "projects" => $data->projects,
-            "folders" => $data->folders
+            "boards" => $data->folders
         ]);
+    });
+
+    Route::get('/tasks', function (Request $request, MondayService $mondayService) {
     });
 });
 
