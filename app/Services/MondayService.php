@@ -437,25 +437,25 @@ GRAPHQL;
                 $projects[$item['id']] = $project;
             }
 
-            //FOLDERS
-            $filtered_folders = array_filter($data, function ($item) {
+            //boards
+            $filtered_boards = array_filter($data, function ($item) {
                 return !is_null($item['parent']) && !empty($item['children']);
             });
 
-            foreach ($filtered_folders as $item) {
+            foreach ($filtered_boards as $item) {
                 foreach ($item['children'] as $child) {
                     $client_id = $item['parent']['id'];
                     $project_id = $item['id'];
-                    $folder_id = $child['id'];
+                    $board_id = $child['id'];
 
-                    if (!isset($folders[$client_id])) {
-                        $folders[$client_id] = [];
+                    if (!isset($boards[$client_id])) {
+                        $boards[$client_id] = [];
                     }
 
-                    if (!isset($folders[$client_id][$project_id])) {
-                        $folders[$client_id][$project_id] = [];
+                    if (!isset($boards[$client_id][$project_id])) {
+                        $boards[$client_id][$project_id] = [];
                     }
-                    $folders[$client_id][$project_id][] = $folder_id;
+                    $boards[$client_id][$project_id][] = $board_id;
                 }
             }
             $page++;
@@ -474,7 +474,7 @@ GRAPHQL;
         $data = new \stdClass();
         $data->clients = $clients;
         $data->projects = $projects;
-        $data->folders = $folders;
+        $data->boards = $boards;
         return $data;
     }
 

@@ -57,6 +57,22 @@ class InvoicingController extends Controller
     {
         $mondayService = new MondayService();
         $data = $mondayService->getFolders();
+
+        return response()->json([
+            "clients" => $data->clients,
+            "projects" => $data->projects,
+            "boards" => $data->boards
+        ]);
+    }
+
+    public function tasks(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'board_ids' => 'required|array',
+        ]);
+
+        $mondayService = new MondayService();
+        $data = $mondayService->getFolders();
         $clients = $data->clients;
         $projects = $data->projects;
         $folders = $data->folders;
