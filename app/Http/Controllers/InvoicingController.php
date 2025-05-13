@@ -28,7 +28,7 @@ class InvoicingController extends Controller
 
         $boards = [];
 
-        foreach($boardIds as $boardId) {
+        foreach ($boardIds as $boardId) {
             $boards[] = $this->mondayService->getBoard($boardId);
         }
 
@@ -51,5 +51,20 @@ class InvoicingController extends Controller
 
         // Redirect back to the index with a success message
         return redirect()->route('invoicing.index')->with('success', 'Invoice created successfully!');
+    }
+
+    public function init(Request $request)
+    {
+        $mondayService = new MondayService();
+        $data = $mondayService->getFolders();
+        $clients = $data->clients;
+        $projects = $data->projects;
+        $folders = $data->folders;
+
+        return response()->json([
+            "clients" => $data->clients,
+            "projects" => $data->projects,
+            "boards" => $data->folders
+        ]);
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\InvoicingController;
 use App\Http\Controllers\SzamlazzController;
 use App\Models\User;
 use App\Services\GoogleSheetsService;
@@ -40,18 +41,7 @@ Route::middleware(['auth:sanctum', 'refresh-token'])->group(function () {
     });
 
     //return with dropdown inits
-    Route::get('/init', function (Request $request, MondayService $mondayService) {
-        $data = $mondayService->getFolders();
-        $clients = $data->clients;
-        $projects = $data->projects;
-        $folders = $data->folders;
-
-        return response()->json([
-            "clients" => $data->clients,
-            "projects" => $data->projects,
-            "boards" => $data->folders
-        ]);
-    });
+    Route::get('/init', [InvoicingController::class, 'init']);
 
     Route::get('/tasks', function (Request $request, MondayService $mondayService) {
     });
