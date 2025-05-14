@@ -40,6 +40,7 @@ Route::middleware(['auth:sanctum', 'refresh-token'])->group(function () {
 
     Route::post('/tasks', [InvoicingController::class, 'tasks']);
 });
+Route::get('/invoice/generate', [InvoicingController::class, 'generate']);
 
 // ---------------Public routes--------------------
 //google login
