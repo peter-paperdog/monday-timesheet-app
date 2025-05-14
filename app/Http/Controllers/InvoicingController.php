@@ -75,7 +75,10 @@ class InvoicingController extends Controller
         $mondayService = new MondayService();
 
         foreach ($request->board_ids as $board_id) {
-            $data[$board_id] = $mondayService->getItems($board_id);
+            $data[$board_id] = new \stdClass();
+            $board_datas = $mondayService->getInvoiceItems($board_id);
+            $data[$board_id]->name = $board_datas->name;
+            $data[$board_id]->groups = $board_datas->data;
         }
 
         return response()->json(
