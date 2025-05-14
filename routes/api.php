@@ -3,15 +3,10 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InvoicingController;
-use App\Http\Controllers\SzamlazzController;
 use App\Models\User;
 use App\Services\GoogleSheetsService;
-use App\Services\MondayService;
 use App\Services\SlackService;
 use Carbon\Carbon;
-use Google\Client;
-
-use Google\Service\Sheets;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
