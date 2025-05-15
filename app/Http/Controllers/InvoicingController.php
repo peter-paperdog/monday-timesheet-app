@@ -149,11 +149,22 @@ class InvoicingController extends Controller
             // Prepare invoice data
             $invoice->load(['items', 'items.project']);
 
+            /*
             $data = [
                 ['desc 1', 'Service', 1, 2, 3],
                 ['desc 2', 'Service', 4, 5, 6],
                 ['desc 3', 'Expense', 7, 8, 9],
-            ];
+            ];*/
+
+            $data = $invoice->items->map(function ($item) {
+                return [
+                    $item->description,     // Column A (merged A:X)
+                    $item->type,            // Column Y (Y:AD)
+                    $item->quantity,        // Column AE (AE:AJ)
+                    $item->unit_price,      // Column AK (AK:AP)
+                    null,                   // Placeholder for AQ (we’ll use formula)
+                ];
+            })->values()->all();
 
             $insertRow = 14;
             $rowCount = count($data);
