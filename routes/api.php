@@ -4,12 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InvoicingController;
 use App\Http\Controllers\OfficeController;
-use App\Models\User;
-use App\Services\GoogleSheetsService;
-use App\Services\SlackService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 Route::options('{any}', function () {
