@@ -180,10 +180,21 @@ class InvoicingController extends Controller
         });
 
         foreach ($data['items'] as $itemData) {
-            Item::create([
-                ...$itemData,
-                'project_id' => $projects[$itemData['project_monday_id']],
-            ]);
+            $item = Item::updateOrCreate(
+                ['monday_id' => $itemData['monday_id']],
+                [
+                    'description' => $itemData['description'],
+                    'type' => $itemData['type'],
+                    'quantity' => $itemData['quantity'],
+                    'unit' => $itemData['unit'],
+                    'unit_price' => $itemData['unit_price'],
+                    'currency' => $itemData['currency'],
+                    'project_id' => $projects[$itemData['project_monday_id']],
+                ]
+            );
+
+            // hozzárendeljük a számlához (pivot tábla!)
+            $invoice->items()->syncWithoutDetaching([$item->id]);
         }
 
         return response()->json([
