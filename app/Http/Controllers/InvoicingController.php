@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\Project;
 use App\Services\MondayService;
@@ -163,10 +164,17 @@ class InvoicingController extends Controller
             ['name' => $data['client']['name']]
         );
 
-        $projects = collect($data['projects'])->mapWithKeys(function ($projectData) {
+        $invoice = Invoice::create([
+            'client_id' => $client->id,
+        ]);
+
+        $projects = collect($data['projects'])->mapWithKeys(function ($projectData) use ($invoice) {
             $project = Project::updateOrCreate(
                 ['monday_id' => $projectData['monday_id']],
-                ['name' => $projectData['name']]
+                [
+                    'name' => $projectData['name'],
+                    'invoice_id' => $invoice->id,
+                ]
             );
             return [$projectData['monday_id'] => $project->id];
         });
@@ -178,7 +186,10 @@ class InvoicingController extends Controller
             ]);
         }
 
-        return response()->json(['message' => 'Invoice data stored successfully.']);
+        return response()->json([
+            'message' => 'Invoice stored successfully.',
+            'invoice_id' => $invoice->id
+        ]);
     }
 
     public function init(): \Illuminate\Http\JsonResponse
