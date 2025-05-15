@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Item;
+use App\Models\Project;
 use App\Services\MondayService;
 use Google\Client;
+use Google\Service\AdMob\App;
 use Google\Service\Drive\DriveFile;
 use Google\Service\Sheets;
 use Google\Service\Drive;
@@ -138,9 +141,44 @@ class InvoicingController extends Controller
 
     public function store(Request $request)
     {
+        $data = $request->validate([
+            'client.monday_id' => 'required|integer',
+            'client.name' => 'required|string',
+            'projects' => 'required|array',
+            'projects.*.monday_id' => 'required|integer',
+            'projects.*.name' => 'required|string',
+            'items' => 'required|array',
+            'items.*.monday_id' => 'required|integer',
+            'items.*.description' => 'required|string',
+            'items.*.type' => 'required|string',
+            'items.*.quantity' => 'required|numeric',
+            'items.*.unit' => 'required|string',
+            'items.*.unit_price' => 'required|numeric',
+            'items.*.currency' => 'required|string',
+            'items.*.project_monday_id' => 'required|integer',
+        ]);
 
-        // Redirect back to the index with a success message
-        return redirect()->route('invoicing.index')->with('success', 'Invoice created successfully!');
+        $client = \App\Models\Client::updateOrCreate(
+            ['monday_id' => $data['client']['monday_id']],
+            ['name' => $data['client']['name']]
+        );
+
+        $projects = collect($data['projects'])->mapWithKeys(function ($projectData) {
+            $project = Project::updateOrCreate(
+                ['monday_id' => $projectData['monday_id']],
+                ['name' => $projectData['name']]
+            );
+            return [$projectData['monday_id'] => $project->id];
+        });
+
+        foreach ($data['items'] as $itemData) {
+            Item::create([
+                ...$itemData,
+                'project_id' => $projects[$itemData['project_monday_id']],
+            ]);
+        }
+
+        return response()->json(['message' => 'Invoice data stored successfully.']);
     }
 
     public function init(): \Illuminate\Http\JsonResponse
