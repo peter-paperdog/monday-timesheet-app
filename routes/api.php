@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InvoicingController;
+use App\Http\Controllers\OfficeController;
 use App\Models\User;
 use App\Services\GoogleSheetsService;
 use App\Services\SlackService;
@@ -45,33 +46,6 @@ Route::get('/invoice/generate', [InvoicingController::class, 'generate']);
 // ---------------Public routes--------------------
 //google login
 Route::post('/auth/google-login', [GoogleAuthController::class, 'login']);
-//slack answer processing
-Route::post('slack/office-answer', function (Request $request) {
+//Slack answer processing
+Route::post('slack/office-answer', [OfficeController::class, 'slackAnswer']);
 
-    $payload = json_decode($request->input('payload'), true);
-
-    if (!isset($payload['actions'][0])) {
-        return response()->json(['error' => 'Invalid interaction data'], 400);
-    }
-
-    $selectedOption = str_replace('_', ' ', $payload['actions'][0]['value']);
-    $responseUrl = $payload['response_url'];
-    $user = User::where('slack_id', $payload['user']['id'])->first();
-
-    Log::info("{$user->name} selected: {$selectedOption}");
-
-    $tsDate = Carbon::createFromTimestamp((int) $payload['message']['ts'])->toDateString();
-
-    $user->schedules()
-        ->where('date', $tsDate)
-        ->update(['status' => $selectedOption]);
-
-    $googlesheetservice = app(GoogleSheetsService::class);
-
-    $googlesheetservice->updateHUOfficeSchedule($user->email, $tsDate, $selectedOption);
-
-    $slackService = new SlackService();
-    $slackService->updateSlackMessage($responseUrl, $selectedOption);
-
-    return response()->json(['success' => true]);
-});

@@ -57,4 +57,34 @@ class OfficeController extends Controller
 
         return view('office-schedule', compact('structuredData', 'startOfWeek', 'endOfWeek', 'locations'));
     }
+
+    public function slackAnswer(Request $request)
+    {
+        $payload = json_decode($request->input('payload'), true);
+
+        if (!isset($payload['actions'][0])) {
+            return response()->json(['error' => 'Invalid interaction data'], 400);
+        }
+
+        $selectedOption = str_replace('_', ' ', $payload['actions'][0]['value']);
+        $responseUrl = $payload['response_url'];
+        $user = User::where('slack_id', $payload['user']['id'])->first();
+
+        Log::info("{$user->name} selected: {$selectedOption}");
+
+        $tsDate = Carbon::createFromTimestamp((int) $payload['message']['ts'])->toDateString();
+
+        $user->schedules()
+            ->where('date', $tsDate)
+            ->update(['status' => $selectedOption]);
+
+        $googlesheetservice = app(GoogleSheetsService::class);
+
+        $googlesheetservice->updateHUOfficeSchedule($user->email, $tsDate, $selectedOption);
+
+        $slackService = new SlackService();
+        $slackService->updateSlackMessage($responseUrl, $selectedOption);
+
+        return response()->json(['success' => true]);
+    }
 }
