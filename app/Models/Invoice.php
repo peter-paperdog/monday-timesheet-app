@@ -22,6 +22,6 @@ class Invoice extends Model
     }
     public function items()
     {
-        return $this->belongsToMany(Item::class)->withTimestamps();
+        return $this->hasMany(Item::class);
     }
 }
