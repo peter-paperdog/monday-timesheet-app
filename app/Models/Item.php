@@ -18,4 +18,9 @@ class Item extends Model
     {
         return $this->belongsTo(Project::class);
     }
+
+    public function invoices()
+    {
+        return $this->belongsToMany(Invoice::class)->withTimestamps();
+    }
 }
