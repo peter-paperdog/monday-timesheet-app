@@ -39,6 +39,7 @@ Route::middleware(['auth:sanctum', 'refresh-token'])->group(function () {
     Route::get('/invoices', [InvoicingController::class, 'index']);
     Route::get('/invoices/{invoice}', [InvoicingController::class, 'show']);
     Route::post('/invoices/{invoice}/actions/generate-sheet', [InvoicingController::class, 'generateSheet']);
+    Route::post('/invoices/{invoice}/actions/update-sheet', [InvoicingController::class, 'updateSheetFromInvoice']);
 });
 
 // ---------------Public routes--------------------
