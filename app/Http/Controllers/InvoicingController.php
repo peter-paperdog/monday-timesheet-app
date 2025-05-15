@@ -114,6 +114,166 @@ class InvoicingController extends Controller
         }
     }
 
+    public function updateSheetFromInvoice(Invoice $invoice): \Illuminate\Http\JsonResponse
+    {
+        if (empty($invoice->sheet_url)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No sheet URL found for this invoice.',
+            ], 404);
+        }
+
+        // Extract spreadsheetId from URL
+        preg_match('/\/d\/([a-zA-Z0-9-_]+)\//', $invoice->sheet_url, $matches);
+        $spreadsheetId = $matches[1] ?? null;
+
+        if (!$spreadsheetId) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid Google Sheet URL.',
+            ], 400);
+        }
+
+        try {
+            // Load credentials
+            $envValue = trim(env('GOOGLE_SERVICE_ACCOUNT_JSON'));
+            $pathToCredentials = storage_path('app/' . $envValue);
+
+            if (empty($envValue) || !file_exists($pathToCredentials)) {
+                throw new \Exception("Service account config missing.");
+            }
+
+            // Init Google Sheets client
+            $client = new \Google\Client();
+            $client->setAuthConfig($pathToCredentials);
+            $client->addScope(\Google\Service\Sheets::SPREADSHEETS);
+            $sheets = new \Google\Service\Sheets($client);
+
+            // Prepare invoice data
+            $invoice->load(['items', 'items.project']);
+
+            $data = [
+                ['desc 1', 'Service', 1, 2, 3],
+                ['desc 2', 'Service', 4, 5, 6],
+                ['desc 3', 'Expense', 7, 8, 9],
+            ];
+
+            $insertRow = 14;
+            $rowCount = count($data);
+            $sheetId = 0; // vagy lekérheted dinamikusan is
+            $colMap = [
+                0 => [0, 23],   // A:X   = 0-23
+                1 => [24, 29],  // Y:AD  = 24-29
+                2 => [30, 35],  // AE:AJ = 30-35
+                3 => [36, 41],  // AK:AP = 36-41
+                4 => [42, 47],  // AQ:AV = 42-47
+            ];
+
+            // Insert rows first
+            $sheets->spreadsheets->batchUpdate($spreadsheetId, new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
+                'requests' => [
+                    new \Google\Service\Sheets\Request([
+                        'insertDimension' => [
+                            'range' => [
+                                'sheetId' => $sheetId,
+                                'dimension' => 'ROWS',
+                                'startIndex' => $insertRow - 1,
+                                'endIndex' => $insertRow - 1 + $rowCount,
+                            ],
+                            'inheritFromBefore' => false,
+                        ]
+                    ])
+                ]
+            ]));
+
+            // Prepare values for each row (padded with empty cells)
+            $rows = [];
+
+            foreach ($data as $i => $rowData) {
+                $currentRow = $insertRow + $i;
+
+                $row = array_fill(0, 48, '');
+                $row[0] = $rowData[0];    // A
+                $row[24] = $rowData[1];   // Y
+                $row[30] = $rowData[2];   // AE
+                $row[36] = $rowData[3];   // AK
+
+                $row[42] = "=AK$currentRow * AE$currentRow";   // AQ
+                $rows[] = $row;
+            }
+
+            // Write values
+            $sheets->spreadsheets_values->update($spreadsheetId, 'A' . $insertRow, new \Google\Service\Sheets\ValueRange([
+                'values' => $rows,
+            ]), ['valueInputOption' => 'USER_ENTERED']);
+
+// Add merge requests per row
+            $mergeRequests = [];
+
+            for ($i = 0; $i < $rowCount; $i++) {
+                $rowIndex = $insertRow - 1 + $i; // 0-based
+                foreach ($colMap as $block) {
+                    $mergeRequests[] = new \Google\Service\Sheets\Request([
+                        'mergeCells' => [
+                            'range' => [
+                                'sheetId' => $sheetId,
+                                'startRowIndex' => $rowIndex,
+                                'endRowIndex' => $rowIndex + 1,
+                                'startColumnIndex' => $block[0],
+                                'endColumnIndex' => $block[1] + 1,
+                            ],
+                            'mergeType' => 'MERGE_ALL',
+                        ]
+                    ]);
+                }
+            }
+
+// Apply merges
+            $sheets->spreadsheets->batchUpdate($spreadsheetId, new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
+                'requests' => $mergeRequests
+            ]));
+
+
+            $formatRequests = [
+                new \Google\Service\Sheets\Request([
+                    'repeatCell' => [
+                        'range' => [
+                            'sheetId' => $sheetId,
+                            'startRowIndex' => $insertRow - 1,
+                            'endRowIndex' => $insertRow - 1 + $rowCount,
+                            'startColumnIndex' => 30, // AE
+                            'endColumnIndex' => 36,   // AJ (exclusive)
+                        ],
+                        'cell' => [
+                            'userEnteredFormat' => [
+                                'numberFormat' => [
+                                    'type' => 'NUMBER'
+                                ],
+                            ],
+                        ],
+                        'fields' => 'userEnteredFormat.numberFormat'
+                    ]
+                ])
+            ];
+            $sheets->spreadsheets->batchUpdate($spreadsheetId, new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
+                'requests' => $formatRequests
+            ]));
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Sheet updated successfully.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Sheet update failed: " . $e->getMessage());
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Sheet update failed.',
+                'debug' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function create(Request $request)
     {
         $clientId = $request->input('client');
