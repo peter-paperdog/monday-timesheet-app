@@ -93,10 +93,7 @@ class InvoicingController extends Controller
             $invoice->sheet_url = $sheetUrl;
             $invoice->save();
 
-            return response()->json([
-                'status' => 'success',
-                'spreadsheet_url' => $sheetUrl,
-            ]);
+            return $this->updateSheetFromInvoice_($invoice);
         } catch (\Google\Service\Exception $e) {
             Log::error("Google API error: " . $e->getMessage());
 
@@ -114,8 +111,8 @@ class InvoicingController extends Controller
         }
     }
 
-    public function updateSheetFromInvoice(Invoice $invoice): \Illuminate\Http\JsonResponse
-    {
+    private function updateSheetFromInvoice_(Invoice $invoice) : \Illuminate\Http\JsonResponse{
+
         if (empty($invoice->sheet_url)) {
             return response()->json([
                 'status' => 'error',
@@ -262,6 +259,7 @@ class InvoicingController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Sheet updated successfully.',
+                'spreadsheet_url' => $invoice->sheet_url
             ]);
         } catch (\Exception $e) {
             Log::error("Sheet update failed: " . $e->getMessage());
@@ -272,6 +270,11 @@ class InvoicingController extends Controller
                 'debug' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function updateSheetFromInvoice(Invoice $invoice): \Illuminate\Http\JsonResponse
+    {
+        return $this->updateSheetFromInvoice_($invoice);
     }
 
     public function create(Request $request)
