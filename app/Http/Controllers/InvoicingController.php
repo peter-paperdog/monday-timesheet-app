@@ -131,13 +131,15 @@ class InvoicingController extends Controller
 
     public function index()
     {
-        $data = $this->mondayService->getFolders();
+        $invoices = Invoice::with([
+            'client',
+            'items',
+            'items.project'
+        ])->latest()->get();
 
-        $clients = $data->clients;
-        $projects = $data->projects;
-        $folders = $data->folders;
-
-        return view('invoicing.index', compact('clients', 'projects', 'folders'));
+        return response()->json([
+            'invoices' => $invoices
+        ]);
     }
 
     public function store(Request $request)
