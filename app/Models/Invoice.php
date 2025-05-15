@@ -20,4 +20,8 @@ class Invoice extends Model
     {
         return $this->hasMany(Project::class);
     }
+    public function items()
+    {
+        return $this->belongsToMany(Item::class)->withTimestamps();
+    }
 }
