@@ -26,84 +26,92 @@ class InvoicingController extends Controller
      *
      * @param Request $request The request containing the data needed for timesheet generation
      */
-    public function generate(Request $request)
+    public function generateSheet(Request $request, Invoice $invoice)
     {
-        $envValue = trim(env('GOOGLE_SERVICE_ACCOUNT_JSON'));
-
-        // Check if it's not set
-        if ($envValue === null) {
-            $this->logger->error("Error: GOOGLE_SERVICE_ACCOUNT_JSON is NOT set in .env file.");
-            throw new \Exception("Error: GOOGLE_SERVICE_ACCOUNT_JSON is NOT set in .env file.");
-        }
-
-        // Check if it's empty
-        if (trim($envValue) === '') {
-            $this->logger->error("Error: GOOGLE_SERVICE_ACCOUNT_JSON is SET but EMPTY.");
-            throw new \Exception("Error: GOOGLE_SERVICE_ACCOUNT_JSON is SET but EMPTY.");
-        }
-
-        // Build the full path
-        $pathToCredentials = storage_path('app/' . $envValue);
-
-        // Debugging: Log the resolved path
-        if (!file_exists($pathToCredentials)) {
-            $this->logger->error("Error: Google service account JSON file not found at: " . $pathToCredentials);
-            throw new \Exception("Error: Google service account JSON file not found at: " . $pathToCredentials);
-        }
-
-
-        // Initialize Google Client
-        $client = new Client();
-        $client->setAuthConfig($pathToCredentials);
-        $client->addScope(Sheets::SPREADSHEETS);
-        $client->addScope(Drive::DRIVE);
-
-        $driveService = new Drive($client);
-
-        $originalSpreadsheetId = '1jY-ilQBaYRI8R_PFM2h99Nh0bXAccGA1syBypoI4pF4';
-
         try {
-            $driveService->files->get($originalSpreadsheetId);
-            return ('File access OK');
-        } catch (\Exception $e) {
-            Log::error('File access FAILED: ' . $e->getMessage());
-        }
+            $envValue = trim(env('GOOGLE_SERVICE_ACCOUNT_JSON'));
 
+            if (empty($envValue)) {
+                Log::error("GOOGLE_SERVICE_ACCOUNT_JSON is missing or empty.");
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Google service account is not configured.',
+                ], 500);
+            }
 
+            $pathToCredentials = storage_path('app/' . $envValue);
 
-        $targetFolderId = '1CiJed7IMuGNfoFvCZtqRCBkNBKQyZVaT';
+            if (!file_exists($pathToCredentials)) {
+                Log::error("Google service account file not found at: $pathToCredentials");
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Google credentials file not found.',
+                ], 500);
+            }
 
-        // Create a copy of the file
-        $copy = new DriveFile([
-            'name' => 'Invoice Copy ' . date('Y-m-d H:i:s'),
-            'parents' => [$targetFolderId]
-        ]);
+            // Initialize Google client
+            $client = new Client();
+            $client->setAuthConfig($pathToCredentials);
+            $client->addScope(Sheets::SPREADSHEETS);
+            $client->addScope(Drive::DRIVE);
 
-        try {
+            $driveService = new Drive($client);
+
+            $originalSpreadsheetId = '1jY-ilQBaYRI8R_PFM2h99Nh0bXAccGA1syBypoI4pF4';
+            $targetFolderId = '1CiJed7IMuGNfoFvCZtqRCBkNBKQyZVaT';
+
+            // Check access to the original file
+            try {
+                $driveService->files->get($originalSpreadsheetId, [
+                    'supportsAllDrives' => true,
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Access to original spreadsheet failed: " . $e->getMessage());
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Cannot access original Google Sheet.',
+                    'google_error' => $e->getMessage(), // 🔍 include this for debugging
+                ], 500);
+            }
+
+            // Duplicate spreadsheet
+            $copy = new DriveFile([
+                'name' => 'Invoice #' . $invoice->id . ' – ' . now()->format('Y-m-d H:i:s'),
+                'parents' => [$targetFolderId],
+            ]);
+
             $newFile = $driveService->files->copy($originalSpreadsheetId, $copy, [
                 'supportsAllDrives' => true,
             ]);
-            $newSpreadsheetId = $newFile->id;
 
-            Log::info("Spreadsheet duplicated: https://docs.google.com/spreadsheets/d/{$newSpreadsheetId}/edit");
+            $newSpreadsheetId = $newFile->id;
+            $sheetUrl = "https://docs.google.com/spreadsheets/d/{$newSpreadsheetId}/edit";
+
+            Log::info("Invoice spreadsheet generated: $sheetUrl");
+
+            // Optional: save URL to invoice
+            $invoice->sheet_url = $sheetUrl;
+            $invoice->save();
 
             return response()->json([
                 'status' => 'success',
-                'spreadsheet_url' => "https://docs.google.com/spreadsheets/d/{$newSpreadsheetId}/edit"
+                'spreadsheet_url' => $sheetUrl,
             ]);
         } catch (\Google\Service\Exception $e) {
-            Log::error('Google API error: ' . $e->getMessage());
+            Log::error("Google API error: " . $e->getMessage());
 
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'Google API error: ' . $e->getMessage(),
+            ], 500);
+        } catch (\Exception $e) {
+            Log::error("General error: " . $e->getMessage());
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unexpected error: ' . $e->getMessage(),
             ], 500);
         }
-        // Get the new spreadsheet ID
-        $newSpreadsheetId = $newFile->id;
-
-        // Log it or return it
-        $this->logger->info("Spreadsheet duplicated: https://docs.google.com/spreadsheets/d/$newSpreadsheetId/edit");
     }
 
     public function create(Request $request)
