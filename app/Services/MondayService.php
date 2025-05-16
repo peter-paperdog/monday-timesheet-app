@@ -698,4 +698,45 @@ GRAPHQL;
 
         return $response['data']['boards'][0];
     }
+
+
+    /**
+     * Update status of the items
+     *
+     * @return void The array of the board objects.
+     */
+    public function updateTaskStatus(string $status, array $items): void
+    {
+        $statusMap = [
+            'To Be Invoiced' => 3,
+            'Invoiced'       => 4,
+        ];
+
+        if (!isset($statusMap[$status])) {
+            throw new \InvalidArgumentException("Invalid status: $status");
+        }
+
+        $statusId = $statusMap[$status];
+
+        foreach ($items as $index => $item) {
+            if (!isset($item['item_id'], $item['board_id'])) {
+                throw new \InvalidArgumentException("Missing argument");
+            }
+
+            $query = <<<GRAPHQL
+                mutation {
+                  change_simple_column_value (item_id:"{$item['item_id']}", board_id: "{$item['board_id']}", column_id:"status", value: "{$statusId}") {
+                    id
+                  }
+                }
+            GRAPHQL;
+
+            // Define the variables to pass into the query
+            try {
+                $this->makeApiRequest($query);
+            } catch (\Exception $exception) {
+                throw $exception;
+            }
+        }
+    }
 }
