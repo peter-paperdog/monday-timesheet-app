@@ -146,8 +146,8 @@ class InvoicingController extends Controller
                 'supportsAllDrives' => true,
             ]);
 
-            $newSpreadsheetId = $newFile->id;
-            $sheetUrl = "https://docs.google.com/spreadsheets/d/{$newSpreadsheetId}/edit";
+            $spreadsheetId = $newFile->id;
+            $sheetUrl = "https://docs.google.com/spreadsheets/d/{$spreadsheetId}/edit";
 
             Log::info("Invoice spreadsheet generated: $sheetUrl");
 
