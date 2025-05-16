@@ -28,6 +28,13 @@ class InvoicingController extends Controller
      */
     public function generateSheet(Request $request, Invoice $invoice)
     {
+        if (!is_null($invoice->sheet_url)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => "This invoice (#{$invoice->id}) already has a generated Google Sheet.",
+            ], 400);
+        }
+
         try {
             $envValue = trim(env('GOOGLE_SERVICE_ACCOUNT_JSON'));
 
@@ -288,29 +295,6 @@ class InvoicingController extends Controller
         return $this->updateSheetFromInvoice_($invoice);
     }
 
-    public function create(Request $request)
-    {
-        $clientId = $request->input('client');
-        $projectId = $request->input('project');
-        $boardIds = explode(',', $request->input('folders', ''));
-
-        $clientName = $this->mondayService->getFoldername($clientId);
-
-        if (!empty($projectId) && $projectId !== '-1') {
-            $projectName = $this->mondayService->getFoldername($projectId);
-        } else {
-            $projectName = null;
-        }
-
-        $boards = [];
-
-        foreach ($boardIds as $boardId) {
-            $boards[] = $this->mondayService->getBoard($boardId);
-        }
-
-        return view('invoicing.create', compact('clientName', 'projectName', 'boards'));
-    }
-
     public function index()
     {
         $invoices = Invoice::with([
@@ -380,10 +364,7 @@ class InvoicingController extends Controller
             $item->save();
         }
 
-        return response()->json([
-            'message' => 'Invoice stored successfully.',
-            'invoice_id' => $invoice->id,
-        ]);
+        return response()->json($invoice);
     }
 
     public function init(): \Illuminate\Http\JsonResponse
