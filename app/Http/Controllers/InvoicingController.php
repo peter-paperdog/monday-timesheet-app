@@ -22,13 +22,19 @@ class InvoicingController extends Controller
 
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $invoices = Invoice::with([
+        $query = Invoice::with([
             'client',
             'items',
             'items.project'
-        ])->latest()->get();
+        ])->latest();
+
+        if ($request->has('client_id')) {
+            $query->where('client_id', $request->input('client_id'));
+        }
+
+        $invoices = $query->get();
 
         return response()->json([
             'invoices' => $invoices
