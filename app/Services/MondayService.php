@@ -340,6 +340,10 @@ class MondayService
                 return [$title => $col['text']];
             });
 
+
+            $columnValues['id'] = $item['id'];
+            $columnValues['name'] = $item['name'];
+
             $grouped[] = $columnValues;
         }
 
