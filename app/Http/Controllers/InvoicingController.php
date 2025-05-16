@@ -299,7 +299,7 @@ class InvoicingController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Sheet updated successfully.',
-                'invoice' => $invoice
+                'invoice' =>  $invoice->load('client'),
             ]);
         } catch (\Exception $e) {
             Log::error("Sheet update failed: " . $e->getMessage());
