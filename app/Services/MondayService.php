@@ -282,6 +282,72 @@ class MondayService
     }
 
     /**
+     * Fetches the items for the board.
+     *
+     * @param  string  $boardId  The ID of the board.
+     * @return array The array of items with time tracking data.
+     */
+    public function getInvoiceContacts(): array
+    {
+        $allItems = [];
+        $cursor = null;
+
+        do {
+            $cursorPart = $cursor ? "cursor: \"$cursor\"" : '';
+
+            $query = <<<GRAPHQL
+            query {
+              boards(ids: 8451006561) {
+                columns{
+                    id
+                    title
+                }
+                items_page(limit: 500, $cursorPart) {
+                  cursor
+                  items {
+                    id
+                    name
+                    group {
+                        title
+                    }
+                    column_values {
+                        id
+                        text
+                        value
+                    }
+                  }
+                }
+              }
+            }
+            GRAPHQL;
+
+            $response = $this->makeApiRequest($query);
+            $columnsMeta = $response['data']['boards'][0]['columns'] ?? [];
+            $page = $response['data']['boards'][0]['items_page'];
+
+            $items = $page['items'] ?? [];
+            $allItems = array_merge($allItems, $items);
+            $cursor = $page['cursor'] ?? null;
+
+        } while ($cursor); // Amíg van még lap, folytatjuk
+
+        $columnsById = collect($columnsMeta)->keyBy('id');
+        $grouped = [];
+        foreach ($allItems as $item) {
+
+            $columnValues = collect($item['column_values'] ?? [])->mapWithKeys(function ($col) use ($columnsById) {
+                $title = $columnsById[$col['id']]['title'] ?? $col['id'];
+                return [$title => $col['text']];
+            });
+
+            $grouped[] = $columnValues;
+        }
+
+        return  $grouped;
+    }
+
+
+    /**
      * Fetches the groups for the board.
      *
      * @param  string | array  $itemId  The ID(s) of the item(s).

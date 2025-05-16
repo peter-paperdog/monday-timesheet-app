@@ -11,6 +11,7 @@ use Google\Service\AdMob\App;
 use Google\Service\Drive\DriveFile;
 use Google\Service\Sheets;
 use Google\Service\Drive;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -312,7 +313,7 @@ class InvoicingController extends Controller
         }
     }
 
-    public function init(): \Illuminate\Http\JsonResponse
+    public function init(): JsonResponse
     {
         $mondayService = new MondayService();
         $data = $mondayService->getFolders();
@@ -324,7 +325,7 @@ class InvoicingController extends Controller
         ]);
     }
 
-    public function tasks(Request $request): \Illuminate\Http\JsonResponse
+    public function tasks(Request $request): JsonResponse
     {
         $request->validate([
             'board_ids' => 'required|array',
@@ -339,6 +340,16 @@ class InvoicingController extends Controller
             $data[$board_id]->name = $board_datas->name;
             $data[$board_id]->groups = $board_datas->data;
         }
+
+        return response()->json(
+            $data
+        );
+    }
+
+    public function contacts(): JsonResponse
+    {
+        $mondayService = new MondayService();
+        $data = $mondayService->getInvoiceContacts();
 
         return response()->json(
             $data

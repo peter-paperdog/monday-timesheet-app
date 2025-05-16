@@ -34,6 +34,8 @@ Route::middleware(['auth:sanctum', 'refresh-token'])->group(function () {
     //return with dropdown inits
     Route::get('/init', [InvoicingController::class, 'init']);
 
+    Route::get('/contacts', [InvoicingController::class, 'contacts']);
+
     Route::post('/tasks', [InvoicingController::class, 'tasks']);
     Route::post('/invoices', [InvoicingController::class, 'store']);
     Route::get('/invoices', [InvoicingController::class, 'index']);
