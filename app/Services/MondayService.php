@@ -210,7 +210,7 @@ class MondayService
                     title
                 }
                 name
-                items_page(limit: 500, $cursorPart, query_params: {rules: [{column_id: "status", compare_value: [3], operator:any_of}]}) {
+                items_page(limit: 500, $cursorPart) {
                   cursor
                   items {
                     id
@@ -249,6 +249,13 @@ class MondayService
                 $title = $columnsById[$col['id']]['title'] ?? $col['id'];
                 return [$title => $col['text']];
             });
+
+            $type = $columnValues['Type'] ?? '';
+            $status = $columnValues['Status'] ?? '';
+
+            if ($type !== 'Billable' || $status !== 'To Be Invoiced') {
+                continue;
+            }
 
             $columnValues = $columnValues->toArray();
             $columnValues['id'] = $item['id'];
