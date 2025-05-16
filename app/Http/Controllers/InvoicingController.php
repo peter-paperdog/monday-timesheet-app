@@ -368,9 +368,18 @@ class InvoicingController extends Controller
             }),
         ]);
     }
-    public function destroy(Invoice $invoice)
+    public function destroy($id)
     {
         try {
+            $invoice = Invoice::with('items')->find($id);
+
+            if (!$invoice) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Invoice with ID {$id} not found.",
+                ], 404);
+            }
+
             foreach ($invoice->items as $item) {
                 $item->delete();
             }
