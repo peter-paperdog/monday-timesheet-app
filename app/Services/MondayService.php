@@ -253,10 +253,6 @@ class MondayService
             $type = $columnValues['Type'] ?? '';
             $status = $columnValues['Status'] ?? '';
 
-            var_dump($type);
-            var_dump($status);
-            var_dump('');
-
             if ($type !== 'Billable' || $status !== 'To Be Invoiced') {
                 continue;
             }
@@ -266,7 +262,11 @@ class MondayService
             $columnValues['name'] = $item['name'];
             $columnValues['parent_id'] = $item['parent_item']['id'] ?? null;
 
-            if (isset($columnValues['Time Spent']) && $columnValues['Time Spent'] != ''){
+            if (empty($columnValues['Time Spent'])) {
+                $columnValues['Time Spent'] = '0:0:0';
+            }
+
+            if (isset($columnValues['Time Spent'])){
                 list($hours, $minutes, $seconds) = explode(':', $columnValues['Time Spent']);
                 $hoursDecimal = (int)$hours + ((int)$minutes / 60) + ((int)$seconds / 3600);
                 $hoursDecimal = round($hoursDecimal, 2); // opcionálisan kerekítjük
