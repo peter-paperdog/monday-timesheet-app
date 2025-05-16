@@ -357,21 +357,10 @@ class InvoicingController extends Controller
         );
     }
 
-    public function contacts(Request $request): JsonResponse
+    public function contacts(): JsonResponse
     {
-        $request->validate([
-            'board_ids' => 'required|array',
-        ]);
-
-        $data = array();
         $mondayService = new MondayService();
-
-        foreach ($request->board_ids as $board_id) {
-            $data[$board_id] = new \stdClass();
-            $board_datas = $mondayService->getInvoiceItems($board_id);
-            $data[$board_id]->name = $board_datas->name;
-            $data[$board_id]->groups = $board_datas->data;
-        }
+        $data = $mondayService->getInvoiceContacts();
 
         return response()->json(
             $data
