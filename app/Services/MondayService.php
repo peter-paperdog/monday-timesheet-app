@@ -203,31 +203,31 @@ class MondayService
             $cursorPart = $cursor ? "cursor: \"$cursor\"" : '';
 
             $query = <<<GRAPHQL
-        query {
-          boards(ids: "$boardId") {
-            columns{
-                id
-                title
-            }
-            name
-            items_page(limit: 500, $cursorPart) {
-              cursor
-              items {
-                id
-                name
-                group {
-                  title
-                }
-                column_values {
+            query {
+              boards(ids: "$boardId") {
+                columns{
                     id
-                    text
-                    value
+                    title
+                }
+                name
+                items_page(limit: 500, $cursorPart) {
+                  cursor
+                  items {
+                    id
+                    name
+                    group {
+                      title
+                    }
+                    column_values {
+                        id
+                        text
+                        value
+                    }
+                  }
                 }
               }
             }
-          }
-        }
-        GRAPHQL;
+            GRAPHQL;
 
             $response = $this->makeApiRequest($query);
             $return->name = $response['data']['boards'][0]['name'];
@@ -249,12 +249,24 @@ class MondayService
                 $title = $columnsById[$col['id']]['title'] ?? $col['id'];
                 return [$title => $col['text']];
             });
+
+            $type = $columnValues['Type'] ?? '';
+            $status = $columnValues['Status'] ?? '';
+
+            var_dump($type);
+            var_dump($status);
+            var_dump('');
+
+            if ($type !== 'Billable' || $status !== 'To Be Invoiced') {
+                continue;
+            }
+
             $columnValues = $columnValues->toArray();
             $columnValues['id'] = $item['id'];
             $columnValues['name'] = $item['name'];
             $columnValues['parent_id'] = $item['parent_item']['id'] ?? null;
 
-            if (isset($columnValues['Time Spent'])){
+            if (isset($columnValues['Time Spent']) && $columnValues['Time Spent'] != ''){
                 list($hours, $minutes, $seconds) = explode(':', $columnValues['Time Spent']);
                 $hoursDecimal = (int)$hours + ((int)$minutes / 60) + ((int)$seconds / 3600);
                 $hoursDecimal = round($hoursDecimal, 2); // opcionálisan kerekítjük
