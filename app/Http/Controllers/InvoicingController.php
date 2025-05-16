@@ -313,7 +313,7 @@ class InvoicingController extends Controller
         }
     }
 
-    public function init(): JsonResponse
+    public function init(): \Illuminate\Http\JsonResponse
     {
         $mondayService = new MondayService();
         $data = $mondayService->getFolders();
@@ -325,7 +325,7 @@ class InvoicingController extends Controller
         ]);
     }
 
-    public function tasks(Request $request): JsonResponse
+    public function tasks(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'board_ids' => 'required|array',
@@ -340,16 +340,6 @@ class InvoicingController extends Controller
             $data[$board_id]->name = $board_datas->name;
             $data[$board_id]->groups = $board_datas->data;
         }
-
-        return response()->json(
-            $data
-        );
-    }
-
-    public function contacts(): JsonResponse
-    {
-        $mondayService = new MondayService();
-        $data = $mondayService->getInvoiceContacts();
 
         return response()->json(
             $data
@@ -377,5 +367,30 @@ class InvoicingController extends Controller
                 ];
             }),
         ]);
+    }
+    public function destroy(Invoice $invoice)
+    {
+        try {
+            foreach ($invoice->items as $item) {
+                $item->delete();
+            }
+
+            $invoice->delete();
+
+            Log::info("Invoice #{$invoice->id} deleted.");
+
+            return response()->json([
+                'status' => 'success',
+                'message' => "Invoice #{$invoice->id} deleted successfully.",
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Failed to delete invoice: " . $e->getMessage());
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to delete invoice.',
+                'debug' => $e->getMessage()
+            ], 500);
+        }
     }
 }
