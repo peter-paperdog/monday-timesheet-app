@@ -31,7 +31,9 @@ class InvoicingController extends Controller
         ])->latest();
 
         if ($request->has('client_id')) {
-            $query->where('client_id', $request->input('client_id'));
+            $query->whereHas('client', function ($q) use ($request) {
+                $q->where('monday_id', $request->input('client_id'));
+            });
         }
 
         $invoices = $query->get();
