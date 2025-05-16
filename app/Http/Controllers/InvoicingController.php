@@ -110,7 +110,7 @@ class InvoicingController extends Controller
                 ], 500);
             }
 
-            $pathToCredentials = storage_path('app/' . $envValue);
+            $pathToCredentials = storage_path('app/'.$envValue);
 
             if (!file_exists($pathToCredentials)) {
                 Log::error("Google service account file not found at: $pathToCredentials");
@@ -137,7 +137,7 @@ class InvoicingController extends Controller
                     'supportsAllDrives' => true,
                 ]);
             } catch (\Exception $e) {
-                Log::error("Access to original spreadsheet failed: " . $e->getMessage());
+                Log::error("Access to original spreadsheet failed: ".$e->getMessage());
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Cannot access original Google Sheet.',
@@ -147,7 +147,7 @@ class InvoicingController extends Controller
 
             // Duplicate spreadsheet
             $copy = new DriveFile([
-                'name' => 'Invoice #' . $invoice->id . ' – ' . now()->format('Y-m-d H:i:s'),
+                'name' => 'Invoice #'.$invoice->id.' – '.now()->format('Y-m-d H:i:s'),
                 'parents' => [$targetFolderId],
             ]);
 
@@ -164,25 +164,25 @@ class InvoicingController extends Controller
             $invoice->sheet_url = $sheetUrl;
             $invoice->save();
         } catch (\Google\Service\Exception $e) {
-            Log::error("Google API error: " . $e->getMessage());
+            Log::error("Google API error: ".$e->getMessage());
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Google API error: ' . $e->getMessage(),
+                'message' => 'Google API error: '.$e->getMessage(),
             ], 500);
         } catch (\Exception $e) {
-            Log::error("General error: " . $e->getMessage());
+            Log::error("General error: ".$e->getMessage());
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Unexpected error: ' . $e->getMessage(),
+                'message' => 'Unexpected error: '.$e->getMessage(),
             ], 500);
         }
 
         try {
             // Load credentials
             $envValue = trim(env('GOOGLE_SERVICE_ACCOUNT_JSON'));
-            $pathToCredentials = storage_path('app/' . $envValue);
+            $pathToCredentials = storage_path('app/'.$envValue);
 
             if (empty($envValue) || !file_exists($pathToCredentials)) {
                 throw new \Exception("Service account config missing.");
@@ -219,21 +219,22 @@ class InvoicingController extends Controller
             ];
 
             // Insert rows first
-            $sheets->spreadsheets->batchUpdate($spreadsheetId, new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
-                'requests' => [
-                    new \Google\Service\Sheets\Request([
-                        'insertDimension' => [
-                            'range' => [
-                                'sheetId' => $sheetId,
-                                'dimension' => 'ROWS',
-                                'startIndex' => $insertRow - 1,
-                                'endIndex' => $insertRow - 1 + $rowCount,
-                            ],
-                            'inheritFromBefore' => false,
-                        ]
-                    ])
-                ]
-            ]));
+            $sheets->spreadsheets->batchUpdate($spreadsheetId,
+                new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
+                    'requests' => [
+                        new \Google\Service\Sheets\Request([
+                            'insertDimension' => [
+                                'range' => [
+                                    'sheetId' => $sheetId,
+                                    'dimension' => 'ROWS',
+                                    'startIndex' => $insertRow - 1,
+                                    'endIndex' => $insertRow - 1 + $rowCount,
+                                ],
+                                'inheritFromBefore' => false,
+                            ]
+                        ])
+                    ]
+                ]));
 
             // Prepare values for each row (padded with empty cells)
             $rows = [];
@@ -252,7 +253,7 @@ class InvoicingController extends Controller
             }
 
             // Write values
-            $sheets->spreadsheets_values->update($spreadsheetId, 'A' . $insertRow, new \Google\Service\Sheets\ValueRange([
+            $sheets->spreadsheets_values->update($spreadsheetId, 'A'.$insertRow, new \Google\Service\Sheets\ValueRange([
                 'values' => $rows,
             ]), ['valueInputOption' => 'USER_ENTERED']);
 
@@ -276,9 +277,10 @@ class InvoicingController extends Controller
                 }
             }
 
-            $sheets->spreadsheets->batchUpdate($spreadsheetId, new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
-                'requests' => $mergeRequests
-            ]));
+            $sheets->spreadsheets->batchUpdate($spreadsheetId,
+                new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
+                    'requests' => $mergeRequests
+                ]));
 
             $formatRequests = [
                 new \Google\Service\Sheets\Request([
@@ -301,17 +303,18 @@ class InvoicingController extends Controller
                     ]
                 ])
             ];
-            $sheets->spreadsheets->batchUpdate($spreadsheetId, new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
-                'requests' => $formatRequests
-            ]));
+            $sheets->spreadsheets->batchUpdate($spreadsheetId,
+                new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
+                    'requests' => $formatRequests
+                ]));
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Sheet updated successfully.',
-                'invoice' =>  $invoice->load('client'),
+                'invoice' => $invoice->load('client'),
             ]);
         } catch (\Exception $e) {
-            Log::error("Sheet update failed: " . $e->getMessage());
+            Log::error("Sheet update failed: ".$e->getMessage());
 
             return response()->json([
                 'status' => 'error',
@@ -321,7 +324,7 @@ class InvoicingController extends Controller
         }
     }
 
-    public function init(): \Illuminate\Http\JsonResponse
+    public function init(): JsonResponse
     {
         $mondayService = new MondayService();
         $data = $mondayService->getFolders();
@@ -333,7 +336,28 @@ class InvoicingController extends Controller
         ]);
     }
 
-    public function tasks(Request $request): \Illuminate\Http\JsonResponse
+    public function tasks(Request $request): JsonResponse
+    {
+        $request->validate([
+            'board_ids' => 'required|array',
+        ]);
+
+        $data = array();
+        $mondayService = new MondayService();
+
+        foreach ($request->board_ids as $board_id) {
+            $data[$board_id] = new \stdClass();
+            $board_datas = $mondayService->getInvoiceItems($board_id);
+            $data[$board_id]->name = $board_datas->name;
+            $data[$board_id]->groups = $board_datas->data;
+        }
+
+        return response()->json(
+            $data
+        );
+    }
+
+    public function contacts(Request $request): JsonResponse
     {
         $request->validate([
             'board_ids' => 'required|array',
@@ -376,6 +400,7 @@ class InvoicingController extends Controller
             }),
         ]);
     }
+
     public function destroy($id)
     {
         try {
@@ -401,7 +426,7 @@ class InvoicingController extends Controller
                 'message' => "Invoice #{$invoice->id} deleted successfully.",
             ]);
         } catch (\Exception $e) {
-            Log::error("Failed to delete invoice: " . $e->getMessage());
+            Log::error("Failed to delete invoice: ".$e->getMessage());
 
             return response()->json([
                 'status' => 'error',
