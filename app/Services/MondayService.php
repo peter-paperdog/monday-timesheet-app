@@ -250,13 +250,6 @@ class MondayService
                 return [$title => $col['text']];
             });
 
-            $type = $columnValues['Type'] ?? '';
-            $status = $columnValues['Status'] ?? '';
-
-            //if ($type !== 'Billable' || $status !== 'To Be Invoiced') {
-            //    continue;
-            //}
-
             $columnValues = $columnValues->toArray();
             $columnValues['id'] = $item['id'];
             $columnValues['name'] = $item['name'];
