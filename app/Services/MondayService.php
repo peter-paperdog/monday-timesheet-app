@@ -253,7 +253,7 @@ class MondayService
             $type = $columnValues['Type'] ?? '';
             $status = $columnValues['Status'] ?? '';
 
-            if ($type !== 'Billable' || $status !== 'To Be Invoiced') {
+            if ($status !== 'To Be Invoiced') {
                 continue;
             }
 
