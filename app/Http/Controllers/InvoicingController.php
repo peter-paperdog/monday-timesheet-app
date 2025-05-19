@@ -422,11 +422,19 @@ class InvoicingController extends Controller
                 ], 404);
             }
 
+            $items = [];
+
             foreach ($invoice->items as $item) {
                 $item->delete();
+                $items[] = [
+                    'item_id' => (int) $item['monday_id'],
+                    'board_id' => (int) $item['board_id'],
+                ];
             }
 
             $invoice->delete();
+
+            $this->mondayService->updateTaskStatus('To Be Invoiced', $items);
 
             Log::info("Invoice #{$invoice->id} deleted.");
 
