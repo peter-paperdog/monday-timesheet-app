@@ -60,6 +60,7 @@ class InvoicingController extends Controller
             'items.*.unit_price' => 'required|numeric',
             'items.*.currency' => 'required|string',
             'items.*.project_monday_id' => 'required|integer',
+            'items.*.board_id' => 'required|integer',
         ]);
 
         $client = \App\Models\Client::updateOrCreate(
@@ -93,6 +94,7 @@ class InvoicingController extends Controller
                 'currency' => $itemData['currency'],
                 'project_id' => $projects[$itemData['project_monday_id']],
                 'invoice_id' => $invoice->id,
+                'board_id' => $itemData['board_id'],
             ]);
 
             $item->invoice_id = $invoice->id;
