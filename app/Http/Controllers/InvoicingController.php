@@ -181,6 +181,24 @@ class InvoicingController extends Controller
             ], 500);
         }
 
+        $items = array_map(function ($item) {
+            return [
+                'item_id' => (int) $item['monday_id'],
+                'board_id' => (int) $item['board_id'], // itt történik a cast int-re
+            ];
+        }, $data['items']);
+        try {
+            $this->mondayService->updateTaskStatus('Invoiced', $items);
+        } catch (\Exception $e) {
+            Log::error("Monday task update failed: ".$e->getMessage());
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Monday task update failed.',
+                'debug' => $e->getMessage()
+            ], 500);
+        }
+
         try {
             // Load credentials
             $envValue = trim(env('GOOGLE_SERVICE_ACCOUNT_JSON'));
