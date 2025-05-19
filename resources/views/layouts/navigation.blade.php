@@ -21,15 +21,15 @@
                     <x-nav-link :href="route('timesheets.calendar')" :active="request()->routeIs('timesheets.calendar')">
                         Calendar
                     </x-nav-link>
+                    <x-nav-link :href="route('timesheets.timetracking')" :active="request()->routeIs('timesheets.timetracking')">
+                        Time tracking
+                    </x-nav-link>
                     <x-nav-link :href="route('office-schedule')" :active="request()->routeIs('office-schedule')">
                         Office schedule
                     </x-nav-link>
                     @if(auth()->user()->admin)
                         <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.index')">
                             Admin
-                        </x-nav-link>
-                        <x-nav-link :href="route('invoicing.index')" :active="request()->routeIs('invoicing.index')">
-                            Invoicing
                         </x-nav-link>
                     @endif
                 </div>
@@ -95,7 +95,10 @@
                 {{ __('Timesheets') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('timesheets.calendar')" :active="request()->routeIs('timesheets.calendar')">
-                {{ __('Timesheets') }}
+                {{ __('Calendar') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('timesheets.timetracking')" :active="request()->routeIs('timesheets.timetracking')">
+                {{ __('Time tracking') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('office-schedule')" :active="request()->routeIs('office-schedule')">
                 {{ __('Office schedule') }}
@@ -103,9 +106,6 @@
             @if(auth()->user()->admin)
                 <x-responsive-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.index')">
                     {{ __('Admin') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('invoicing.index')" :active="request()->routeIs('invoicing.index')">
-                    {{ __('Invoicing') }}
                 </x-responsive-nav-link>
             @endif
         </div>
@@ -127,15 +127,15 @@
                 <x-responsive-nav-link :href="route('timesheets.calendar')">
                     {{ __('Calendar') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('timesheets.timetracking')">
+                    {{ __('Time tracking') }}
+                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('office-schedule')">
                     {{ __('Office schedule') }}
                 </x-responsive-nav-link>
                 @if(auth()->user()->admin)
                     <x-responsive-nav-link :href="route('admin.index')">
                         {{ __('Admin') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('invoicing.index')">
-                        {{ __('Invoicing') }}
                     </x-responsive-nav-link>
                 @endif
 
