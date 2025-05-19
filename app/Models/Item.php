@@ -11,7 +11,7 @@ class Item extends Model
 
     protected $fillable = [
         'monday_id', 'description', 'type', 'quantity', 'unit',
-        'unit_price', 'currency', 'project_id'
+        'unit_price', 'currency', 'project_id', 'board_id'
     ];
 
     public function project()
