@@ -8,37 +8,44 @@
     </x-slot>
 
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-6">
-        @if(auth()->user()->admin)
-            <form method="get" action="{{ route('timesheets.timetracking') }}" class="flex flex-wrap gap-4 mb-6">
+        <form method="get" action="{{ route('timesheets.timetracking') }}" class="flex flex-wrap gap-4 mb-6">
+            @if(auth()->user()->admin)
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">User</label>
                     <select name="user_id" class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:text-white">
                         @foreach($users as $userOption)
-                            <option value="{{ $userOption->id }}" {{ $selectedUserId == $userOption->id ? 'selected' : '' }}>
+                            <option
+                                value="{{ $userOption->id }}" {{ $selectedUserId == $userOption->id ? 'selected' : '' }}>
                                 {{ $userOption->name }}
                             </option>
                         @endforeach
                     </select>
                 </div>
+            @endif
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
+                <input type="date" name="start" value="{{ $start->toDateString() }}"
+                       class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:text-white">
+            </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
-                    <input type="date" name="start" value="{{ $start->toDateString() }}"
-                           class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:text-white">
-                </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
+                <input type="date" name="end" value="{{ $end->toDateString() }}"
+                       class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:text-white">
+            </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
-                    <input type="date" name="end" value="{{ $end->toDateString() }}"
-                           class="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:text-white">
-                </div>
-
-                <div class="flex items-end">
-                    <x-primary-button class="px-6 py-2 text-lg whitespace-nowrap">Filter</x-primary-button>
-                </div>
-            </form>
-        @endif
-
+            <div class="flex items-end">
+                <x-primary-button class="px-6 py-2 text-lg whitespace-nowrap">Filter</x-primary-button>
+            </div>
+        </form>
+        <a href="{{ route('timesheets.timetracking.download', [
+    'user_id' => $selectedUserId,
+    'start' => request('start'),
+    'end' => request('end')
+]) }}"
+           class="ml-4 inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded">
+             Download Excel
+        </a>
         <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
             <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
                 <thead class="bg-gray-100 dark:bg-gray-700">

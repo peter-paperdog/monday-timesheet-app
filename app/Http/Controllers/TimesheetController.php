@@ -7,6 +7,8 @@ use App\Models\MondayTimeTracking;
 use App\Models\SyncStatus;
 use App\Models\User;
 use App\Models\UserSchedule;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Support\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -272,5 +274,52 @@ class TimesheetController extends Controller
             'end' => $endDate,
             'users' => $users
         ]);
+    }
+
+
+    public function downloadTimeTrackingExcel(Request $request)
+    {
+        $userId = auth()->user()->admin ? $request->input('user_id') : auth()->id();
+        $start = Carbon::parse($request->input('start'))->startOfDay();
+        $end = Carbon::parse($request->input('end'))->endOfDay();
+
+        $entries = MondayTimeTracking::where('user_id', $userId)
+            ->whereBetween('started_at', [$start, $end])
+            ->with(['user', 'item.board'])
+            ->orderBy('started_at', 'asc')
+            ->get();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Headers
+        $sheet->fromArray([
+            'Date', 'User', 'Board', 'Task', 'Start Time', 'End Time', 'Duration (minutes)'
+        ], null, 'A1');
+
+        // Rows
+        $row = 2;
+        foreach ($entries as $entry) {
+            $startAt = $entry->started_at;
+            $endAt = $entry->ended_at;
+            $duration = $startAt && $endAt ? $startAt->diffInMinutes($endAt) : null;
+
+            $sheet->fromArray([
+                $startAt?->toDateString(),
+                $entry->user->name ?? '-',
+                $entry->item->board->name ?? '-',
+                $entry->item->name ?? '-',
+                $startAt?->format('H:i'),
+                $endAt?->format('H:i'),
+                $duration,
+            ], null, 'A' . $row++);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+
+        // Stream the file
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, 'time_tracking_report.xlsx');
     }
 }
