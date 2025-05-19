@@ -703,7 +703,7 @@ GRAPHQL;
     /**
      * Update status of the items
      *
-     * @return void The array of the board objects.
+     * @return void.
      */
     public function updateTaskStatus(string $status, array $items): void
     {
