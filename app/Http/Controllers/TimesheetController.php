@@ -232,10 +232,45 @@ class TimesheetController extends Controller
     {
         $selectedUserId = auth()->user()->admin ? $request->input('user_id', auth()->id()) : auth()->id();
 
-        return view('calendar',[
+        return view('calendar', [
             'users' => User::orderBy('name', 'asc')->get(),
             'selectedUserId' => $selectedUserId,
             'lastupdated' => $this->getLastUpdated('monday-boards')
+        ]);
+    }
+
+    public function timetracking(Request $request)
+    {
+        // Determine selected user (if admin), otherwise use current user
+        $selectedUserId = auth()->user()->admin
+            ? $request->input('user_id', auth()->id())
+            : auth()->id();
+
+        // Parse date range with fallback to last 7 days
+        $startDate = $request->input('start')
+            ? Carbon::parse($request->input('start'))->startOfDay()
+            : now()->subDays(6)->startOfDay();
+
+        $endDate = $request->input('end')
+            ? Carbon::parse($request->input('end'))->endOfDay()
+            : now()->endOfDay();
+
+        // Fetch time tracking entries with item and board relations
+        $entries = MondayTimeTracking::where('user_id', $selectedUserId)
+            ->whereBetween('started_at', [$startDate, $endDate])
+            ->with(['item.board', 'item.group', 'item.parent'])
+            ->orderBy('started_at', 'desc')
+            ->get();
+
+        // Fetch users list for admin
+        $users = auth()->user()->admin ? User::orderBy('name')->get() : collect();
+
+        return view('timetracking', [
+            'trackings' => $entries,
+            'selectedUserId' => $selectedUserId,
+            'start' => $startDate,
+            'end' => $endDate,
+            'users' => $users
         ]);
     }
 }
