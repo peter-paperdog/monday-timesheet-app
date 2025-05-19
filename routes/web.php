@@ -27,6 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [TimesheetController::class, 'dashboard'])->name('dashboard');
     Route::get('/timesheets', [TimesheetController::class, 'timesheets'])->name('timesheets');
     Route::get('/timesheets/calendar', [TimesheetController::class, 'calendar'])->name('timesheets.calendar');
+    Route::get('/timesheets/timetracking', [TimesheetController::class, 'timetracking'])->name('timesheets.timetracking');
     Route::get('/office-schedule', [OfficeController::class, 'schedule'])->name('office-schedule');
 
     Route::post('download', [TimesheetController::class, 'downloadUserSheet'])
