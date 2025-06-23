@@ -42,10 +42,10 @@ return Application::configure(basePath: dirname(__DIR__))
          */
 
         // Send weekly timesheet PDFs to all users.
-        $schedule->command('email:send-weekly-timesheets')->weeklyOn(1, '09:15');
-        $schedule->command('email:send-weekly-timesheets')->weeklyOn(1, '15:15');
+        //$schedule->command('email:send-weekly-timesheets')->weeklyOn(1, '09:15');
+        //$schedule->command('email:send-weekly-timesheets')->weeklyOn(1, '15:15');
         $schedule->command('email:send-time-record-notification')->weeklyOn(5, '15:00');
-        $schedule->command('email:send-weekly-timesheets-admin')->weeklyOn(1, '17:00');
+        //$schedule->command('email:send-weekly-timesheets-admin')->weeklyOn(1, '17:00');
 
         /*
          * All weekday UK 9am notification to UK users
