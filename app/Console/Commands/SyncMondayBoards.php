@@ -38,8 +38,114 @@ class SyncMondayBoards extends Command
     public function handle()
     {
         $startTime = microtime(true);
-        $this->info('Fetching boards from Monday.com...');
-        $boards = $this->mondayService->getBoards();
+        $this->info('Fetching clients into board from Monday.com...');
+        $folders = $this->mondayService->getFolders();
+
+        $this->info('Updating '.count($folders->clients).' clients.'.PHP_EOL);
+
+        foreach ($folders->clients as $client) {
+            $board = MondayBoard::updateOrCreate(
+                ['id' => $client->id],
+                [
+                    'id' => $client->id,
+                    'name' => str_replace('Subitems of ', '', $client->name),
+                    'type' => 'folder'
+                ]
+            );
+            $board->touch();
+
+            $this->info("Processing client '{$board->name}' ({$board->id})");
+        }
+
+        $this->info('Adding projects for clients.');
+
+        $g = 0;
+        foreach ($folders->projects as $project) {
+            if ($project->name !== "Subitems") {
+                $MondayGroup = MondayGroup::updateOrCreate(
+                    ['id' => $project->id],
+                    [
+                        'id' => $project->id,
+                        'name' => $project->name,
+                        'board_id' => $project->client_id
+                    ]
+                );
+                $g++;
+                $MondayGroup->touch();
+            }
+        }
+        if ($g === 0) {
+            $this->warn("No project found.");
+        } else {
+            $this->info("Added ".$g." proejcts.");
+        }
+
+        $boards = $this->mondayService->getBoardsFromNewStructure();
+        $this->info('Get '.count($boards).' boards for get items.'.PHP_EOL);
+
+        foreach ($boards as $board) {
+            if (is_null($board['board_folder_id'])){
+                continue;
+            }
+            $parent_id = $this->mondayService->getFolderParentId($board['board_folder_id']);
+            $board_id = null;
+            $group_id = null;
+
+            if (is_null($parent_id)){
+                $board_id = $board['board_folder_id'];
+            }else{
+                $board_id = $parent_id;
+                $group_id = $board['board_folder_id'];
+            }
+
+            $items = $this->mondayService->getItems($board['id']);
+
+            if (empty($items)) {
+                $this->warn("No item data found for board '{$board['name']}' (#{$board['id']})");
+            } else {
+                $this->info("Found ".count($items)." task items for board '{$board['name']}' (#{$board['id']})");
+            }
+
+
+            foreach ($items as $itemData) {
+                $MondayItem = MondayItem::updateOrCreate(
+                    ['id' => $itemData['id']],
+                    [
+                        'name' => $itemData['name'],
+                        'board_id' => $board_id,
+                        'group_id' => $group_id,
+                        'parent_id' => null
+                    ]
+                );
+                $MondayItem->touch();
+            }
+
+            // Fetch time tracking data for this board
+            $items = $this->mondayService->getTimeTrackingItems($board['id']);
+
+            if (empty($items)) {
+                $this->warn("No time tracking data found for board '{$board['name']}' ({$board['id']})");
+            } else {
+                $this->info("Found ".count($items)." time tracking items for board '{$board['name']}' ({$board['id']})");
+            }
+
+            foreach ($items as $trackingData) {
+                $MondayTimeTracking = MondayTimeTracking::updateOrCreate(
+                    ['id' => $trackingData['id']],
+                    [
+                        'item_id' => $trackingData['item_id'],
+                        'user_id' => $trackingData['started_user_id'],
+                        'started_at' => Carbon::parse($trackingData['started_at'])->toDateTimeString(),
+                        'ended_at' => !empty($trackingData['ended_at']) ? Carbon::parse($trackingData['ended_at'])->toDateTimeString() : null,
+                    ]
+                );
+                $MondayTimeTracking->touch();
+            }
+            $this->info("Successfully updated board '{$board['name']}' ({$board['id']})".PHP_EOL.PHP_EOL);
+        }
+
+        //old structrure code
+        /*$boards = $this->mondayService->getBoards();
         $this->info('Updating ' . count($boards) . ' items.' . PHP_EOL);
 
         foreach ($boards as $boardData) {
@@ -55,77 +161,79 @@ class SyncMondayBoards extends Command
 
             $this->info("Processing board '{$board->name}' ({$board->id})");
 
-            $groups = $this->mondayService->getGroups($board->id);
-            $this->info('Adding groups for board.');
 
-            $g = 0;
-            foreach ($groups as $groupData) {
-                if ($groupData['title'] !== "Subitems") {
-                    $MondayGroup = MondayGroup::updateOrCreate(
-                        ['id' => $board->id . '_' . $groupData['id']],
-                        [
-                            'id' => $board->id . '_' . $groupData['id'],
-                            'name' => $groupData['title'],
-                            'board_id' => $board->id
-                        ]
-                    );
-                    $g++;
-                    $MondayGroup->touch();
-                }
-            }
-            if ($g === 0) {
-                $this->warn("No group found.");
-            } else {
-                $this->info("Added " . $g . " groups.");
-            }
+                    $groups = $this->mondayService->getGroups($board->id);
+                    $this->info('Adding groups for board.');
 
-            $items = $this->mondayService->getItems($board->id);
+                    $g = 0;
+                    foreach ($groups as $groupData) {
+                        if ($groupData['title'] !== "Subitems") {
+                            $MondayGroup = MondayGroup::updateOrCreate(
+                                ['id' => $board->id . '_' . $groupData['id']],
+                                [
+                                    'id' => $board->id . '_' . $groupData['id'],
+                                    'name' => $groupData['title'],
+                                    'board_id' => $board->id
+                                ]
+                            );
+                            $g++;
+                            $MondayGroup->touch();
+                        }
+                    }
+                    if ($g === 0) {
+                        $this->warn("No group found.");
+                    } else {
+                        $this->info("Added " . $g . " groups.");
+                    }
 
-            if (empty($items)) {
-                $this->warn("No item data found for board '{$board->name}' (#{$board->id})");
-            } else {
-                $this->info("Found " . count($items) . " task items for board '{$board->name}' (#{$board->id})");
-            }
 
-            foreach ($items as $itemData) {
-                $MondayItem = MondayItem::updateOrCreate(
-                    ['id' => $itemData['id']],
-                    [
-                        'name' => $itemData['name'],
-                        'board_id' => $board->id,
-                        'group_id' => $itemData['group']['id'] ? ($board->id . '_' . $itemData['group']['id']) : null,
-                        'parent_id' => $itemData['parent_item']['id'] ?? null
-                    ]
-                );
-                $MondayItem->touch();
-            }
+                    $items = $this->mondayService->getItems($board->id);
 
-            // Fetch time tracking data for this board
-            $items = $this->mondayService->getTimeTrackingItems($board->id);
+                    if (empty($items)) {
+                        $this->warn("No item data found for board '{$board->name}' (#{$board->id})");
+                    } else {
+                        $this->info("Found " . count($items) . " task items for board '{$board->name}' (#{$board->id})");
+                    }
 
-            if (empty($items)) {
-                $this->warn("No time tracking data found for board '{$board->name}' ({$board->id})");
-            } else {
-                $this->info("Found " . count($items) . " time tracking items for board '{$board->name}' ({$board->id})");
-            }
+                    foreach ($items as $itemData) {
+                        $MondayItem = MondayItem::updateOrCreate(
+                            ['id' => $itemData['id']],
+                            [
+                                'name' => $itemData['name'],
+                                'board_id' => $board->id,
+                                'group_id' => $itemData['group']['id'] ? ($board->id . '_' . $itemData['group']['id']) : null,
+                                'parent_id' => $itemData['parent_item']['id'] ?? null
+                            ]
+                        );
+                        $MondayItem->touch();
+                    }
 
-            foreach ($items as $trackingData) {
-                $MondayTimeTracking = MondayTimeTracking::updateOrCreate(
-                    ['id' => $trackingData['id']],
-                    [
-                        'item_id' => $trackingData['item_id'],
-                        'user_id' => $trackingData['started_user_id'],
-                        'started_at' => Carbon::parse($trackingData['started_at'])->toDateTimeString(),
-                        'ended_at' => !empty($trackingData['ended_at']) ? Carbon::parse($trackingData['ended_at'])->toDateTimeString() : null,
-                    ]
-                );
-                $MondayTimeTracking->touch();
-            }
-            $this->info("Successfully updated board '{$board->name}' ({$board->id})" . PHP_EOL . PHP_EOL);
-        }
+                    // Fetch time tracking data for this board
+                    $items = $this->mondayService->getTimeTrackingItems($board->id);
+
+                    if (empty($items)) {
+                        $this->warn("No time tracking data found for board '{$board->name}' ({$board->id})");
+                    } else {
+                        $this->info("Found " . count($items) . " time tracking items for board '{$board->name}' ({$board->id})");
+                    }
+
+                    foreach ($items as $trackingData) {
+                        $MondayTimeTracking = MondayTimeTracking::updateOrCreate(
+                            ['id' => $trackingData['id']],
+                            [
+                                'item_id' => $trackingData['item_id'],
+                                'user_id' => $trackingData['started_user_id'],
+                                'started_at' => Carbon::parse($trackingData['started_at'])->toDateTimeString(),
+                                'ended_at' => !empty($trackingData['ended_at']) ? Carbon::parse($trackingData['ended_at'])->toDateTimeString() : null,
+                            ]
+                        );
+                        $MondayTimeTracking->touch();
+                    }
+                    $this->info("Successfully updated board '{$board->name}' ({$board->id})" . PHP_EOL . PHP_EOL);
+                }*/
         $totalTime = round(microtime(true) - $startTime, 2);
 
-        $this->info('Monday synchronization complete in ' . $totalTime . ' seconds.');
+        $this->info('Monday synchronization complete in '.$totalTime.' seconds.');
         SyncStatus::recordSync('monday-boards'); // Record sync time
     }
 }

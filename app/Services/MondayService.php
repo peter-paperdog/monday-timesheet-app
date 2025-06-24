@@ -111,11 +111,70 @@ class MondayService
      *
      * @return array The array of board objects.
      */
+    public function getBoardsFromNewStructure()
+    {
+        $query = <<<'GRAPHQL'
+    query {
+      boards(limit: 999, workspace_ids: 9147845, order_by: used_at){
+            id
+            name
+            type
+            board_folder_id
+      }
+    }
+    GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+
+        return $response['data']['boards'];
+    }
+
+    /**
+     * Fetches the list of boards from the Monday.com API.
+     *
+     * @return array The array of board objects.
+     */
     public function getAssignments()
     {
         $query = <<<'GRAPHQL'
     query {
         boards (limit:500, workspace_ids: 5096840){
+            items_page(limit: 300) {
+                items {
+                    id
+                    column_values {
+                        ... on PeopleValue {
+                        persons_and_teams{
+                            id
+                        }
+                        }
+                        ... on StatusValue {
+                            is_done
+                        }
+                    }
+                }
+            }
+        }
+    }
+    GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+
+        return $response['data']['boards'];
+    }
+
+    /**
+     * Fetches the list of boards from the Monday.com API.
+     *
+     * @return array The array of board objects.
+     */
+    public function getAssignmentsFromNewStructure()
+    {
+        $query = <<<'GRAPHQL'
+    query {
+        boards (limit:500, workspace_ids: 9147845){
             items_page(limit: 300) {
                 items {
                     id
@@ -266,9 +325,9 @@ class MondayService
                 $columnValues['Time Spent'] = '0:0:0';
             }
 
-            if (isset($columnValues['Time Spent'])){
+            if (isset($columnValues['Time Spent'])) {
                 list($hours, $minutes, $seconds) = explode(':', $columnValues['Time Spent']);
-                $hoursDecimal = (int)$hours + ((int)$minutes / 60) + ((int)$seconds / 3600);
+                $hoursDecimal = (int) $hours + ((int) $minutes / 60) + ((int) $seconds / 3600);
                 $hoursDecimal = round($hoursDecimal, 2); // opcionálisan kerekítjük
                 $columnValues['Cost'] = $hoursDecimal * 45;
             }
@@ -278,7 +337,7 @@ class MondayService
 
         $return->data = $grouped;
 
-        return  $return;
+        return $return;
     }
 
     /**
@@ -347,7 +406,7 @@ class MondayService
             $grouped[] = $columnValues;
         }
 
-        return  $grouped;
+        return $grouped;
     }
 
 
@@ -664,6 +723,24 @@ GRAPHQL;
         return $response['data']['folders'][0]['name'];
     }
 
+    public function getFolderParentId(string $folderId)
+    {
+        $query = <<<GRAPHQL
+    query {
+      folders (ids:"$folderId"){
+        parent {
+          id
+        }
+      }
+    }
+GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+
+        return is_null($response['data']['folders'][0]['parent']) ? null : $response['data']['folders'][0]['parent']['id'];
+    }
+
 
     /**
      * Fetches the details of a specific board
@@ -709,7 +786,7 @@ GRAPHQL;
     {
         $statusMap = [
             'To Be Invoiced' => 3,
-            'Invoiced'       => 4,
+            'Invoiced' => 4,
         ];
 
         if (!isset($statusMap[$status])) {

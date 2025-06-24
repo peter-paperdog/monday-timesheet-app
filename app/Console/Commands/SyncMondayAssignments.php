@@ -36,7 +36,7 @@ class SyncMondayAssignments extends Command
         $this->info("Fetching assignments from Monday.com...");
 
         // Fetch tasks with assigned users where `is_done === false`
-        $assignments = $this->mondayService->getAssignments();
+        $assignments = $this->mondayService->getAssignmentsFromNewStructure();
 
         $syncedAssignments = [];
 
