@@ -209,7 +209,7 @@
                                 @endif
 
                                 <tr class="bg-gray-300 dark:bg-gray-700 font-bold text-lg">
-                                    <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">Daily Total:
+                                    <td class="border border-gray-300 px-4 py-2 text-right" colspan="3">Daily Total:
                                     </td>
                                     <td class="border border-gray-300 px-4 py-2 text-center">
                                         {{ $dailyTotal > 0 ? floor($dailyTotal / 60) . 'h ' . ($dailyTotal % 60) . 'm' : '-' }}
@@ -222,7 +222,7 @@
                             @endforeach
 
                             <tr class="font-bold text-xl">
-                                <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">Weekly Total:</td>
+                                <td class="border border-gray-300 px-4 py-2 text-right" colspan="3">Weekly Total:</td>
                                 <td class="border border-gray-300 px-4 py-2 text-center">
                                     {{ floor($weeklyTotal / 60) }}h {{ $weeklyTotal % 60 }}m
                                 </td>
