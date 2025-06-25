@@ -178,7 +178,7 @@
                                             @endforeach
 
                                             <tr class="bg-gray-100 dark:bg-gray-700 font-semibold">
-                                                <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">
+                                                <td class="border border-gray-300 px-4 py-2 text-right" colspan="3">
                                                     Project Total:
                                                 </td>
                                                 <td class="border border-gray-300 px-4 py-2 text-center">
@@ -189,7 +189,7 @@
 
                                         @if ($boardCount > 1)
                                             <tr class="bg-gray-200 dark:bg-gray-800 font-bold">
-                                                <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">
+                                                <td class="border border-gray-300 px-4 py-2 text-right" colspan="3">
                                                     Client Total:
                                                 </td>
                                                 <td class="border border-gray-300 px-4 py-2 text-center">
@@ -201,7 +201,7 @@
                                 @else
                                     @if (!$date->isWeekend())
                                         <tr>
-                                            <td class="border border-gray-300 px-4 py-2 text-center" colspan="5">
+                                            <td class="border border-gray-300 px-4 py-2 text-center" colspan="4">
                                                 No entries for this day.
                                             </td>
                                         </tr>
