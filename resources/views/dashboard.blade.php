@@ -62,8 +62,8 @@
                                 @if(request()->query('recordtime') === 'true' && auth()->user()->admin)
                                     <th class="border border-gray-300 px-4 py-2 text-left w-10">Select</th>
                                 @endif
-                                <th class="border border-gray-300 px-4 py-2 text-left">Board</th>
-                                <th class="border border-gray-300 px-4 py-2 text-left">Group</th>
+                                <th class="border border-gray-300 px-4 py-2 text-left">Client</th>
+                                <th class="border border-gray-300 px-4 py-2 text-left">Project</th>
                                 <th class="border border-gray-300 px-4 py-2 text-left">Task</th>
                             </tr>
                             </thead>

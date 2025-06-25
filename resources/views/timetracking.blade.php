@@ -52,7 +52,7 @@
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Board</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Task</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Start</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">End</th>

@@ -82,9 +82,8 @@
                         <table class="w-full border-collapse border border-gray-300 mt-4">
                             <thead>
                             <tr class="bg-gray-100 dark:bg-gray-700">
-                                <th class="border border-gray-300 px-4 py-2 text-left">Day</th>
-                                <th class="border border-gray-300 px-4 py-2 text-left">Board</th>
-                                <th class="border border-gray-300 px-4 py-2 text-left">Group</th>
+                                <th class="border border-gray-300 px-4 py-2 text-left">Client</th>
+                                <th class="border border-gray-300 px-4 py-2 text-left">Project</th>
                                 <th class="border border-gray-300 px-4 py-2 text-left">Task</th>
                                 <th class="border border-gray-300 px-4 py-2 text-center">Total Time</th>
                             </tr>
@@ -149,7 +148,6 @@
                                                     $boardTotal += $taskTotal;
                                                 @endphp
                                                 <tr>
-                                                    <td class="border border-gray-300 px-4 py-2"></td>
                                                     <td class="border border-gray-300 px-4 py-2">
                                                         @if ($boardName !== $previousBoard)
                                                             <a href="https://paperdog-team.monday.com/boards/{{$entries->first()->item->board->id}}"
@@ -162,7 +160,7 @@
                                                     </td>
                                                     <td class="border border-gray-300 px-4 py-2">
                                                         @if ($groupName !== $previousGroup)
-                                                            {{ $groupName ?? 'No Group' }}
+                                                            {{ $groupName ?? 'No Project' }}
                                                             @php $previousGroup = $groupName; @endphp
                                                         @endif
                                                     </td>
@@ -181,7 +179,7 @@
 
                                             <tr class="bg-gray-100 dark:bg-gray-700 font-semibold">
                                                 <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">
-                                                    Group Total:
+                                                    Project Total:
                                                 </td>
                                                 <td class="border border-gray-300 px-4 py-2 text-center">
                                                     {{ floor($groupTotal / 60) }}h {{ $groupTotal % 60 }}m
@@ -192,7 +190,7 @@
                                         @if ($boardCount > 1)
                                             <tr class="bg-gray-200 dark:bg-gray-800 font-bold">
                                                 <td class="border border-gray-300 px-4 py-2 text-right" colspan="4">
-                                                    Board Total:
+                                                    Client Total:
                                                 </td>
                                                 <td class="border border-gray-300 px-4 py-2 text-center">
                                                     {{ floor($boardTotal / 60) }}h {{ $boardTotal % 60 }}m

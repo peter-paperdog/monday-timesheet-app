@@ -55,11 +55,11 @@
                     </table>
 
 
-                    <h1 class="text-xl mt-6">Total time spent on each board</h1>
+                    <h1 class="text-xl mt-6">Total time spent on each project</h1>
                     <table class="w-full border-collapse border border-gray-300 mt-4">
                         <thead>
                         <tr class="bg-gray-100 dark:bg-gray-700">
-                            <th class="border border-gray-300 px-4 py-2 text-left">Board</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Project</th>
                             <th class="border border-gray-300 px-4 py-2 text-center">Total Time</th>
                         </tr>
                         </thead>
@@ -67,7 +67,7 @@
                         @foreach ($boardWeeklyTotals as $boardTotal)
                             <tr>
                                 <td class="border border-gray-300 px-4 py-2">
-                                    {{ $boardTotal->board_name ?? 'Unknown Board' }}
+                                    {{ $boardTotal->board_name ?? 'Unknown Project' }}
                                 </td>
                                 <td class="border border-gray-300 px-4 py-2 text-center">
                                     {{ floor($boardTotal->total_minutes / 60) }}h {{ $boardTotal->total_minutes % 60 }}m
