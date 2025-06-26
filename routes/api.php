@@ -48,4 +48,6 @@ Route::middleware(['auth:sanctum', 'refresh-token'])->group(function () {
 Route::post('/auth/google-login', [GoogleAuthController::class, 'login']);
 //Slack answer processing
 Route::post('slack/office-answer', [OfficeController::class, 'slackAnswer']);
-
+Route::post('/webhook_monday', function (Request $request) {
+    return null;
+});
