@@ -6,5 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class BoardWebhook extends Model
 {
-    protected $fillable = ['board_id', 'webhook_id'];
+    protected $table = 'monday_board_webhooks';
+    protected $fillable = [
+        'board_id',
+        'event',
+        'webhook_id',
+    ];
+
+    public $timestamps = true;
 }
