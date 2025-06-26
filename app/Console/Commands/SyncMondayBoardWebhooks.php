@@ -6,6 +6,7 @@ use App\Models\BoardWebhook;
 use App\Services\MondayService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class SyncMondayBoardWebhooks extends Command
 {
@@ -49,6 +50,7 @@ class SyncMondayBoardWebhooks extends Command
     {
         $start = microtime(true);
         $this->info("Starting board webhook sync...");
+        Log::info("Starting board webhook sync...");
         $existingBoardIds = BoardWebhook::distinct()->pluck('board_id')->toArray();
 
         $workspaceId = env('MONDAY_WORKSPACE_ID');
@@ -125,6 +127,7 @@ class SyncMondayBoardWebhooks extends Command
 
         $duration = round(microtime(true) - $start, 2);
         $this->info("🔁 Sync completed in {$duration} seconds. Total new webhooks created: $totalCreated");
+        Log::info("🔁 Sync completed in {$duration} seconds. Total new webhooks created: $totalCreated");
         return Command::SUCCESS;
     }
 
