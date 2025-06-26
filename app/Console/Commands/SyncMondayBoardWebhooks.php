@@ -110,8 +110,10 @@ class SyncMondayBoardWebhooks extends Command
                             'webhook_id' => $webhookId,
                         ]);
                         $this->info("✅ Created webhook for '{$event}' on board '{$board['name']}'");
+                        Log::info("✅ Created webhook for '{$event}' on board '{$board['name']}'");
                         $totalCreated++;
                     } else {
+                        Log::warn("❌ Failed to create webhook for '{$event}' on board {$board['id']}");
                         $this->warn("❌ Failed to create webhook for '{$event}' on board {$board['id']}");
                     }
                 }
@@ -128,7 +130,7 @@ class SyncMondayBoardWebhooks extends Command
         $this->info("🔁 Sync completed in {$duration} seconds. Total new webhooks created: $totalCreated");
 
         if ($totalCreated) {
-            $this->info("🔁 Webhook sync completed in {$duration} seconds. Total new webhooks created: $totalCreated");
+            Log::info("🔁 Webhook sync completed in {$duration} seconds. Total new webhooks created: $totalCreated");
         }
 
         return Command::SUCCESS;
