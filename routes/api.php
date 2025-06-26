@@ -48,11 +48,11 @@ Route::middleware(['auth:sanctum', 'refresh-token'])->group(function () {
 Route::post('/auth/google-login', [GoogleAuthController::class, 'login']);
 //Slack answer processing
 Route::post('slack/office-answer', [OfficeController::class, 'slackAnswer']);
-Route::post('/webhook_monday', function (Request $request) {
-    Log::info('Monday webhook received:', $request->all());
+Route::post('/webhook_monday/{event}', function (Request $request, $event) {
+    Log::info("Monday webhook received for event: $event", $request->all());
 
-    // Ha van challenge kulcs, visszaküldjük
     if ($request->has('challenge')) {
         return response()->json(['challenge' => $request->input('challenge')]);
     }
+    return response()->json(['status' => 'ok']);
 });
