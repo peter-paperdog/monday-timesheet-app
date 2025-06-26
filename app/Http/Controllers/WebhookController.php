@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MondayTimeTracking;
+use App\Models\User;
 use App\Services\MondayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -43,8 +44,6 @@ class WebhookController extends Controller
             $trackingItems = $mondayService->getTimeTrackingItemsForItem($eventData['pulseId']);
 
             foreach ($trackingItems as $trackingData) {
-                Log::debug($trackingData);
-                /*
                 MondayTimeTracking::updateOrCreate(
                     ['id' => $trackingData['id']],
                     [
@@ -53,8 +52,12 @@ class WebhookController extends Controller
                         'started_at' => Carbon::parse($trackingData['started_at'])->toDateTimeString(),
                         'ended_at' => !empty($trackingData['ended_at']) ? Carbon::parse($trackingData['ended_at'])->toDateTimeString() : null,
                     ]
-                );*/
+                );
             }
+
+            $userName = User::find($eventData['userId'])?->name ?? 'Unknown';
+
+            Log::info("Time recorded: {$eventData['pulseName']} (id: {$eventData['pulseId']}) User: {$userName} ({$eventData['userId']})");
         }
     }
 }
