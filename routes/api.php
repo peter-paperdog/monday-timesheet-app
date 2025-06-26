@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InvoicingController;
 use App\Http\Controllers\OfficeController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,11 +49,5 @@ Route::middleware(['auth:sanctum', 'refresh-token'])->group(function () {
 Route::post('/auth/google-login', [GoogleAuthController::class, 'login']);
 //Slack answer processing
 Route::post('slack/office-answer', [OfficeController::class, 'slackAnswer']);
-Route::post('/webhook_monday/{event}', function (Request $request, $event) {
-    Log::channel('webhook')->info("Webhook received for event: {$event} \n" . json_encode($request->all(), JSON_PRETTY_PRINT));
 
-    if ($request->has('challenge')) {
-        return response()->json(['challenge' => $request->input('challenge')]);
-    }
-    return response()->json(['status' => 'ok']);
-});
+Route::post('/webhook_monday/{event}', [WebhookController::class, 'handle']);

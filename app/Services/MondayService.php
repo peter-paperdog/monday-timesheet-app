@@ -16,7 +16,7 @@ class MondayService
     /**
      * Makes a request to the Monday.com API with the given GraphQL query.
      *
-     * @param  string  $query  The GraphQL query string.
+     * @param string $query The GraphQL query string.
      * @return array The JSON response from the API.
      */
     private function makeApiRequest(string $query, array $variables = []): array|null
@@ -203,7 +203,7 @@ class MondayService
     /**
      * Fetches the items for the board.
      *
-     * @param  string  $boardId  The ID of the board.
+     * @param string $boardId The ID of the board.
      * @return array The array of items with time tracking data.
      */
     public function getItems(string $boardId): array
@@ -249,7 +249,7 @@ class MondayService
     /**
      * Fetches the items for the board.
      *
-     * @param  string  $boardId  The ID of the board.
+     * @param string $boardId The ID of the board.
      * @return \stdClass The array of items with time tracking data.
      */
     public function getInvoiceItems(string $boardId): \stdClass
@@ -327,7 +327,7 @@ class MondayService
 
             if (isset($columnValues['Time Spent'])) {
                 list($hours, $minutes, $seconds) = explode(':', $columnValues['Time Spent']);
-                $hoursDecimal = (int) $hours + ((int) $minutes / 60) + ((int) $seconds / 3600);
+                $hoursDecimal = (int)$hours + ((int)$minutes / 60) + ((int)$seconds / 3600);
                 $hoursDecimal = round($hoursDecimal, 2); // opcionálisan kerekítjük
                 $columnValues['Cost'] = $hoursDecimal * 45;
             }
@@ -343,7 +343,7 @@ class MondayService
     /**
      * Fetches the items for the board.
      *
-     * @param  string  $boardId  The ID of the board.
+     * @param string $boardId The ID of the board.
      * @return array The array of items with time tracking data.
      */
     public function getInvoiceContacts(): array
@@ -413,7 +413,7 @@ class MondayService
     /**
      * Fetches the groups for the board.
      *
-     * @param  string | array  $itemId  The ID(s) of the item(s).
+     * @param string | array $itemId The ID(s) of the item(s).
      * @return array The array of TimeTrackingValue columns.
      */
     public function getTimeTrackingColumns(array|string $itemIds)
@@ -446,11 +446,11 @@ GRAPHQL;
     /**
      * Updates the time tracking data for a specific item on a board.
      *
-     * @param  string  $boardId  The ID of the board.
-     * @param  string  $itemId  The ID of the item to update.
-     * @param  string  $columnId  The ID of the column containing the time tracking data.
-     * @param  int  $startTimestamp  The starting timestamp for the time tracking entry.
-     * @param  int  $endTimestamp  The ending timestamp for the time tracking entry.
+     * @param string $boardId The ID of the board.
+     * @param string $itemId The ID of the item to update.
+     * @param string $columnId The ID of the column containing the time tracking data.
+     * @param int $startTimestamp The starting timestamp for the time tracking entry.
+     * @param int $endTimestamp The ending timestamp for the time tracking entry.
      * @return array The result of the API request to update the time tracking data.
      */
     public function updateTimeTracking($boardId, $itemId, $columnId, $startTimestamp, $endTimestamp)
@@ -485,7 +485,7 @@ GRAPHQL;
     /**
      * Fetches the groups for the board.
      *
-     * @param  string  $boardId  The ID of the board.
+     * @param string $boardId The ID of the board.
      * @return array The array of groups.
      */
     public function getGroups(string $boardId)
@@ -507,10 +507,61 @@ GRAPHQL;
         return $response['data']['boards'][0]['groups'];
     }
 
+
+    /**
+     * Fetches the time tracking data for a specific item.
+     *
+     * @param string $itemId The ID of the item.
+     * @return array The array of items with time tracking data.
+     */
+    public function getTimeTrackingItemsForItem($itemId)
+    {
+        $query = <<<GRAPHQL
+    {
+        items(ids: [$itemId]) {
+            id
+            column_values {
+                ... on TimeTrackingValue {
+                    history {
+                        id
+                        started_user_id
+                        started_at
+                        ended_at
+                    }
+                }
+            }
+        }
+    }
+    GRAPHQL;
+
+        $response = $this->makeApiRequest($query);
+        $item = $response['data']['items'][0] ?? null;
+
+        if (!$item) {
+            return [];
+        }
+
+        foreach ($item['column_values'] as $columnValue) {
+            if (!empty($columnValue) && isset($columnValue['history'])) {
+                foreach ($columnValue['history'] as $history) {
+                    $results[] = [
+                        'item_id' => intval($item['id']),
+                        'id' => intval($history['id']),
+                        'started_user_id' => intval($history['started_user_id']),
+                        'started_at' => $history['started_at'],
+                        'ended_at' => $history['ended_at'],
+                    ];
+                }
+            }
+        }
+
+        return $results;
+    }
+
     /**
      * Fetches the time tracking data for the board.
      *
-     * @param  string  $boardId  The ID of the board.
+     * @param string $boardId The ID of the board.
      * @return array The array of items with time tracking data.
      */
     public function getTimeTrackingItems(string $boardId): array
@@ -575,7 +626,7 @@ GRAPHQL;
     /**
      * Fetches the items for the board.
      *
-     * @param  string  $boardId  The ID of the board.
+     * @param string $boardId The ID of the board.
      * @return array The array of items with time tracking data.
      */
     public function getContactItems(string $boardId)
@@ -704,7 +755,7 @@ GRAPHQL;
     /**
      * Fetches the folders name
      *
-     * @param  string  $folderId  The ID of the Folder.
+     * @param string $folderId The ID of the Folder.
      * @return string
      */
     public function getFoldername(string $folderId)
