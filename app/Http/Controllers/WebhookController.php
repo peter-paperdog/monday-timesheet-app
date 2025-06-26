@@ -41,7 +41,17 @@ class WebhookController extends Controller
             /** @var \App\Services\MondayService $mondayService */
             $mondayService = app(MondayService::class);
 
-            $trackingItems = $mondayService->getTimeTrackingItemsForItem($eventData['pulseId']);
+            $itemId = $eventData['pulseId'];
+            $trackingItems = $mondayService->getTimeTrackingItemsForItem($itemId);
+
+            $newIds = array_column($trackingItems, 'id');
+            $existingIds = MondayTimeTracking::where('item_id', $itemId)->pluck('id')->toArray();
+            $toDelete = array_diff($existingIds, $newIds);
+
+            if (!empty($toDelete)) {
+                MondayTimeTracking::whereIn('id', $toDelete)->delete();
+                Log::info("Deleted " . count($toDelete) . " outdated time tracking records for item {$itemId}");
+            }
 
             foreach ($trackingItems as $trackingData) {
                 MondayTimeTracking::updateOrCreate(
@@ -56,8 +66,7 @@ class WebhookController extends Controller
             }
 
             $userName = User::find($eventData['userId'])?->name ?? 'Unknown';
-
-            Log::info("Time recorded: {$eventData['pulseName']} (id: {$eventData['pulseId']}) User: {$userName} ({$eventData['userId']})");
+            Log::info("Time updated: {$eventData['pulseName']} (ID: {$eventData['pulseId']}), by {$userName} ({$eventData['userId']})");
         }
     }
 }
