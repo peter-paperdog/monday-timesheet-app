@@ -49,7 +49,7 @@ Route::post('/auth/google-login', [GoogleAuthController::class, 'login']);
 //Slack answer processing
 Route::post('slack/office-answer', [OfficeController::class, 'slackAnswer']);
 Route::post('/webhook_monday/{event}', function (Request $request, $event) {
-    Log::info("Monday webhook received for event: $event", $request->all());
+    Log::channel('webhook')->info("Webhook received for event: {$event}", $request->all());
 
     if ($request->has('challenge')) {
         return response()->json(['challenge' => $request->input('challenge')]);
