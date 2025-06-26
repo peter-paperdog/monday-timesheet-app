@@ -47,20 +47,24 @@ class SyncMondayBoardWebhooks extends Command
      */
     public function handle()
     {
-        $this->info("Starting webhook sync...");
+        $start = microtime(true);
+        $this->info("Starting board webhook sync...");
+        $existingBoardIds = BoardWebhook::distinct()->pluck('board_id')->toArray();
+
         $workspaceId = env('MONDAY_WORKSPACE_ID');
-        $limit = 10;
+        $limit = 500;
         $page = 1;
+        $totalCreated = 0;
 
         while (true) {
             $query = <<<GRAPHQL
-            query GetBoards(\$workspaceIds: [ID!]!, \$limit: Int!, \$page: Int!) {
-                boards(workspace_ids: \$workspaceIds, limit: \$limit, page: \$page) {
-                    id
-                    name
-                }
+        query GetBoards(\$workspaceIds: [ID!]!, \$limit: Int!, \$page: Int!) {
+            boards(workspace_ids: \$workspaceIds, limit: \$limit, page: \$page) {
+                id
+                name
             }
-            GRAPHQL;
+        }
+        GRAPHQL;
 
             $response = Http::withHeaders([
                 'Authorization' => env('MONDAY_API_TOKEN'),
@@ -73,8 +77,7 @@ class SyncMondayBoardWebhooks extends Command
                 ],
             ]);
 
-            $data = $response->json();
-            $boards = data_get($data, 'data.boards', []);
+            $boards = data_get($response->json(), 'data.boards', []);
 
             if (empty($boards)) {
                 break;
@@ -84,23 +87,31 @@ class SyncMondayBoardWebhooks extends Command
                 if (str_starts_with($board['name'], 'Subitems of')) {
                     continue;
                 }
+                if (in_array($board['id'], $existingBoardIds)) {
+                    continue;
+                }
+
+                // Check if any webhook exists for this board
+                $hasWebhook = BoardWebhook::where('board_id', $board['id'])->exists();
+
+                if ($hasWebhook) {
+                    continue;
+                }
+
+                // No webhook found, create all events
                 foreach ($this->events as $event) {
-                    $exists = BoardWebhook::where('board_id', $board['id'])->where('event', $event)->exists();
+                    $webhookId = $this->createWebhook($board['id'], $event);
 
-                    if (!$exists) {
-                        $webhookId = $this->createWebhook($board['id'], $event);
-
-                        if ($webhookId) {
-                            BoardWebhook::create([
-                                'board_id' => $board['id'],
-                                'event' => $event,
-                                'webhook_id' => $webhookId,
-                            ]);
-
-                            $this->info("Webhook for '{$event}' created on board '{$board['name']}' ({$board['id']})");
-                        } else {
-                            $this->warn("Failed to create webhook for event '{$event}' on board {$board['id']}");
-                        }
+                    if ($webhookId) {
+                        BoardWebhook::create([
+                            'board_id' => $board['id'],
+                            'event' => $event,
+                            'webhook_id' => $webhookId,
+                        ]);
+                        $this->info("✅ Created webhook for '{$event}' on board '{$board['name']}'");
+                        $totalCreated++;
+                    } else {
+                        $this->warn("❌ Failed to create webhook for '{$event}' on board {$board['id']}");
                     }
                 }
             }
@@ -112,7 +123,8 @@ class SyncMondayBoardWebhooks extends Command
             $page++;
         }
 
-        $this->info("All webhooks synchronized.");
+        $duration = round(microtime(true) - $start, 2);
+        $this->info("🔁 Sync completed in {$duration} seconds. Total new webhooks created: $totalCreated");
         return Command::SUCCESS;
     }
 
