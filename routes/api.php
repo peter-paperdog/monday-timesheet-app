@@ -49,5 +49,10 @@ Route::post('/auth/google-login', [GoogleAuthController::class, 'login']);
 //Slack answer processing
 Route::post('slack/office-answer', [OfficeController::class, 'slackAnswer']);
 Route::post('/webhook_monday', function (Request $request) {
-    return null;
+    Log::info('Monday webhook received:', $request->all());
+
+    // Ha van challenge kulcs, visszaküldjük
+    if ($request->has('challenge')) {
+        return response()->json(['challenge' => $request->input('challenge')]);
+    }
 });
