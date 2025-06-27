@@ -99,14 +99,14 @@ class SlackService
             'value' => "WFH"
         ];
 
-        $actions[] = [
+        /*$actions[] = [
             'type' => 'button',
             'text' => [
                 'type' => 'plain_text',
                 'text' => "🌞 Friday off"
             ],
             'value' => "Friday off"
-        ];
+        ];*/
 
         $actions[] = [
             'type' => 'button',
