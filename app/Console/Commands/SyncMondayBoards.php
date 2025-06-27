@@ -2,11 +2,13 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Item;
 use App\Models\MondayBoard;
 use App\Models\MondayGroup;
 use App\Models\MondayItem;
 use App\Models\MondayTimeTracking;
 use App\Models\SyncStatus;
+use App\Models\Task;
 use App\Services\MondayService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -118,6 +120,14 @@ class SyncMondayBoards extends Command
                     ]
                 );
                 $MondayItem->touch();
+
+                Task::updateOrCreate(
+                    ['id' => $itemData['id']],
+                    [
+                        'name' => $itemData['name'],
+                        'group_id' => $itemData['name']['group']['id']
+                    ]
+                );
             }
 
             // Fetch time tracking data for this board
