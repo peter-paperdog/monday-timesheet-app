@@ -663,7 +663,7 @@ GRAPHQL;
     {
         $clients = [];
         $projects = [];
-        $folders = [];
+        $boards = [];
 
         $page = 1;
         do {
@@ -734,16 +734,6 @@ GRAPHQL;
             }
             $page++;
         } while (!empty($data));
-
-        // Sort the data by 'name' ascending
-        usort($clients, function ($a, $b) {
-            return strcmp($a->name, $b->name);
-        });
-
-        // Sort the data by 'name' ascending
-        usort($projects, function ($a, $b) {
-            return strcmp($a->name, $b->name);
-        });
 
         $data = new \stdClass();
         $data->clients = $clients;
