@@ -8,9 +8,9 @@ class Project extends Model
 {
     protected $fillable = ['id', 'name', 'client_id'];
 
-    public function items()
+    public function groups()
     {
-        return $this->hasMany(Item::class);
+        return $this->hasMany(Group::class);
     }
 
     public function client()
