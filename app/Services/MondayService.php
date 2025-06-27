@@ -691,8 +691,12 @@ GRAPHQL;
             });
 
             foreach ($filtered_clients as $item) {
+                //template folders should be ignored
+                if($item['name'] === "1_Reference" || $item['name'] === "2_Admin" ) {
+                    continue;
+                }
                 $client = new \stdClass();
-                $client->id = $item['id'];
+                $client->id = intval($item['id']);
                 $client->name = $item['name'];
                 $clients[$item['id']] = $client;
             }
