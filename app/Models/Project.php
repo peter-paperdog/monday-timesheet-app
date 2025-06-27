@@ -2,17 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
-    use HasFactory;
-
-    protected $fillable = ['monday_id', 'name'];
+    public $timestamps = false;
+    protected $fillable = ['id', 'name', 'client_id'];
 
     public function items()
     {
         return $this->hasMany(Item::class);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
     }
 }

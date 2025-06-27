@@ -6,5 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Client extends Model
 {
-    protected $fillable = ['monday_id', 'name'];
+    public $timestamps = false;
+    protected $fillable = ['id', 'name'];
+
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
 }
