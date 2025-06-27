@@ -488,16 +488,16 @@ GRAPHQL;
      * @param string $boardId The ID of the board.
      * @return array The array of groups.
      */
-    public function getGroups(string $boardId)
+    public function getGroups($boardId)
     {
         $query = <<<GRAPHQL
     query {
-      boards (ids:"$boardId"){
-        groups{
-            id
-            title
-        }
-      }
+          boards (ids:[$boardId] limit: 100 page: 1){
+                groups{
+                    id
+                    title
+                }
+          }
     }
 GRAPHQL;
 
@@ -505,6 +505,32 @@ GRAPHQL;
         $response = $this->makeApiRequest($query);
 
         return $response['data']['boards'][0]['groups'];
+    }
+
+    /**
+     * Fetches the groups for the board.
+     *
+     * @param string $boardId The ID of the board.
+     * @return array The array of groups.
+     */
+    public function getExpenses(string $boardId)
+    {
+        $query = <<<GRAPHQL
+    query {
+      folders (ids:"$boardId"){
+              children{
+                groups{
+                    id
+                    title
+                }
+              }
+      }
+    }
+GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+        return $response['data']['folders'][0]['children'][1]['groups'];
     }
 
 
@@ -692,7 +718,7 @@ GRAPHQL;
 
             foreach ($filtered_clients as $item) {
                 //template folders should be ignored
-                if($item['name'] === "1_Reference" || $item['name'] === "2_Admin" ) {
+                if ($item['name'] === "1_Reference" || $item['name'] === "2_Admin") {
                     continue;
                 }
                 $client = new \stdClass();
@@ -708,7 +734,7 @@ GRAPHQL;
 
             foreach ($filtered_projects as $item) {
                 $project = new \stdClass();
-                $project->id = intval($item['id']);
+                $project->id = intval($item['children'][0]['id']);
                 $project->name = $item['name'];
                 $project->client_id = intval($item['parent']['id']);
                 $projects[$item['id']] = $project;
