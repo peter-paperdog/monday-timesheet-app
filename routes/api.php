@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\GoogleAuthController;
@@ -26,6 +27,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/projects', [ProjectController::class, 'index']);
     Route::get('/projects/{id}', [ProjectController::class, 'show']);
+
+    Route::get('/contacts', [ContactController::class, 'index']);
 
     Route::get('/auth/status', function (Request $request) {
         return response()->json([], 204);
