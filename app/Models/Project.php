@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
-    public $timestamps = false;
     protected $fillable = ['id', 'name', 'client_id'];
 
     public function items()
