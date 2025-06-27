@@ -64,21 +64,3 @@ Route::post('/auth/google-login', [GoogleAuthController::class, 'login']);
 Route::post('slack/office-answer', [OfficeController::class, 'slackAnswer']);
 
 Route::post('/webhook_monday/{event}', [WebhookController::class, 'handle']);
-
-
-Route::get('/dev', function (Request $request) {
-
-    /** @var \App\Services\MondayService $mondayService */
-    $mondayService = app(MondayService::class);
-
-    $project_ids = [];
-    Project::all()->each(function ($project) use ($mondayService) {
-        $project_ids[]=$project->id;
-    });
-
-
-   $groups = $mondayService->getGroups([17515053]);
-
-    var_dump($groups);
-
-});
