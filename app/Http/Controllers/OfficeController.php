@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\UserSchedule;
+use App\Services\GoogleSheetsService;
+use App\Services\SlackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class OfficeController extends Controller
@@ -58,7 +62,7 @@ class OfficeController extends Controller
         return view('office-schedule', compact('structuredData', 'startOfWeek', 'endOfWeek', 'locations'));
     }
 
-    public function slackAnswer(Request $request)
+    public function slackAnswer(Request $request): \Illuminate\Http\JsonResponse
     {
         $payload = json_decode($request->input('payload'), true);
 
