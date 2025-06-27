@@ -663,7 +663,6 @@ GRAPHQL;
     {
         $clients = [];
         $projects = [];
-        $boards = [];
 
         $page = 1;
         do {
@@ -705,9 +704,9 @@ GRAPHQL;
 
             foreach ($filtered_projects as $item) {
                 $project = new \stdClass();
-                $project->id = $item['id'];
+                $project->id = intval($item['id']);
                 $project->name = $item['name'];
-                $project->client_id = $item['parent']['id'];
+                $project->client_id = intval($item['parent']['id']);
                 $projects[$item['id']] = $project;
             }
 
@@ -718,18 +717,9 @@ GRAPHQL;
 
             foreach ($filtered_boards as $item) {
                 foreach ($item['children'] as $child) {
-                    $client_id = $item['parent']['id'];
-                    $project_id = $item['id'];
-                    $board_id = $child['id'];
-
-                    if (!isset($boards[$client_id])) {
-                        $boards[$client_id] = [];
+                    if (str_starts_with($child['name'], '2_Expenses')) {
+                        $projects[$item['id']]->expenses_folder_id = intval($child['id']);
                     }
-
-                    if (!isset($boards[$client_id][$project_id])) {
-                        $boards[$client_id][$project_id] = [];
-                    }
-                    $boards[$client_id][$project_id][] = $board_id;
                 }
             }
             $page++;
@@ -738,7 +728,6 @@ GRAPHQL;
         $data = new \stdClass();
         $data->clients = $clients;
         $data->projects = $projects;
-        $data->boards = $boards;
         return $data;
     }
 
