@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InvoicingController;
@@ -35,6 +36,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/projects/{project}/groups', [GroupController::class, 'index']);
 
     Route::get('/contacts', [ContactController::class, 'index']);
+
+    Route::get('/tasks', [TaskController::class, 'index']);
 
     Route::get('/auth/status', function (Request $request) {
         return response()->json([], 204);
