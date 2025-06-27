@@ -344,18 +344,6 @@ class InvoicingController extends Controller
         }
     }
 
-    public function init(): JsonResponse
-    {
-        $mondayService = new MondayService();
-        $data = $mondayService->getFolders();
-
-        return response()->json([
-            "clients" => $data->clients,
-            "projects" => $data->projects,
-            "boards" => $data->boards
-        ]);
-    }
-
     public function tasks(Request $request): JsonResponse
     {
         $request->validate([
