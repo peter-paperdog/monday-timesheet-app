@@ -125,7 +125,7 @@ class SyncMondayBoards extends Command
                     ['id' => $itemData['id']],
                     [
                         'name' => $itemData['name'],
-                        'group_id' => $itemData['name']['group']['id']
+                        'group_id' => $itemData['group']['id']
                     ]
                 );
             }
