@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InvoicingController;
@@ -19,6 +21,12 @@ Route::options('{any}', function () {
 
 //---protected routes, but do not increase token lifetime---
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/clients', [ClientController::class, 'index']);
+    Route::get('/clients/{id}', [ClientController::class, 'show']);
+
+    Route::get('/projects', [ProjectController::class, 'index']);
+    Route::get('/projects/{id}', [ProjectController::class, 'show']);
+
     Route::get('/auth/status', function (Request $request) {
         return response()->json([], 204);
     });
@@ -33,10 +41,6 @@ Route::middleware(['auth:sanctum', 'refresh-token'])->group(function () {
     });
 
     //return with dropdown inits
-    Route::get('/init', [InvoicingController::class, 'init']);
-
-    Route::get('/contacts', [InvoicingController::class, 'contacts']);
-
     Route::post('/tasks', [InvoicingController::class, 'tasks']);
     Route::post('/invoices', [InvoicingController::class, 'store']);
     Route::get('/invoices', [InvoicingController::class, 'index']);
