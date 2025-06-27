@@ -41,8 +41,11 @@ class SyncMondayGroups extends Command
             $groups = $mondayService->getGroups($project->id);
 
             foreach ($groups as $group) {
+                if ($group['id'] === "topics") {
+                    continue;
+                }
                 Group::updateOrCreate(
-                    ['id' => $project->id . "_" . $group['id']],
+                    ['id' => $group['id']],
                     [
                         'name' => $group['title'],
                         'project_id' => $project->id
