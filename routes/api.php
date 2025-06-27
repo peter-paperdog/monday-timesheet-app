@@ -2,12 +2,15 @@
 
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InvoicingController;
 use App\Http\Controllers\OfficeController;
 use App\Http\Controllers\WebhookController;
+use App\Models\Project;
+use App\Services\MondayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +32,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/projects', [ProjectController::class, 'index']);
     Route::get('/projects/{id}', [ProjectController::class, 'show']);
+    Route::get('/projects/{project}/groups', [GroupController::class, 'index']);
 
     Route::get('/contacts', [ContactController::class, 'index']);
 
@@ -60,3 +64,21 @@ Route::post('/auth/google-login', [GoogleAuthController::class, 'login']);
 Route::post('slack/office-answer', [OfficeController::class, 'slackAnswer']);
 
 Route::post('/webhook_monday/{event}', [WebhookController::class, 'handle']);
+
+
+Route::get('/dev', function (Request $request) {
+
+    /** @var \App\Services\MondayService $mondayService */
+    $mondayService = app(MondayService::class);
+
+    $project_ids = [];
+    Project::all()->each(function ($project) use ($mondayService) {
+        $project_ids[]=$project->id;
+    });
+
+
+   $groups = $mondayService->getGroups([17515053]);
+
+    var_dump($groups);
+
+});
