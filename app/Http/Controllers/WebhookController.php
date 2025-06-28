@@ -16,6 +16,7 @@ class WebhookController extends Controller
     {
 
     }
+
     private function webhookChallengeResponse(Request $request)
     {
         Log::channel('webhook')->info(__METHOD__);
@@ -49,9 +50,9 @@ class WebhookController extends Controller
         $projects = $board['groups'][0]['items_page']['items'];
         Log::channel('webhook')->info(var_export($projects, true));
 
-        foreach($projects as $project){
-            Log::channel('webhook')->info(var_export($project, true));
-        }
+        $project_nr = sizeof($projects) + 1;
+
+        Log::channel('webhook')->info("New project number will be: {$project_nr}.");
 
         return $this->webhookChallengeResponse($request);
     }
