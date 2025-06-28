@@ -807,33 +807,38 @@ GRAPHQL;
      *
      * @return array The array of the board objects.
      */
-    public function getBoard(string $boardId)
+    public function getProjectBoard()
     {
-        $query = <<<GRAPHQL
-    query {
-      boards(ids:"$boardId"){
-          id
-          name
-          groups{
-            title
-            items_page(limit:500){
-                items{
-                    name
-                }
+        $allItems = [];
+        $cursor = null;
+
+        do {
+            $cursorPart = $cursor ? "cursor: \"$cursor\"" : '';
+
+            $query = <<<GRAPHQL
+        query {
+            boards(ids: "9370542454") {
+                    items_page(limit:500 cursor: null){
+                        items{
+                            id
+                            name
+                        }
+                        cursor
+                  }
             }
-          }
-      }
-    }
+        }
 GRAPHQL;
 
-        // Define the variables to pass into the query
-        try {
             $response = $this->makeApiRequest($query);
-        } catch (\Exception $exception) {
-            die($exception->getMessage());
-        }
+            $page = $response['data']['boards'][0]['items_page'];
 
-        return $response['data']['boards'][0];
+            $items = $page['items'] ?? [];
+            $allItems = array_merge($allItems, $items);
+            $cursor = $page['cursor'] ?? null;
+
+        } while ($cursor);
+
+        return $allItems;
     }
 
 
