@@ -37,6 +37,7 @@ class WebhookController extends Controller
 
     private function handleProjectNumberBoard(Request $request, string $eventData)
     {
+        Log::channel('webhook')->info(__METHOD__);
         $eventData->boardId;
         $eventData->pulseId;
         $eventData->pulseName;
