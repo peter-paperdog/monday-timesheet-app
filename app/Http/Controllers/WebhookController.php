@@ -47,10 +47,12 @@ class WebhookController extends Controller
         Log::channel('webhook')->info("New project created: {$eventData['pulseName']}.");
 
         $projects = $this->mondayService->getProjectBoard();
-
         $project_nr = sizeof($projects);
 
         Log::channel('webhook')->info("New project number will be: {$project_nr}.");
+
+        $response = $this->mondayService->setProjectNumber($eventData['pulseId'], $project_nr);
+        Log::channel('webhook')->info(var_export($response, true));
 
         return $this->webhookChallengeResponse($request);
     }
