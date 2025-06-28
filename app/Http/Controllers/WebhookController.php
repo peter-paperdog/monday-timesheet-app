@@ -35,9 +35,11 @@ class WebhookController extends Controller
         $this->webhookChallengeResponse();
     }
 
-    private function handleProjectNumberBoard(Request $request, string $eventData)
+    private function handleProjectNumberBoard(Request $request)
     {
         Log::channel('webhook')->info(__METHOD__);
+        $eventData = $request->input('event');
+        Log::channel('webhook')->info(var_export($eventData,true));
         $eventData->boardId;
         $eventData->pulseId;
         $eventData->pulseName;
@@ -51,7 +53,7 @@ class WebhookController extends Controller
         $eventData = $request->input('event');
 
         if ($eventData->boardId === 9370542454) {
-            $this->handleProjectNumberBoard($eventData);
+            $this->handleProjectNumberBoard();
         }
     }
 
