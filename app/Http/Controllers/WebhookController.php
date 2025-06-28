@@ -27,12 +27,12 @@ class WebhookController extends Controller
 
         if (method_exists($this, $method)) {
             $this->{$method}($request);
-            Log::channel('webhook')->info("Calling " . $this->{$method});
+            Log::channel('webhook')->info("Calling handler method: {$method}");
         } else {
             Log::channel('webhook')->warning("No {$this->{$method}} handler found for event: {$event}");
         }
 
-        $this->webhookChallengeResponse();
+        return $this->webhookChallengeResponse($request);
     }
 
     private function handleProjectNumberBoard(Request $request)
@@ -43,7 +43,7 @@ class WebhookController extends Controller
         $eventData->pulseId;
         $eventData->pulseName;
         Log::channel('webhook')->info("New project created: {$eventData['pulseName']}.");
-        $this->webhookChallengeResponse();
+        return $this->webhookChallengeResponse($request);
     }
 
     private function handleCreateItem(Request $request)
@@ -52,7 +52,7 @@ class WebhookController extends Controller
         $eventData = $request->input('event');
 
         if ($eventData['boardId'] === 9370542454) {
-            $this->handleProjectNumberBoard();
+            $this->handleProjectNumberBoard($request);
         }
     }
 
