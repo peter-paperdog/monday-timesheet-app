@@ -43,7 +43,6 @@ class WebhookController extends Controller
         $eventData->pulseId;
         $eventData->pulseName;
         Log::channel('webhook')->info("New project created: {$eventData['pulseName']}.");
-        return $this->webhookChallengeResponse($request);
     }
 
     private function handleCreateItem(Request $request)
