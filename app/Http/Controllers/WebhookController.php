@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
+
+    public function __construct(private MondayService $mondayService)
+    {
+
+    }
     private function webhookChallengeResponse(Request $request)
     {
         Log::channel('webhook')->info(__METHOD__);
@@ -39,6 +44,9 @@ class WebhookController extends Controller
         Log::channel('webhook')->info(__METHOD__);
         $eventData = $request->input('event');
         Log::channel('webhook')->info("New project created: {$eventData['pulseName']}.");
+
+        $board = $this->mondayService->getBoard();
+        Log::channel('webhook')->info(var_export($board, true));
 
         return $this->webhookChallengeResponse($request);
     }
