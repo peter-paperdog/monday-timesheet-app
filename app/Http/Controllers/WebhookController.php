@@ -11,27 +11,32 @@ use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
-    private function webhookChallengeResponse(Request $request){
+    private function webhookChallengeResponse(Request $request)
+    {
+        Log::channel('webhook')->info(__METHOD__);
         if ($request->has('challenge')) {
             return response()->json(['challenge' => $request->input('challenge')]);
         }
         return response()->json(['status' => 'no challenge'], 204);
     }
+
     public function handle(Request $request, string $event)
     {
         Log::channel('webhook')->info("Webhook received for event: {$event} \n" . json_encode($request->all(), JSON_PRETTY_PRINT));
-
         $method = 'handle' . str_replace(' ', '', ucwords(str_replace('_', ' ', $event)));
 
         if (method_exists($this, $method)) {
             $this->{$method}($request);
+            Log::channel('webhook')->info("Calling " . $this->{$method}($request));
         } else {
             Log::channel('webhook')->warning("No handler found for event: {$event}");
         }
 
         $this->webhookChallengeResponse();
     }
-    private function handleProjectNumberBoard(Request $request, string $eventData){
+
+    private function handleProjectNumberBoard(Request $request, string $eventData)
+    {
         $eventData->boardId;
         $eventData->pulseId;
         $eventData->pulseName;
@@ -39,16 +44,19 @@ class WebhookController extends Controller
         $this->webhookChallengeResponse();
     }
 
-    private function handleCreateItem(Request $request){
+    private function handleCreateItem(Request $request)
+    {
+        Log::channel('webhook')->info(__METHOD__);
         $eventData = $request->input('event');
 
-        if($eventData->boardId === 9370542454){
+        if ($eventData->boardId === 9370542454) {
             $this->handleProjectNumberBoard($eventData);
         }
     }
 
     private function handleChangeColumnValue(Request $request)
     {
+        Log::channel('webhook')->info(__METHOD__);
         $eventData = $request->input('event');
 
         if (
