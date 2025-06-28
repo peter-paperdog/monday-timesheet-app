@@ -26,7 +26,7 @@ class WebhookController extends Controller
         if (method_exists($this, $method)) {
             $this->{$method}($request);
         } else {
-            Log::warning("No handler found for event: {$event}");
+            Log::channel('webhook')->warning("No handler found for event: {$event}");
         }
 
         $this->webhookChallengeResponse();
@@ -35,7 +35,7 @@ class WebhookController extends Controller
         $eventData->boardId;
         $eventData->pulseId;
         $eventData->pulseName;
-        Log::info("New project created: {$eventData->pulseName}.");
+        Log::channel('webhook')->info("New project created: {$eventData->pulseName}.");
         $this->webhookChallengeResponse();
     }
 
