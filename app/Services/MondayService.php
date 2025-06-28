@@ -801,6 +801,22 @@ GRAPHQL;
         return is_null($response['data']['folders'][0]['parent']) ? null : $response['data']['folders'][0]['parent']['id'];
     }
 
+    /**
+     * @param $item_id
+     * @param $projectNr
+     * @return array|null
+     */
+    public function setProjectNumber($item_id, $projectNr)
+    {
+        $query = <<<GRAPHQL
+        mutation {
+            change_column_value (board_id: 9370542454, item_id: $item_id, column_id: "numeric_mkrwataq", value: "$projectNr") {
+             id
+            }
+        }
+GRAPHQL;
+        return $this->makeApiRequest($query);
+    }
 
     /**
      * Fetches the details of a specific board
