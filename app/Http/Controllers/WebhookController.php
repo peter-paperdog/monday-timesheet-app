@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
+    private function webhookChallengeResponse(Request $request){
+        if ($request->has('challenge')) {
+            return response()->json(['challenge' => $request->input('challenge')]);
+        }
+        return response()->json(['status' => 'no challenge'], 204);
+    }
     public function handle(Request $request, string $event)
     {
         Log::channel('webhook')->info("Webhook received for event: {$event} \n" . json_encode($request->all(), JSON_PRETTY_PRINT));
@@ -23,10 +29,22 @@ class WebhookController extends Controller
             Log::warning("No handler found for event: {$event}");
         }
 
-        if ($request->has('challenge')) {
-            return response()->json(['challenge' => $request->input('challenge')]);
+        $this->webhookChallengeResponse();
+    }
+    private function handleProjectNumberBoard(Request $request, string $eventData){
+        $eventData->boardId;
+        $eventData->pulseId;
+        $eventData->pulseName;
+        Log::info("New project created: {$eventData->pulseName}.");
+        $this->webhookChallengeResponse();
+    }
+
+    private function handleCreateItem(Request $request){
+        $eventData = $request->input('event');
+
+        if($eventData->boardId === 9370542454){
+            $this->handleProjectNumberBoard($eventData);
         }
-        return response()->json(['status' => 'no challenge'], 204);
     }
 
     private function handleChangeColumnValue(Request $request)
