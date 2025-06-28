@@ -47,11 +47,9 @@ class WebhookController extends Controller
         Log::channel('webhook')->info("New project created: {$eventData['pulseName']}.");
 
         $board = $this->mondayService->getBoard($eventData['boardId']);
-        Log::channel('webhook')->info(var_export($board, true));
         $projects = $board['groups'][0]['items_page']['items'];
-        Log::channel('webhook')->info(var_export($projects, true));
 
-        $project_nr = sizeof($projects) + 1;
+        $project_nr = sizeof($projects);
 
         Log::channel('webhook')->info("New project number will be: {$project_nr}.");
 
