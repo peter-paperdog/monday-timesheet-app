@@ -27,11 +27,10 @@ class WebhookController extends Controller
 
         if (method_exists($this, $method)) {
             Log::channel('webhook')->info("Calling handler method: {$method}");
-            $this->{$method}($request);
-        } else {
-            Log::channel('webhook')->warning("No handler method found for event: {$event}");
+            return $this->{$method}($request);
         }
 
+        Log::channel('webhook')->warning("No handler method found for event: {$event}");
         return $this->webhookChallengeResponse($request);
     }
 
@@ -39,10 +38,9 @@ class WebhookController extends Controller
     {
         Log::channel('webhook')->info(__METHOD__);
         $eventData = $request->input('event');
-        $eventData->boardId;
-        $eventData->pulseId;
-        $eventData->pulseName;
         Log::channel('webhook')->info("New project created: {$eventData['pulseName']}.");
+
+        return $this->webhookChallengeResponse($request);
     }
 
     private function handleCreateItem(Request $request)
@@ -51,8 +49,10 @@ class WebhookController extends Controller
         $eventData = $request->input('event');
 
         if ($eventData['boardId'] === 9370542454) {
-            $this->handleProjectNumberBoard($request);
+            return $this->handleProjectNumberBoard($request);
         }
+
+        return $this->webhookChallengeResponse($request);
     }
 
     private function handleChangeColumnValue(Request $request)
@@ -95,5 +95,7 @@ class WebhookController extends Controller
             $userName = User::find($eventData['userId'])?->name ?? 'Unknown';
             Log::info("Time updated: {$eventData['pulseName']} (ID: {$eventData['pulseId']}), by {$userName} ({$eventData['userId']})");
         }
+
+        return $this->webhookChallengeResponse($request);
     }
 }
