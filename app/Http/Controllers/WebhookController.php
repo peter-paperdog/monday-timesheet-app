@@ -26,10 +26,10 @@ class WebhookController extends Controller
         $method = 'handle' . str_replace(' ', '', ucwords(str_replace('_', ' ', $event)));
 
         if (method_exists($this, $method)) {
-            $this->{$method}($request);
             Log::channel('webhook')->info("Calling handler method: {$method}");
+            $this->{$method}($request);
         } else {
-            Log::channel('webhook')->warning("No {$this->{$method}} handler found for event: {$event}");
+            Log::channel('webhook')->warning("No handler method found for event: {$event}");
         }
 
         return $this->webhookChallengeResponse($request);
