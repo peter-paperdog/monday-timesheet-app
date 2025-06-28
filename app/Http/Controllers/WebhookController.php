@@ -39,11 +39,10 @@ class WebhookController extends Controller
     {
         Log::channel('webhook')->info(__METHOD__);
         $eventData = $request->input('event');
-        Log::channel('webhook')->info(var_export($eventData,true));
         $eventData->boardId;
         $eventData->pulseId;
         $eventData->pulseName;
-        Log::channel('webhook')->info("New project created: {$eventData->pulseName}.");
+        Log::channel('webhook')->info("New project created: {$eventData['pulseName']}.");
         $this->webhookChallengeResponse();
     }
 
@@ -52,7 +51,7 @@ class WebhookController extends Controller
         Log::channel('webhook')->info(__METHOD__);
         $eventData = $request->input('event');
 
-        if ($eventData->boardId === 9370542454) {
+        if ($eventData['boardId'] === 9370542454) {
             $this->handleProjectNumberBoard();
         }
     }
