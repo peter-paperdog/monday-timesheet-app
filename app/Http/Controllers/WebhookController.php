@@ -78,9 +78,6 @@ class WebhookController extends Controller
 
         $projectName = $mondayService->getProjectBoardLastItemProjectName();
 
-
-        $mondayService->updateFolder(17620590, $projectName);
-
         $found = false;
         $attempts = 0;
         $maxAttempts = 30;
@@ -115,8 +112,8 @@ class WebhookController extends Controller
                 Log::channel('webhook')->info("Board not found on attempt {$attempts}, sleeping 1 second...");
                 sleep(1);
             } else {
-                Log::channel('webhook')->info("Rename folder to '{$newName}' (folder_id: {$folderId})");
-                $mondayService->updateFolder($folderId, $newName);
+                Log::channel('webhook')->info("Rename folder to '{$projectName}' (folder_id: {$folderId})");
+                $mondayService->updateFolder($folderId, $projectName);
                 Log::channel('webhook')->info("DONE ✅");
             }
         }
