@@ -89,9 +89,16 @@ class WebhookController extends Controller
 
             $boards = $mondayService->getBoardsFromNewStructure();
 
+            $board_folder_ids = [];
+
             foreach ($boards as $board) {
                 $originalName = $board['name'];
+                $board_folder_ids[] = $board['board_folder_id'];
                 $newName = $originalName;
+
+                if (Str::contains($newName, 'PDYY_XXXX')) {
+                    $newName = str_replace('PDYY_XXXX', $lastProjectName, $newName);
+                }
 
                 if (Str::contains($newName, '[Project number & name]')) {
                     $newName = str_replace('[Project number & name]', $lastProjectName, $newName);
@@ -100,9 +107,11 @@ class WebhookController extends Controller
                 if ($newName !== $originalName) {
                     $mondayService->setBoardName($board['id'], $newName);
                     Log::channel('webhook')->info("☑️ Found board on attempt {$attempts}. Renamed '{$originalName}' to '{$newName}' (board_id: {$board['id']})");
-
-                    $mondayService->updateFolder($board['board_folder_id'], $lastProjectName);
                     $found = true;
+
+                    $board_folder_id = $board['board_folder_id'];
+                    Log::channel('webhook')->info("Rename folder to '{$newName}' (folder_id: {$board_folder_id})");
+                    $mondayService->updateFolder($board_folder_id, $newName);
                 }
             }
 
