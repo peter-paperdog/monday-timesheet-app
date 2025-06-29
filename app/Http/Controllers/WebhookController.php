@@ -78,15 +78,26 @@ class WebhookController extends Controller
 
         $last_project_name = $mondayService->getProjectBoardLastItemProjectName();
 
-        $boards = $mondayService->getBoardsFromNewStructure();
+        $found = false;
+        $attempts = 0;
+        $maxAttempts = 30;
+        while (!$found && $attempts < $maxAttempts) {
+            $boards = $mondayService->getBoardsFromNewStructure();
 
-        foreach ($boards as $board) {
-            if (Str::contains($board['name'], '[Project number & name]')) {
-                $new_name = str_replace('[Project number & name]', $last_project_name, $board['name']);
-
-                $response = $mondayService->setBoardName($board['id'], $new_name);
-                Log::channel('webhook')->info("Board {$board['name']} updated to " . $new_name);
+            foreach ($boards as $board) {
+                if (Str::contains($board['name'], '[Project number & name]')) {
+                    $new_name = str_replace('[Project number & name]', $last_project_name, $board['name']);
+                    $mondayService->setBoardName($board['id'], $new_name);
+                    Log::channel('webhook')->info("Board {$board['name']} updated to " . $new_name);
+                }
             }
+            if (!$found) {
+                $attempts++;
+                sleep(1); // wait 1 second before next try
+            }
+        }
+        if (!$found) {
+            Log::channel('webhook')->warning("Board with '[Project number & name]' not found after {$maxAttempts} attempts.");
         }
     }
 
