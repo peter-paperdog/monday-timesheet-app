@@ -76,28 +76,37 @@ class WebhookController extends Controller
         /** @var \App\Services\MondayService $mondayService */
         $mondayService = app(MondayService::class);
 
-        $last_project_name = $mondayService->getProjectBoardLastItemProjectName();
+        $lastProjectName = $mondayService->getProjectBoardLastItemProjectName();
 
         $found = false;
         $attempts = 0;
         $maxAttempts = 30;
+
         while (!$found && $attempts < $maxAttempts) {
+            $attempts++;
+            Log::channel('webhook')->info("Attempt {$attempts} of {$maxAttempts}: searching for '[Project number & name]' board...");
+
             $boards = $mondayService->getBoardsFromNewStructure();
 
             foreach ($boards as $board) {
                 if (Str::contains($board['name'], '[Project number & name]')) {
-                    $new_name = str_replace('[Project number & name]', $last_project_name, $board['name']);
-                    $mondayService->setBoardName($board['id'], $new_name);
-                    Log::channel('webhook')->info("Board {$board['name']} updated to " . $new_name);
+                    $newName = str_replace('[Project number & name]', $lastProjectName, $board['name']);
+                    $mondayService->setBoardName($board['id'], $newName);
+
+                    Log::channel('webhook')->info("✅ Found board on attempt {$attempts}. Renamed '{$board['name']}' to '{$newName}' (board_id: {$board['id']})");
+                    $found = true;
+                    break;
                 }
             }
+
             if (!$found) {
-                $attempts++;
-                sleep(1); // wait 1 second before next try
+                Log::channel('webhook')->info("Board not found on attempt {$attempts}, sleeping 1 second...");
+                sleep(1);
             }
         }
+
         if (!$found) {
-            Log::channel('webhook')->warning("Board with '[Project number & name]' not found after {$maxAttempts} attempts.");
+            Log::channel('webhook')->warning("⚠️ Gave up after {$maxAttempts} attempts. '[Project number & name]' board not found.");
         }
     }
 
