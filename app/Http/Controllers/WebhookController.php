@@ -93,10 +93,6 @@ class WebhookController extends Controller
                 $originalName = $board['name'];
                 $newName = $originalName;
 
-                if (Str::contains($newName, 'PDYY_XXXX')) {
-                    $newName = str_replace('PDYY_XXXX', $lastProjectName, $newName);
-                }
-
                 if (Str::contains($newName, '[Project number & name]')) {
                     $newName = str_replace('[Project number & name]', $lastProjectName, $newName);
                 }
@@ -104,6 +100,8 @@ class WebhookController extends Controller
                 if ($newName !== $originalName) {
                     $mondayService->setBoardName($board['id'], $newName);
                     Log::channel('webhook')->info("☑️ Found board on attempt {$attempts}. Renamed '{$originalName}' to '{$newName}' (board_id: {$board['id']})");
+
+                    $mondayService->updateFolder($board['board_folder_id'], $lastProjectName);
                     $found = true;
                 }
             }

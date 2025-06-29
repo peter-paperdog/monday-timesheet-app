@@ -107,6 +107,26 @@ class MondayService
     }
 
     /**
+     * Update folder name
+     * @param $folder_id
+     * @param $folder_name
+     * @return array|null
+     */
+    public function updateFolder($folder_id, $folder_name)
+    {
+        $query = <<<'GRAPHQL'
+        mutation {
+            update_folder (folder_id: $folder_id, name: "$folder_name") {
+            id
+            }
+        }
+    GRAPHQL;
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+        return $response;
+    }
+
+    /**
      * Fetches the list of boards from the Monday.com API.
      *
      * @return array The array of board objects.
@@ -118,6 +138,7 @@ class MondayService
       boards(limit: 9, workspace_ids: 9147845, order_by: created_at){
         id
         name
+        board_folder_id
       }
     }
     GRAPHQL;
