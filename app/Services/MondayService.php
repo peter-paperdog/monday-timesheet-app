@@ -107,6 +107,27 @@ class MondayService
     }
 
     /**
+     * @return array The array of board objects.
+     */
+    public function getBoardsCreatedWithNewProjectButtonPress()
+    {
+        $query = <<<'GRAPHQL'
+    query {
+      boards(limit: 3, workspace_ids: 9147845, order_by: created_at){
+            id
+            name
+            board_folder_id
+      }
+    }
+    GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+
+        return $response['data']['boards'];
+    }
+
+    /**
      * Update folder name
      * @param $folder_id
      * @param $folder_name
@@ -114,16 +135,15 @@ class MondayService
      */
     public function updateFolder($folder_id, $folder_name)
     {
-        $query = <<<'GRAPHQL'
-        mutation {
-            update_folder (folder_id: $folder_id, name: "$folder_name") {
-            id
+        $query = <<<GRAPHQL
+            mutation {
+                update_folder (folder_id: $folder_id, name: "$folder_name") {
+                id
+                }
             }
-        }
-    GRAPHQL;
+GRAPHQL;
         // Define the variables to pass into the query
-        $response = $this->makeApiRequest($query);
-        return $response;
+        return $this->makeApiRequest($query);
     }
 
     /**
@@ -135,10 +155,11 @@ class MondayService
     {
         $query = <<<'GRAPHQL'
     query {
-      boards(limit: 9, workspace_ids: 9147845, order_by: created_at){
-        id
-        name
-        board_folder_id
+      boards(limit: 999, workspace_ids: 9147845, order_by: used_at){
+            id
+            name
+            type
+            board_folder_id
       }
     }
     GRAPHQL;

@@ -73,12 +73,13 @@ class WebhookController extends Controller
     private function handleCreateProjectButton(Request $request)
     {
         Log::channel('webhook')->info(__METHOD__);
-exit;//@todo
-
         /** @var \App\Services\MondayService $mondayService */
         $mondayService = app(MondayService::class);
 
-        $lastProjectName = $mondayService->getProjectBoardLastItemProjectName();
+        $projectName = $mondayService->getProjectBoardLastItemProjectName();
+
+
+        $mondayService->updateFolder(17620590, $projectName);
 
         $found = false;
         $attempts = 0;
@@ -88,31 +89,25 @@ exit;//@todo
             $attempts++;
             Log::channel('webhook')->info("Attempt {$attempts} of {$maxAttempts}: searching for '[Project number & name]' board...");
 
-            $boards = $mondayService->getBoardsFromNewStructure();
+            $boards = $mondayService->getBoardsCreatedWithNewProjectButtonPress();
 
-            $board_folder_ids = [];
+            $folderId = collect($boards)
+                ->first(fn($board) => !is_null($board['board_folder_id']))['board_folder_id'];
 
             foreach ($boards as $board) {
-                $originalName = $board['name'];
-                $board_folder_ids[] = $board['board_folder_id'];
-                $newName = $originalName;
-
+                $newName = $board['name'];
                 if (Str::contains($newName, 'PDYY_XXXX')) {
-                    $newName = str_replace('PDYY_XXXX', $lastProjectName, $newName);
+                    $newName = str_replace('PDYY_XXXX', $projectName, $newName);
                 }
 
                 if (Str::contains($newName, '[Project number & name]')) {
-                    $newName = str_replace('[Project number & name]', $lastProjectName, $newName);
+                    $newName = str_replace('[Project number & name]', $projectName, $newName);
                 }
 
-                if ($newName !== $originalName) {
+                if ($newName !== $board['name']) {
                     $mondayService->setBoardName($board['id'], $newName);
-                    Log::channel('webhook')->info("☑️ Found board on attempt {$attempts}. Renamed '{$originalName}' to '{$newName}' (board_id: {$board['id']})");
+                    Log::channel('webhook')->info("☑️ Found board on attempt {$attempts}. Renamed '{$board['name']}' to '{$newName}' (board_id: {$board['id']})");
                     $found = true;
-
-                    $board_folder_id = $board['board_folder_id'];
-                    Log::channel('webhook')->info("Rename folder to '{$newName}' (folder_id: {$board_folder_id})");
-                    $mondayService->updateFolder($board_folder_id, $newName);
                 }
             }
 
@@ -120,6 +115,8 @@ exit;//@todo
                 Log::channel('webhook')->info("Board not found on attempt {$attempts}, sleeping 1 second...");
                 sleep(1);
             } else {
+                Log::channel('webhook')->info("Rename folder to '{$newName}' (folder_id: {$folderId})");
+                $mondayService->updateFolder($folderId, $newName);
                 Log::channel('webhook')->info("DONE ✅");
             }
         }
