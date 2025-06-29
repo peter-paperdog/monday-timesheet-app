@@ -89,6 +89,12 @@ class WebhookController extends Controller
             $boards = $mondayService->getBoardsFromNewStructure();
 
             foreach ($boards as $board) {
+                if (Str::contains($board['name'], 'PDYY_XXXX')) {
+                    $newName = str_replace('PDYY_XXXX', $lastProjectName, $board['name']);
+                    $mondayService->setBoardName($board['id'], $newName);
+                    Log::channel('webhook')->info("☑️ Found board on attempt {$attempts}. Renamed '{$board['name']}' to '{$newName}' (board_id: {$board['id']})");
+                    $found = true;
+                }
                 if (Str::contains($board['name'], '[Project number & name]')) {
                     $newName = str_replace('[Project number & name]', $lastProjectName, $board['name']);
                     $mondayService->setBoardName($board['id'], $newName);
