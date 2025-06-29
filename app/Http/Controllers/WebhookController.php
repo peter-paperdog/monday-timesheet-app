@@ -74,6 +74,8 @@ class WebhookController extends Controller
     {
         Log::channel('webhook')->info(__METHOD__);
 
+
+        exit; //@todo
         /** @var \App\Services\MondayService $mondayService */
         $mondayService = app(MondayService::class);
 
