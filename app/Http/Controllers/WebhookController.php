@@ -73,6 +73,7 @@ class WebhookController extends Controller
     private function handleCreateProjectButton(Request $request)
     {
         Log::channel('webhook')->info(__METHOD__);
+exit;//@todo
 
         /** @var \App\Services\MondayService $mondayService */
         $mondayService = app(MondayService::class);
