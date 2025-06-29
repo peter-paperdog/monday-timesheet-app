@@ -74,7 +74,6 @@ class WebhookController extends Controller
     {
         Log::channel('webhook')->info(__METHOD__);
 
-        exit;//@todo
         /** @var \App\Services\MondayService $mondayService */
         $mondayService = app(MondayService::class);
 
@@ -91,16 +90,20 @@ class WebhookController extends Controller
             $boards = $mondayService->getBoardsFromNewStructure();
 
             foreach ($boards as $board) {
-                if (Str::contains($board['name'], 'PDYY_XXXX')) {
-                    $newName = str_replace('PDYY_XXXX', $lastProjectName, $board['name']);
-                    $mondayService->setBoardName($board['id'], $newName);
-                    Log::channel('webhook')->info("☑️ Found board on attempt {$attempts}. Renamed '{$board['name']}' to '{$newName}' (board_id: {$board['id']})");
-                    $found = true;
+                $originalName = $board['name'];
+                $newName = $originalName;
+
+                if (Str::contains($newName, 'PDYY_XXXX')) {
+                    $newName = str_replace('PDYY_XXXX', $lastProjectName, $newName);
                 }
-                if (Str::contains($board['name'], '[Project number & name]')) {
-                    $newName = str_replace('[Project number & name]', $lastProjectName, $board['name']);
+
+                if (Str::contains($newName, '[Project number & name]')) {
+                    $newName = str_replace('[Project number & name]', $lastProjectName, $newName);
+                }
+
+                if ($newName !== $originalName) {
                     $mondayService->setBoardName($board['id'], $newName);
-                    Log::channel('webhook')->info("☑️ Found board on attempt {$attempts}. Renamed '{$board['name']}' to '{$newName}' (board_id: {$board['id']})");
+                    Log::channel('webhook')->info("☑️ Found board on attempt {$attempts}. Renamed '{$originalName}' to '{$newName}' (board_id: {$board['id']})");
                     $found = true;
                 }
             }
