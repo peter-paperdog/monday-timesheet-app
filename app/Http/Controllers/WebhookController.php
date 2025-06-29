@@ -69,12 +69,36 @@ class WebhookController extends Controller
         return $this->webhookChallengeResponse($request);
     }
 
+    private function handleCreateProjectButton(Request $request)
+    {
+        Log::channel('webhook')->info(__METHOD__);
+
+        /** @var \App\Services\MondayService $mondayService */
+        $mondayService = app(MondayService::class);
+
+        $last_project_name = $mondayService->getProjectBoardLastItemProjectName();
+
+        $boards = $mondayService->getBoardsFromNewStructure();
+
+        foreach ($boards as $board) {
+            if (Str::contains($board['name'], '[Project number & name]')) {
+                $new_name = str_replace('[Project number & name]', $last_project_name, $board['name']);
+
+                $response = $mondayService->setBoardName($board['id'], $new_name);
+                Log::channel('webhook')->info("Board {$board['name']} updated to " . $new_name);
+            }
+        }
+    }
+
     private function handleChangeColumnValue(Request $request)
     {
         Log::channel('webhook')->info(__METHOD__);
         $eventData = $request->input('event');
 
-        if (
+        //create project button clicked
+        if ($eventData["columnId"] === "button_mkrwhp23") {
+            $this->handleCreateProjectButton($request);
+        } else if (
             isset($eventData['columnType']) &&
             $eventData['columnType'] === 'duration' &&
             isset($eventData['pulseId'])

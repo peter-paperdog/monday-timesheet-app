@@ -115,11 +115,9 @@ class MondayService
     {
         $query = <<<'GRAPHQL'
     query {
-      boards(limit: 999, workspace_ids: 9147845, order_by: used_at){
-            id
-            name
-            type
-            board_folder_id
+      boards(limit: 9, workspace_ids: 9147845, order_by: created_at){
+        id
+        name
       }
     }
     GRAPHQL;
@@ -818,6 +816,26 @@ GRAPHQL;
         return $this->makeApiRequest($query);
     }
 
+
+    /**
+     * @param $item_id
+     * @param $projectNr
+     * @return array|null
+     */
+    public function setBoardName($board_id, $new_name)
+    {
+        $query = <<<GRAPHQL
+        mutation {
+            update_board (
+                board_id: $board_id,
+                board_attribute: name,
+                new_value: "$new_name"
+            )
+        }
+GRAPHQL;
+        return $this->makeApiRequest($query);
+    }
+
     /**
      * Fetches the details of a specific board
      *
@@ -855,6 +873,33 @@ GRAPHQL;
         } while ($cursor);
 
         return $allItems;
+    }
+
+    /**
+     * Fetches the last Items project name
+     *
+     * @return array The array of the board objects.
+     */
+    public function getProjectBoardLastItemProjectName()
+    {
+        $query = <<<GRAPHQL
+                query {
+                    items(ids: "9475536184") {
+                        name
+                        column_values (ids: "numeric_mkrwataq"){
+                            value
+                        }
+                    }
+                }
+GRAPHQL;
+
+        $response = $this->makeApiRequest($query);
+        $project_number = $response['data']['items'][0]['column_values'][0]['value'];
+        $project_number = json_decode($project_number);
+
+        $project_name = $response['data']['items'][0]['name'];
+
+        return "PD" . date('y') . "_" . str_pad($project_number, 4, "0", STR_PAD_LEFT) . " " . $project_name;
     }
 
 
