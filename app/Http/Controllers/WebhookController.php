@@ -94,7 +94,7 @@ class WebhookController extends Controller
                     $newName = str_replace('[Project number & name]', $lastProjectName, $board['name']);
                     $mondayService->setBoardName($board['id'], $newName);
 
-                    Log::channel('webhook')->info("✅ Found board on attempt {$attempts}. Renamed '{$board['name']}' to '{$newName}' (board_id: {$board['id']})");
+                    Log::channel('webhook')->info("☑️ Found board on attempt {$attempts}. Renamed '{$board['name']}' to '{$newName}' (board_id: {$board['id']})");
                     $found = true;
                     break;
                 }
@@ -103,6 +103,8 @@ class WebhookController extends Controller
             if (!$found) {
                 Log::channel('webhook')->info("Board not found on attempt {$attempts}, sleeping 1 second...");
                 sleep(1);
+            }else{
+                Log::channel('webhook')->info("DONE ✅");
             }
         }
 
