@@ -882,9 +882,13 @@ GRAPHQL;
      */
     public function getProjectBoardLastItemProjectName()
     {
+        $projects = $this->getProjectBoard();
+        $last_item = end($projects);
+        $last_item_id = $last_item["id"];
+
         $query = <<<GRAPHQL
                 query {
-                    items(ids: "9475536184") {
+                    items(ids: "$last_item_id") {
                         name
                         column_values (ids: "numeric_mkrwataq"){
                             value
