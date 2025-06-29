@@ -73,9 +73,6 @@ class WebhookController extends Controller
     private function handleCreateProjectButton(Request $request)
     {
         Log::channel('webhook')->info(__METHOD__);
-
-
-        exit; //@todo
         /** @var \App\Services\MondayService $mondayService */
         $mondayService = app(MondayService::class);
 
@@ -95,23 +92,17 @@ class WebhookController extends Controller
                 if (Str::contains($board['name'], '[Project number & name]')) {
                     $newName = str_replace('[Project number & name]', $lastProjectName, $board['name']);
                     $mondayService->setBoardName($board['id'], $newName);
-
                     Log::channel('webhook')->info("☑️ Found board on attempt {$attempts}. Renamed '{$board['name']}' to '{$newName}' (board_id: {$board['id']})");
                     $found = true;
-                    break;
                 }
             }
 
             if (!$found) {
                 Log::channel('webhook')->info("Board not found on attempt {$attempts}, sleeping 1 second...");
                 sleep(1);
-            }else{
+            } else {
                 Log::channel('webhook')->info("DONE ✅");
             }
-        }
-
-        if (!$found) {
-            Log::channel('webhook')->warning("⚠️ Gave up after {$maxAttempts} attempts. '[Project number & name]' board not found.");
         }
     }
 
