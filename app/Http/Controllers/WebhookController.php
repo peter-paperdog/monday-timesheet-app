@@ -95,16 +95,21 @@ class WebhookController extends Controller
             return $this->webhookChallengeResponse();
         }
 
-        // Create new task from webhook data
-        $task = new Task([
-            'id' => $eventData['pulseId'],
-            'project_id' => $project_id,
-            'name' => $eventData['pulseName'],
-            'group_id' => $eventData['groupId']
-        ]);
-        $task->save();
+        $existingTask = Task::find($eventData['pulseId']);
 
-        Log::channel('webhook')->info("Created Task from webhook", ['task_id' => $task->id]);
+        if (!$existingTask) {
+            $task = new Task([
+                'id' => $eventData['pulseId'],
+                'project_id' => $project_id,
+                'name' => $eventData['pulseName'],
+                'group_id' => $eventData['groupId']
+            ]);
+            $task->save();
+
+            Log::channel('webhook')->info("New task created", ['id' => $task->id]);
+        } else {
+            Log::channel('webhook')->info("Task already exists", ['id' => $existingTask->id]);
+        }
 
         return $this->webhookChallengeResponse($request);
     }
