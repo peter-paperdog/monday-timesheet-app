@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\Client;
+use App\Models\Group;
+use App\Models\Project;
+use App\Models\Task;
+use App\Services\MondayService;
+use Illuminate\Console\Command;
+
+class SyncMondayTasks extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'sync:monday-tasks';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Synchronize Monday.com tasks with the database.';
+
+    public function __construct(private MondayService $mondayService)
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+        foreach (Project::all() as $project) {
+            $tasks = $this->mondayService->getTasks($project->id);
+            foreach ($tasks as $task) {
+                Task::updateOrCreate(
+                    ['id' => $task['id']],
+                    [
+                        'name' => $task['title'] ?? null,
+                        'group_id' => $task['group']['id']?? null,
+                    ]
+                );
+            }
+        }
+    }
+}
