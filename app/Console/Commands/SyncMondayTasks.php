@@ -41,7 +41,8 @@ class SyncMondayTasks extends Command
                 Task::updateOrCreate(
                     ['id' => $task['id']],
                     [
-                        'name' => $task['title'] ?? null,
+                        'name' => $task['name'] ?? '',
+                        'project_id' => $project->id,
                         'group_id' => $task['group']['id']?? null,
                     ]
                 );
