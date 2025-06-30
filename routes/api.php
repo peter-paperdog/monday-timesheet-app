@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\Api\TimeTrackingController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InvoicingController;
@@ -40,6 +41,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/projects/{project}/groups', [GroupController::class, 'index']);
     Route::get('/projects/{project}/tasks', [TaskController::class, 'indexByProject']);
     Route::get('/projects/{project}/tasks/{id}', [TaskController::class, 'show']);
+    Route::get('/projects/{project}/tasks/{id}/timetrackings', [TimeTrackingController::class, 'indexByTask']);
 
     Route::get('/contacts', [ContactController::class, 'index']);
 
