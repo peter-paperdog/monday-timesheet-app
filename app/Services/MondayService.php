@@ -548,6 +548,45 @@ GRAPHQL;
     }
 
     /**
+     * Fetches the tasks for the project.
+     */
+    public function getTasks($projectId)
+    {
+        $tasks = [];
+        $cursor = null;
+
+        do {
+            $cursorPart = $cursor ? "cursor: \"$cursor\"" : '';
+            $query = <<<GRAPHQL
+                query {
+                    boards(ids: 9383765975){
+                        items_page(limit: 100, $cursorPart){
+                            items{
+                                id
+                                name
+                                group{
+                                    id
+                                }
+                            }
+                            cursor
+                        }
+                    }
+                }
+GRAPHQL;
+
+            $response = $this->makeApiRequest($query);
+
+            $page = $response['data']['boards'][0]['items_page'];
+
+            $items = $page['items'] ?? [];
+            $cursor = $page['cursor'] ?? null;
+
+            $tasks = array_merge($tasks, $items);
+        } while ($cursor);
+        return $tasks;
+    }
+
+    /**
      * Fetches the groups for the board.
      *
      * @param string $boardId The ID of the board.
