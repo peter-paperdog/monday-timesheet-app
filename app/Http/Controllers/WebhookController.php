@@ -23,7 +23,7 @@ class WebhookController extends Controller
 
     private function webhookChallengeResponse(Request $request)
     {
-        Log::channel('webhook')->info(__METHOD__);
+        Log::channel('webhook')->debug(__METHOD__);
         if ($request->has('challenge')) {
             return response()->json(['challenge' => $request->input('challenge')]);
         }
@@ -51,7 +51,7 @@ class WebhookController extends Controller
 
     private function handleProjectNumberBoard(Request $request)
     {
-        Log::channel('webhook')->info(__METHOD__." by {$this->_username} ");
+        Log::channel('webhook')->debug(__METHOD__." by {$this->_username} ");
         $eventData = $request->input('event');
         Log::channel('webhook')->info("New project created: {$eventData['pulseName']}.");
 
@@ -68,7 +68,7 @@ class WebhookController extends Controller
 
     private function handleItemDeleted(Request $request)
     {
-        Log::channel('webhook')->info(__METHOD__." by {$this->_username} ");
+        Log::channel('webhook')->debug(__METHOD__." by {$this->_username} ");
         $eventData = $request->input('event');
         $itemId = $eventData['itemId'];
 
@@ -88,7 +88,7 @@ class WebhookController extends Controller
 
     private function handleCreateItem(Request $request)
     {
-        Log::channel('webhook')->info(__METHOD__." by {$this->_username} ");
+        Log::channel('webhook')->debug(__METHOD__." by {$this->_username} ");
         $eventData = $request->input('event');
 
         if ($eventData['boardId'] === 9370542454) {
@@ -117,7 +117,7 @@ class WebhookController extends Controller
 
             Log::channel('webhook')->info("New task created", ['id' => $task->id]);
         } else {
-            Log::channel('webhook')->info("Task already exists", ['id' => $existingTask->id]);
+            Log::channel('webhook')->warning("Task already exists", ['id' => $existingTask->id]);
         }
 
         return $this->webhookChallengeResponse($request);
@@ -125,7 +125,7 @@ class WebhookController extends Controller
 
     private function handleCreateProjectButton(Request $request)
     {
-        Log::channel('webhook')->info(__METHOD__." by {$this->_username} ");
+        Log::channel('webhook')->debug(__METHOD__." by {$this->_username} ");
         /** @var \App\Services\MondayService $mondayService */
         $mondayService = app(MondayService::class);
 
@@ -162,7 +162,7 @@ class WebhookController extends Controller
             }
 
             if (!$found) {
-                Log::channel('webhook')->info("Board not found on attempt {$attempts}, sleeping 1 second...");
+                Log::channel('webhook')->warning("Board not found on attempt {$attempts}, sleeping 1 second...");
                 sleep(1);
             } else {
                 Log::channel('webhook')->info("Rename folder to '{$projectName}' (folder_id: {$folderId})");
@@ -174,7 +174,7 @@ class WebhookController extends Controller
 
     private function handleChangeColumnValue(Request $request)
     {
-        Log::channel('webhook')->info(__METHOD__." by {$this->_username} ");
+        Log::channel('webhook')->debug(__METHOD__." by {$this->_username} ");
         $eventData = $request->input('event');
 
         //create project button clicked
