@@ -813,23 +813,25 @@ GRAPHQL;
 
             foreach ($filtered_projects as $item) {
                 $project = new \stdClass();
-                $project->id = intval($item['children'][0]['id']);
+                $project->id = intval($item['id']);
                 $project->name = $item['name'];
                 $project->client_id = intval($item['parent']['id']);
-                $projects[$item['id']] = $project;
-            }
+                $project->time_board_id = null;
+                $project->expenses_board_id = null;
 
-            //boards
-            $filtered_boards = array_filter($data, function ($item) {
-                return !is_null($item['parent']) && !empty($item['children']);
-            });
+                foreach($item['children'] as $child){
+                    $childName = strtolower($child['name']);
 
-            foreach ($filtered_boards as $item) {
-                foreach ($item['children'] as $child) {
-                    if (str_starts_with($child['name'], '2_Expenses')) {
-                        $projects[$item['id']]->expenses_folder_id = intval($child['id']);
+                    if (str_starts_with($childName, '1_time')) {
+                        $project->time_board_id = intval($child['id']);
+                    }
+
+                    if (str_starts_with($childName, '2_expenses')) {
+                        $project->expenses_board_id = intval($child['id']);
                     }
                 }
+
+                $projects[$item['id']] = $project;
             }
             $page++;
         } while (!empty($data));
