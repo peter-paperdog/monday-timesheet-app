@@ -90,20 +90,23 @@ class MondayService
      */
     public function getBoards()
     {
-        $query = <<<'GRAPHQL'
-    query {
-      boards(limit: 999, workspace_ids: 5096840, order_by: used_at){
-            id
-            name
-            type
-      }
-    }
-    GRAPHQL;
-
-        // Define the variables to pass into the query
-        $response = $this->makeApiRequest($query);
-
-        return $response['data']['boards'];
+        $page = 1;
+        $boards = [];
+        do {
+            $query = <<<GRAPHQL
+                query {
+                  boards(workspace_ids: 9147845, limit: 100, page: $page){
+                        id
+                        name
+                        type
+                  }
+                }
+GRAPHQL;
+            $response = $this->makeApiRequest($query);
+            $boards = array_merge($boards, $response['data']['boards']);
+            $page++;
+        } while (!empty($response['data']['boards']));
+        return $boards;
     }
 
     /**
@@ -593,7 +596,7 @@ GRAPHQL;
     public function getProjectIdForItem($itemId)
     {
 
-            $query = <<<GRAPHQL
+        $query = <<<GRAPHQL
                 query {
                     items(ids: $itemId){
                         board{
@@ -603,8 +606,8 @@ GRAPHQL;
                 }
 GRAPHQL;
 
-            $response = $this->makeApiRequest($query);
-            return intval($response['data']['items'][0]['board']['board_folder_id']);
+        $response = $this->makeApiRequest($query);
+        return intval($response['data']['items'][0]['board']['board_folder_id']);
     }
 
     /**
@@ -840,7 +843,7 @@ GRAPHQL;
                 $project->time_board_id = null;
                 $project->expenses_board_id = null;
 
-                foreach($item['children'] as $child){
+                foreach ($item['children'] as $child) {
                     $childName = strtolower($child['name']);
 
                     if (str_starts_with($childName, '1_time')) {
@@ -883,6 +886,27 @@ GRAPHQL;
         $response = $this->makeApiRequest($query);
 
         return $response['data']['folders'][0]['name'];
+    }
+
+    /**
+     * @param string $boardId The ID of the Board.
+     * @return string
+     */
+    public function getWebhooksForBoard(string $boardId)
+    {
+        $query = <<<GRAPHQL
+        query {
+          webhooks(board_id: $boardId){
+            id
+            event
+          }
+        }
+GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+
+        return $response['data']['webhooks'];
     }
 
     public function getFolderParentId(string $folderId)

@@ -39,7 +39,6 @@ class SyncMondayBoardWebhooks extends Command
     public function __construct(private MondayService $mondayService)
     {
         parent::__construct();
-        $this->mondayToken = env('MONDAY_API_TOKEN');
         $this->webhookCallbackUrl = env('MONDAY_WEBHOOK_CALLBACK');
     }
 
@@ -48,97 +47,57 @@ class SyncMondayBoardWebhooks extends Command
      */
     public function handle()
     {
-        $start = microtime(true);
         $this->info("Starting board webhook sync...");
-        $existingBoardIds = BoardWebhook::distinct()->pluck('board_id')->toArray();
 
-        $workspaceId = env('MONDAY_WORKSPACE_ID');
-        $limit = 500;
-        $page = 1;
-        $totalCreated = 0;
+        $boards = $this->mondayService->getBoards();
 
-        while (true) {
-            $query = <<<GRAPHQL
-        query GetBoards(\$workspaceIds: [ID!]!, \$limit: Int!, \$page: Int!) {
-            boards(workspace_ids: \$workspaceIds, limit: \$limit, page: \$page) {
-                id
-                name
-            }
-        }
-        GRAPHQL;
+        foreach ($boards as $board) {
+            $boardId = $board['id'];
+            $boardType = $board['type'];
 
-            $response = Http::withHeaders([
-                'Authorization' => env('MONDAY_API_TOKEN'),
-            ])->post('https://api.monday.com/v2', [
-                'query' => $query,
-                'variables' => [
-                    'workspaceIds' => [$workspaceId],
-                    'limit' => $limit,
-                    'page' => $page,
-                ],
-            ]);
-
-            $boards = data_get($response->json(), 'data.boards', []);
-
-            if (empty($boards)) {
-                break;
+            // Skip subitem boards
+            if ($boardType === "sub_items_board") {
+                $this->info("Skipping subitem board: $boardId");
+                continue;
             }
 
-            foreach ($boards as $board) {
-                if (str_starts_with($board['name'], 'Subitems of')) {
-                    continue;
-                }
-                if (in_array($board['id'], $existingBoardIds)) {
-                    continue;
-                }
+            $webhooks = $this->mondayService->getWebhooksForBoard($boardId);
+            $existingEvents = [];
 
-                // Check if any webhook exists for this board
-                $hasWebhook = BoardWebhook::where('board_id', $board['id'])->exists();
+            // Count occurrences per event
+            foreach ($webhooks as $webhook) {
+                $event = $webhook['event'];
+                $existingEvents[$event][] = $webhook['id'];
+            }
 
-                if ($hasWebhook) {
-                    continue;
-                }
+            foreach ($this->events as $event) {
+                $eventCount = count($existingEvents[$event] ?? []);
 
-                // No webhook found, create all events
-                foreach ($this->events as $event) {
-                    $webhookId = $this->createWebhook($board['id'], $event);
-
-                    if ($webhookId) {
-                        BoardWebhook::create([
-                            'board_id' => $board['id'],
-                            'event' => $event,
-                            'webhook_id' => $webhookId,
-                        ]);
-                        $this->info("✅ Created webhook for '{$event}' on board '{$board['name']}'");
-                        Log::info("✅ Created webhook for '{$event}' on board '{$board['name']}'");
-                        $totalCreated++;
-                    } else {
-                        Log::warn("❌ Failed to create webhook for '{$event}' on board {$board['id']}");
-                        $this->warn("❌ Failed to create webhook for '{$event}' on board {$board['id']}");
+                if ($eventCount === 0) {
+                    // Event not registered at all → create it
+                    $this->createWebhook($boardId, $event);
+                } elseif ($eventCount > 1) {
+                    // Event registered more than once → keep one, delete the rest
+                    $this->info("Found duplicate webhooks for '$event' on board $boardId");
+                    $webhookIds = $existingEvents[$event];
+                    // Keep the first, delete the rest
+                    foreach (array_slice($webhookIds, 1) as $duplicateId) {
+                        $this->deleteWebhook($duplicateId);
                     }
+                } else {
+                    $this->info("Webhook for '$event' already exists on board $boardId");
                 }
             }
-
-            if (count($boards) < $limit) {
-                break;
-            }
-
-            $page++;
         }
 
-        $duration = round(microtime(true) - $start, 2);
-        $this->info("🔁 Sync completed in {$duration} seconds. Total new webhooks created: $totalCreated");
-
-        if ($totalCreated) {
-            Log::info("🔁 Webhook sync completed in {$duration} seconds. Total new webhooks created: $totalCreated");
-        }
-
+        $this->info("Finished board webhook sync...");
         return Command::SUCCESS;
     }
 
 
     protected function createWebhook(string $boardId, string $event): ?string
     {
+        $this->info("Creating webhook for board $boardId for event $event");
         $url = env('MONDAY_WEBHOOK_CALLBACK') . '/' . $event;
 
         $mutation = <<<GRAPHQL
@@ -154,5 +113,23 @@ class SyncMondayBoardWebhooks extends Command
         ])->post('https://api.monday.com/v2', ['query' => $mutation]);
 
         return data_get($response->json(), 'data.create_webhook.id');
+    }
+
+    protected function deleteWebhook(string $webhookId): ?string
+    {
+        $this->info("Deleting webhook $webhookId");
+        $mutation = <<<GRAPHQL
+        mutation {
+            delete_webhook(id: $webhookId) {
+                id
+            }
+        }
+        GRAPHQL;
+
+        $response = Http::withHeaders([
+            'Authorization' => env('MONDAY_API_TOKEN'),
+        ])->post('https://api.monday.com/v2', ['query' => $mutation]);
+
+        return data_get($response->json(), 'data.delete_webhook.id');
     }
 }
