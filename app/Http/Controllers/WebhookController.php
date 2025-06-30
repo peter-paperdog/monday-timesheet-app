@@ -76,6 +76,8 @@ class WebhookController extends Controller
         } else {
             Log::channel('webhook')->info("Task with ID {$pulseId} not found.");
         }
+
+        return $this->webhookChallengeResponse($request);
     }
     private function handleCreateItem(Request $request)
     {
