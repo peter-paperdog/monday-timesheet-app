@@ -550,7 +550,7 @@ GRAPHQL;
     /**
      * Fetches the tasks for the project.
      */
-    public function getTasks($projectId)
+    public function getTasks($boardId)
     {
         $tasks = [];
         $cursor = null;
@@ -559,7 +559,7 @@ GRAPHQL;
             $cursorPart = $cursor ? "cursor: \"$cursor\"" : '';
             $query = <<<GRAPHQL
                 query {
-                    boards(ids: 9383765975){
+                    boards(ids: $boardId){
                         items_page(limit: 100, $cursorPart){
                             items{
                                 id
