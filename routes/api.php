@@ -10,8 +10,14 @@ use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InvoicingController;
 use App\Http\Controllers\OfficeController;
 use App\Http\Controllers\WebhookController;
+use App\Models\Client;
+use App\Models\Project;
+use App\Models\Task;
+use App\Services\MondayService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 Route::options('{any}', function () {
     return response()->json([], 200)
@@ -33,6 +39,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/projects/{id}', [ProjectController::class, 'show']);
     Route::get('/projects/{project}/groups', [GroupController::class, 'index']);
     Route::get('/projects/{project}/tasks', [TaskController::class, 'indexByProject']);
+    Route::get('/projects/{project}/tasks/{id}', [TaskController::class, 'show']);
 
     Route::get('/contacts', [ContactController::class, 'index']);
 
