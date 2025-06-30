@@ -108,7 +108,6 @@ class SyncMondayBoards extends Command
                 $this->info("Found ".count($items)." task items for board '{$board['name']}' (#{$board['id']})");
             }
 
-
             foreach ($items as $itemData) {
                 $MondayItem = MondayItem::updateOrCreate(
                     ['id' => $itemData['id']],
@@ -120,14 +119,6 @@ class SyncMondayBoards extends Command
                     ]
                 );
                 $MondayItem->touch();
-
-                Task::updateOrCreate(
-                    ['id' => $itemData['id']],
-                    [
-                        'name' => $itemData['name'],
-                        'group_id' => $itemData['group']['id']
-                    ]
-                );
             }
 
             // Fetch time tracking data for this board
