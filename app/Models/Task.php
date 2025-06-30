@@ -17,4 +17,9 @@ class Task extends Model
     {
         return $this->belongsTo(Project::class);
     }
+
+    public function timeTrackings()
+    {
+        return $this->hasMany(TimeTracking::class, 'item_id');
+    }
 }
