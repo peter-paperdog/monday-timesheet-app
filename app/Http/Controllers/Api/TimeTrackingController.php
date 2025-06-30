@@ -13,6 +13,14 @@ class TimeTrackingController extends Controller
     public function indexByTask(Project $project, $id)
     {
         $task = $project->tasks()->findOrFail($id);
-        return TimeTrackingResource::collection($task->timeTrackings);
+
+        if ($task->project_id !== $project->id) {
+            abort(404, 'Task does not belong to the given project.');
+        }
+
+        // Eager-load user relation
+        $trackings = $task->timeTrackings()->with('user')->get();
+
+        return TimeTrackingResource::collection($trackings);
     }
 }

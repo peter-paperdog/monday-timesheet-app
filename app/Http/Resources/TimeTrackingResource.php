@@ -23,6 +23,13 @@ class TimeTrackingResource extends JsonResource
             'duration_minutes' => $this->calculateDurationMinutes(),
             'duration_seconds' => $this->calculateDurationSeconds(),
             'duration_human' => $this->calculateDurationHuman(),
+            'user' => $this->whenLoaded('user', function () {
+                return [
+                    'id' => $this->user->id,
+                    'name' => $this->user->name,
+                    'email' => $this->user->email,
+                ];
+            }),
         ];
     }
     protected function calculateDurationMinutes()
