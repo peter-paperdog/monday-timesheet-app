@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MondayTimeTracking;
+use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\MondayService;
@@ -69,6 +70,13 @@ class WebhookController extends Controller
         }
 
         $project_id = $this->mondayService->getProjectIdForItem($eventData['pulseId']);
+
+        $projectExists = Project::where('id', $project_id)->exists();
+
+        if (!$projectExists) {
+            Log::warning("No matching project found for project_id {$project_id} (item_id: {$eventData['pulseId']})");
+            return $this->webhookChallengeResponse();
+        }
 
         // Create new task from webhook data
         $task = new Task([
