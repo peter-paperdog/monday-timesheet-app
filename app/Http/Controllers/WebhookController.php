@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 
 class WebhookController extends Controller
 {
+    private $_username = 'unknown';
 
     public function __construct(private MondayService $mondayService)
     {
@@ -31,7 +32,11 @@ class WebhookController extends Controller
 
     public function handle(Request $request, string $event)
     {
-        Log::channel('webhook')->info("Webhook received for event: {$event} \n" . json_encode($request->all(), JSON_PRETTY_PRINT));
+        $eventData = $request->input('event');
+        if (isset($eventData['userId']) && User::find($eventData['userId'])) {
+            $this->_username = User::find($eventData['userId'])->name;
+        }
+        Log::channel('webhook')->info("Webhook received by {$this->_username} for event: {$event} \n" . json_encode($request->all(), JSON_PRETTY_PRINT));
         $method = 'handle' . str_replace(' ', '', ucwords(str_replace('_', ' ', $event)));
 
         if (method_exists($this, $method)) {
@@ -45,7 +50,7 @@ class WebhookController extends Controller
 
     private function handleProjectNumberBoard(Request $request)
     {
-        Log::channel('webhook')->info(__METHOD__);
+        Log::channel('webhook')->info(__METHOD__." by {$this->_username} ");
         $eventData = $request->input('event');
         Log::channel('webhook')->info("New project created: {$eventData['pulseName']}.");
 
@@ -62,7 +67,7 @@ class WebhookController extends Controller
 
     private function handleItemDeleted(Request $request)
     {
-        Log::channel('webhook')->info(__METHOD__);
+        Log::channel('webhook')->info(__METHOD__." by {$this->_username} ");
         $eventData = $request->input('event');
         $itemId = $eventData['itemId'];
 
@@ -79,9 +84,10 @@ class WebhookController extends Controller
 
         return $this->webhookChallengeResponse($request);
     }
+
     private function handleCreateItem(Request $request)
     {
-        Log::channel('webhook')->info(__METHOD__);
+        Log::channel('webhook')->info(__METHOD__." by {$this->_username} ");
         $eventData = $request->input('event');
 
         if ($eventData['boardId'] === 9370542454) {
@@ -118,7 +124,7 @@ class WebhookController extends Controller
 
     private function handleCreateProjectButton(Request $request)
     {
-        Log::channel('webhook')->info(__METHOD__);
+        Log::channel('webhook')->info(__METHOD__." by {$this->_username} ");
         /** @var \App\Services\MondayService $mondayService */
         $mondayService = app(MondayService::class);
 
@@ -167,7 +173,7 @@ class WebhookController extends Controller
 
     private function handleChangeColumnValue(Request $request)
     {
-        Log::channel('webhook')->info(__METHOD__);
+        Log::channel('webhook')->info(__METHOD__." by {$this->_username} ");
         $eventData = $request->input('event');
 
         //create project button clicked
