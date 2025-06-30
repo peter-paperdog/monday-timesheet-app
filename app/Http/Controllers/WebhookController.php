@@ -36,7 +36,7 @@ class WebhookController extends Controller
         if (isset($eventData['userId']) && User::find($eventData['userId'])) {
             $this->_username = User::find($eventData['userId'])->name;
         }
-        Log::channel('webhook')->info("Webhook received by {$this->_username} for event: {$event} \n" . json_encode($request->all(), JSON_PRETTY_PRINT));
+        Log::channel('webhook')->info("Webhook received by {$this->_username} for event: {$event}");
         $method = 'handle' . str_replace(' ', '', ucwords(str_replace('_', ' ', $event)));
 
         if (method_exists($this, $method)) {
@@ -44,7 +44,8 @@ class WebhookController extends Controller
             return $this->{$method}($request);
         }
 
-        Log::channel('webhook')->warning("No handler method found for event: {$event}");
+        Log::channel('webhook')->warning("No handler method found for event: {$event}" . json_encode($request->all(), JSON_PRETTY_PRINT));
+
         return $this->webhookChallengeResponse($request);
     }
 
