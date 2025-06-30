@@ -36,7 +36,10 @@ class SyncMondayTasks extends Command
     public function handle()
     {
         foreach (Project::all() as $project) {
-            $tasks = $this->mondayService->getTasks($project->id);
+            if(is_null($project->time_board_id)) {
+                continue;
+            }
+            $tasks = $this->mondayService->getTasks($project->time_board_id);
             foreach ($tasks as $task) {
                 Task::updateOrCreate(
                     ['id' => $task['id']],
