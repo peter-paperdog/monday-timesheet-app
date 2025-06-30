@@ -60,6 +60,23 @@ class WebhookController extends Controller
         return $this->webhookChallengeResponse($request);
     }
 
+    private function handleItemDeleted(Request $request)
+    {
+        Log::channel('webhook')->info(__METHOD__);
+        $eventData = $request->input('event');
+        $pulseId = $eventData['pulseId'];
+
+        Log::channel('webhook')->info('Item deleted event received', ['pulseId' => $pulseId]);
+
+        $task = Task::find($pulseId);
+
+        if ($task) {
+            $task->delete();
+            Log::channel('webhook')->info("Task with ID {$pulseId} deleted.");
+        } else {
+            Log::channel('webhook')->info("Task with ID {$pulseId} not found.");
+        }
+    }
     private function handleCreateItem(Request $request)
     {
         Log::channel('webhook')->info(__METHOD__);
