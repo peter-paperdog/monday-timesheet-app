@@ -50,12 +50,15 @@ class SyncMondayFolders extends Command
                 ['name' => $client->name]
             );
         }
+
         foreach($folders->projects as $project) {
             Project::updateOrCreate(
                 ['id' => $project->id],
                 [
                     'name' => $project->name,
-                    'client_id' => $project->client_id
+                    'client_id' => $project->client_id,
+                    'time_board_id' => $project->time_board_id,
+                    'expenses_board_id' => $project->expenses_board_id,
                 ]
             );
         }
