@@ -6,10 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
-    protected $fillable = ['id', 'name', 'group_id'];
+    protected $fillable = ['id', 'name', 'group_id', 'project_id'];
 
     public function group()
     {
         return $this->belongsTo(Group::class);
+    }
+
+    public function projects()
+    {
+        return $this->belongsTo(Project::class);
     }
 }
