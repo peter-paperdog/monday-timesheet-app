@@ -16,8 +16,10 @@ class TaskController extends Controller
         return TaskResource::collection(Task::all());
     }
 
-    public function show(Task $task)
+    public function show(Project $project, $id)
     {
+        $task = $project->tasks()->findOrFail($id);
+
         return new TaskResource($task);
     }
 
