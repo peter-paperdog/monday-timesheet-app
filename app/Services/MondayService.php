@@ -587,6 +587,27 @@ GRAPHQL;
     }
 
     /**
+     * @param $itemId
+     * @return int
+     */
+    public function getProjectIdForItem($itemId)
+    {
+
+            $query = <<<GRAPHQL
+                query {
+                    items(ids: $itemId){
+                        board{
+                            board_folder_id
+                        }
+                    }
+                }
+GRAPHQL;
+
+            $response = $this->makeApiRequest($query);
+            return intval($response['data']['items'][0]['board']['board_folder_id']);
+    }
+
+    /**
      * Fetches the groups for the board.
      *
      * @param string $boardId The ID of the board.

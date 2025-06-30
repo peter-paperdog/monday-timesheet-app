@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MondayTimeTracking;
+use App\Models\Task;
 use App\Models\User;
 use App\Services\MondayService;
 use Illuminate\Http\Request;
@@ -66,6 +67,19 @@ class WebhookController extends Controller
         if ($eventData['boardId'] === 9370542454) {
             return $this->handleProjectNumberBoard($request);
         }
+
+        $project_id = $this->mondayService->getProjectIdForItem($eventData['pulseId']);
+
+        // Create new task from webhook data
+        $task = new Task([
+            'id' => $eventData['pulseId'],
+            'project_id' => $project_id,
+            'name' => $eventData['pulseName'],
+            'group_id' => $eventData['groupId']
+        ]);
+        $task->save();
+
+        Log::channel('webhook')->info("Created Task from webhook", ['task_id' => $task->id]);
 
         return $this->webhookChallengeResponse($request);
     }
