@@ -198,7 +198,7 @@ class TimesheetController extends Controller
 
         // Fill missing group from parent if it's a subitem
         $timeTrackings->each(function ($tracking) {
-            if (!$tracking->item->group && $tracking->item->parent) {
+            if ($tracking->item && !$tracking->item->group && $tracking->item->parent) {
                 $tracking->item->group = $tracking->item->parent->group;
             }
         });
