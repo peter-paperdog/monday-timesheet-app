@@ -9,9 +9,9 @@ use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -25,7 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function (Schedule $schedule) {
         // Schedule tasks to run every hour between 6 AM and 12 PM (weekdays only)
-        $schedule->command('sync:monday-users')->daily();
+        $schedule->command('sync:monday-users')->daily()->at("01:00");
+        $schedule->command('sync:monday-tasks')->daily();
         $schedule->command('sync:monday-boards')->everyFifteenMinutes()->between('08:00', '23:00');
         $schedule->command('sync:monday-folders')->hourly()->between('08:05', '23:05');
         $schedule->command('sync:monday-groups')->hourly()->between('08:10', '23:10');
