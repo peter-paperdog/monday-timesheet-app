@@ -67,10 +67,6 @@ class MondayTimeTracking extends Model
         return $this->ended_at ? Carbon::parse($this->ended_at)->toDateTimeString() : null;
     }
 
-    public function trackable()
-    {
-        return $this->morphTo();
-    }
     protected static function booted()
     {
         static::saved(function ($tracking) {

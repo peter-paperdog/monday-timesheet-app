@@ -57,7 +57,7 @@ class MondayTimeTrackingObserver
      */
     protected function updateTaskDuration(MondayTimeTracking $tracking, string $event): void
     {
-        $task = $tracking->item->task ?? null;
+        $task = $tracking->task;
 
         if ($task) {
             Log::info("Observer: {$event} event triggered for tracking ID {$tracking->id}, updating task ID {$task->id}");
