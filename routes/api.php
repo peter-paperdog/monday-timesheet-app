@@ -37,6 +37,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/projects/{id}', [ProjectController::class, 'show']);
     Route::get('/projects/{project}/groups', [GroupController::class, 'index']);
     Route::get('/projects/{project}/groups/{id}', [GroupController::class, 'show']);
+    Route::get('/projects/{project}/groups/{id}/tasks', [TaskController::class, 'indexByGroup']);
     Route::get('/projects/{project}/tasks', [TaskController::class, 'indexByProject']);
     Route::get('/projects/{project}/tasks/{id}', [TaskController::class, 'show']);
     Route::get('/projects/{project}/tasks/{id}/timetrackings', [TimeTrackingController::class, 'indexByTask']);
