@@ -130,7 +130,7 @@ return [
         'webhook' => [
             'driver' => 'single',
             'path' => storage_path('logs/webhook.log'),
-            'level' => 'info',
+            'level' => 'debug',
         ],
 
     ],
