@@ -6,6 +6,7 @@ use App\Models\MondayTimeTracking;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\UserBoard;
 use App\Services\MondayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -51,7 +52,7 @@ class WebhookController extends Controller
 
     private function handleProjectNumberBoard(Request $request)
     {
-        Log::channel('webhook')->debug(__METHOD__." by {$this->_username} ");
+        Log::channel('webhook')->debug(__METHOD__ . " by {$this->_username} ");
         $eventData = $request->input('event');
         Log::channel('webhook')->info("New project created: {$eventData['pulseName']}.");
 
@@ -68,7 +69,7 @@ class WebhookController extends Controller
 
     private function handleItemDeleted(Request $request)
     {
-        Log::channel('webhook')->debug(__METHOD__." by {$this->_username} ");
+        Log::channel('webhook')->debug(__METHOD__ . " by {$this->_username} ");
         $eventData = $request->input('event');
         $itemId = $eventData['itemId'];
 
@@ -88,44 +89,47 @@ class WebhookController extends Controller
 
     private function handleCreateItem(Request $request)
     {
-        Log::channel('webhook')->debug(__METHOD__." by {$this->_username} ");
+        Log::channel('webhook')->debug(__METHOD__ . " by {$this->_username} ");
         $eventData = $request->input('event');
 
         if ($eventData['boardId'] === 9370542454) {
             return $this->handleProjectNumberBoard($request);
         }
 
-        $project_id = $this->mondayService->getProjectIdForItem($eventData['pulseId']);
-
-        $projectExists = Project::where('id', $project_id)->exists();
-
-        if (!$projectExists) {
-            Log::warning("No matching project found for project_id {$project_id} (item_id: {$eventData['pulseId']})");
-            return $this->webhookChallengeResponse();
-        }
-
         $existingTask = Task::find($eventData['pulseId']);
-
-        if (!$existingTask) {
-            $task = new Task([
-                'id' => $eventData['pulseId'],
-                'project_id' => $project_id,
-                'name' => $eventData['pulseName'],
-                'group_id' => $eventData['groupId']
-            ]);
-            $task->save();
-
-            Log::channel('webhook')->info("New task created", ['id' => $task->id]);
-        } else {
+        if ($existingTask) {
             Log::channel('webhook')->warning("Task already exists", ['id' => $existingTask->id]);
+            return $this->webhookChallengeResponse($request);
         }
 
+        $project = Project::where('time_board_id', $eventData['boardId'])->first();
+        if ($project) {
+            $taskable = $project;
+        } else {
+            $userBoard = UserBoard::find($eventData['boardId']);
+            if ($userBoard) {
+                $taskable = $userBoard;
+            } else {
+                Log::channel('webhook')->warning("No matching taskable entity found for board ID {$eventData['boardId']} (item_id: {$eventData['pulseId']})");
+                return $this->webhookChallengeResponse($request);
+            }
+        }
+
+        $task = new Task([
+            'id' => $eventData['pulseId'],
+            'name' => $eventData['pulseName'],
+            'group_id' => $eventData['groupId']
+        ]);
+        $task->taskable()->associate($taskable);
+        $task->save();
+
+        Log::channel('webhook')->info("New task created", ['id' => $task->id]);
         return $this->webhookChallengeResponse($request);
     }
 
     private function handleCreateProjectButton(Request $request)
     {
-        Log::channel('webhook')->debug(__METHOD__." by {$this->_username} ");
+        Log::channel('webhook')->debug(__METHOD__ . " by {$this->_username} ");
         /** @var \App\Services\MondayService $mondayService */
         $mondayService = app(MondayService::class);
 
@@ -174,7 +178,7 @@ class WebhookController extends Controller
 
     private function handleChangeColumnValue(Request $request)
     {
-        Log::channel('webhook')->debug(__METHOD__." by {$this->_username} ");
+        Log::channel('webhook')->debug(__METHOD__ . " by {$this->_username} ");
         $eventData = $request->input('event');
 
         //create project button clicked
