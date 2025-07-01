@@ -19,6 +19,8 @@ class GroupResource extends JsonResource
             'name' => $this->name,
             'project_id' => $this->project_id,
             'tasks' => TaskResource::collection($this->whenLoaded('tasks')),
+            'duration_seconds' => $this->duration_seconds,
+            'duration_human' => gmdate("H:i", $this->duration_seconds),
         ];
     }
 }
