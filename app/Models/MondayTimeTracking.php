@@ -30,6 +30,10 @@ class MondayTimeTracking extends Model
         'user_id' => 'integer'
     ];
 
+    public function task()
+    {
+        return $this->trackable();
+    }
 
     /**
      * A time tracking entry belongs to an item.
@@ -66,5 +70,15 @@ class MondayTimeTracking extends Model
     public function trackable()
     {
         return $this->morphTo();
+    }
+    protected static function booted()
+    {
+        static::saved(function ($tracking) {
+            $tracking->task?->updateDurationSummary();
+        });
+
+        static::deleted(function ($tracking) {
+            $tracking->task?->updateDurationSummary();
+        });
     }
 }
