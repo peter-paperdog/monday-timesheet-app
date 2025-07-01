@@ -197,7 +197,7 @@ class WebhookController extends Controller
         } else {
             Log::channel('webhook')->info("Item found: {$item->name} (ID: {$item->id})");
         }
-        Log::channel('webhook')->info("Column: {$eventData['columnTitle']} (ID: {$eventData['time_tracking_Mjj69Jw8']})");
+        Log::channel('webhook')->info("Column: {$eventData['columnTitle']} (ID: {$eventData['columnId']})");
 
         //create project button clicked
         if ($eventData["columnId"] === "button_mkrwhp23") {
