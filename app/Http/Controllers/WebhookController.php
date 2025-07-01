@@ -185,8 +185,6 @@ class WebhookController extends Controller
             $eventData['columnType'] === 'duration' &&
             isset($eventData['pulseId'])
         ) {
-            return $this->webhookChallengeResponse($request);
-
             /** @var \App\Services\MondayService $mondayService */
             $mondayService = app(MondayService::class);
 
