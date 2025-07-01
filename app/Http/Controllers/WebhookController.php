@@ -65,6 +65,37 @@ class WebhookController extends Controller
         return $this->webhookChallengeResponse($request);
     }
 
+    private function handleChangeName(Request $request)
+    {
+        Log::channel('webhook')->debug(__METHOD__ . " by {$this->_username} ");
+        $eventData = $request->input('event');
+
+        $itemId = $eventData['itemId'] ?? null;
+        $newName = $eventData['value'] ?? null;
+
+        if (!$itemId || !$newName) {
+            Log::channel('webhook')->warning("Missing itemId or new name in event data", [
+                'itemId' => $itemId,
+                'value' => $newName,
+            ]);
+            return $this->webhookChallengeResponse($request);
+        }
+
+        $task = Task::find($itemId);
+
+        if ($task) {
+            $oldName = $task->name;
+            $task->name = $newName;
+            $task->save();
+
+            Log::channel('webhook')->info("Task name updated: '{$oldName}' → '{$newName}' (ID: {$itemId})");
+        } else {
+            Log::channel('webhook')->info("Task with ID {$itemId} not found. Cannot update name to '{$newName}'.");
+        }
+
+        return $this->webhookChallengeResponse($request);
+    }
+
     private function handleProjectNumberBoard(Request $request)
     {
         Log::channel('webhook')->debug(__METHOD__ . " by {$this->_username} ");
