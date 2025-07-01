@@ -22,4 +22,11 @@ class Project extends Model
     {
         return $this->hasMany(Group::class);
     }
+
+    public function updateDurationSummary(): void
+    {
+        $total = $this->groups()->sum('duration_seconds');
+        $this->duration_seconds = $total;
+        $this->save();
+    }
 }
