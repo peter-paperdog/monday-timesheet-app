@@ -12,6 +12,7 @@ use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InvoicingController;
 use App\Http\Controllers\OfficeController;
 use App\Http\Controllers\WebhookController;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/projects', [ProjectController::class, 'index']);
     Route::get('/projects/{id}', [ProjectController::class, 'show']);
     Route::get('/projects/{project}/groups', [GroupController::class, 'index']);
+    Route::get('/projects/{project}/groups/{id}', [GroupController::class, 'show']);
     Route::get('/projects/{project}/tasks', [TaskController::class, 'indexByProject']);
     Route::get('/projects/{project}/tasks/{id}', [TaskController::class, 'show']);
     Route::get('/projects/{project}/tasks/{id}/timetrackings', [TimeTrackingController::class, 'indexByTask']);
