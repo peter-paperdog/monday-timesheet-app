@@ -188,14 +188,14 @@ class WebhookController extends Controller
     {
         Log::channel('webhook')->debug(__METHOD__ . " by {$this->_username} ");
         $eventData = $request->input('event');
-        $itemId = $eventData['pulseId'];
+        $taskId = $eventData['pulseId'];
 
-        $item = Item::find($itemId);
+        $task = Task::find($taskId);
 
-        if (!$item) {
-            Log::channel('webhook')->warning("No item found with ID: {$itemId}");
+        if (!$task) {
+            Log::channel('webhook')->warning("No task found with ID: {$taskId}");
         } else {
-            Log::channel('webhook')->info("Item found: {$item->name} (ID: {$item->id})");
+            Log::channel('webhook')->info("Task found: {$task->name} (ID: {$task->id})");
         }
         Log::channel('webhook')->info("Column: {$eventData['columnTitle']} (ID: {$eventData['columnId']})");
 
@@ -210,15 +210,15 @@ class WebhookController extends Controller
             /** @var \App\Services\MondayService $mondayService */
             $mondayService = app(MondayService::class);
 
-            $trackingItems = $mondayService->getTimeTrackingItemsForItem($itemId);
+            $trackingItems = $mondayService->getTimeTrackingItemsForItem($taskId);
 
             $newIds = array_column($trackingItems, 'id');
-            $existingIds = MondayTimeTracking::where('item_id', $itemId)->pluck('id')->toArray();
+            $existingIds = MondayTimeTracking::where('item_id', $taskId)->pluck('id')->toArray();
             $toDelete = array_diff($existingIds, $newIds);
 
             if (!empty($toDelete)) {
                 MondayTimeTracking::whereIn('id', $toDelete)->delete();
-                Log::info("Deleted " . count($toDelete) . " outdated time tracking records for item {$itemId}");
+                Log::info("Deleted " . count($toDelete) . " outdated time tracking records for item {$taskId}");
             }
 
             foreach ($trackingItems as $trackingData) {
