@@ -21,6 +21,8 @@ class ProjectResource extends JsonResource
             'time_board_id' => $this->time_board_id,
             'expenses_board_id' => $this->expenses_board_id,
             'groups' => GroupResource::collection($this->whenLoaded('groups')),
+            'duration_seconds' => $this->duration_seconds,
+            'duration_human' => gmdate("H:i", $this->duration_seconds),
         ];
     }
 }
