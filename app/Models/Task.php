@@ -20,6 +20,6 @@ class Task extends Model
 
     public function timeTrackings()
     {
-        return $this->hasMany(TimeTracking::class, 'item_id');
+        return $this->morphMany(MondayTimeTracking::class, 'trackable');
     }
 }
