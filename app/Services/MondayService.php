@@ -1117,30 +1117,30 @@ GRAPHQL;
 
     public function setupWebhooksForUserBoard(UserBoard $userBoard)
     {
-            $webhooks = $this->getWebhooksForBoard($userBoard->id);
-            $existingEvents = [];
+        $webhooks = $this->getWebhooksForBoard($userBoard->id);
+        $existingEvents = [];
 
-            // Count occurrences per event
-            foreach ($webhooks as $webhook) {
-                $event = $webhook['event'];
-                $existingEvents[$event][] = $webhook['id'];
-            }
+        // Count occurrences per event
+        foreach ($webhooks as $webhook) {
+            $event = $webhook['event'];
+            $existingEvents[$event][] = $webhook['id'];
+        }
 
-            foreach ($this->webhookEvents as $event) {
-                $eventCount = count($existingEvents[$event] ?? []);
+        foreach ($this->webhookEvents as $event) {
+            $eventCount = count($existingEvents[$event] ?? []);
 
-                if ($eventCount === 0) {
-                    // Event not registered at all → create it
-                    $this->createWebhook($this->id, $event);
-                } elseif ($eventCount > 1) {
-                    // Event registered more than once → keep one, delete the rest
-                    $webhookIds = $existingEvents[$event];
-                    // Keep the first, delete the rest
-                    foreach (array_slice($webhookIds, 1) as $duplicateId) {
-                        $this->deleteWebhook($duplicateId);
-                    }
+            if ($eventCount === 0) {
+                // Event not registered at all → create it
+                $this->createWebhook($this->id, $event);
+            } elseif ($eventCount > 1) {
+                // Event registered more than once → keep one, delete the rest
+                $webhookIds = $existingEvents[$event];
+                // Keep the first, delete the rest
+                foreach (array_slice($webhookIds, 1) as $duplicateId) {
+                    $this->deleteWebhook($duplicateId);
                 }
             }
+        }
     }
 
     public function setupWebhooksForProject(Project $project)
