@@ -52,7 +52,7 @@ class SyncMondayTasks extends Command
                 $task = Task::find($taskData['id']) ?? new Task(['id' => $taskData['id']]);
 
                 $task->name = $taskData['name'] ?? '';
-                $task->group_id = $taskData['group']['id'] ?? null;
+                $task->group_id = $project->id . "_" . $taskData['group']['id'];
                 $task->taskable()->associate($project);
 
                 $task->save();
