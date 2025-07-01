@@ -35,7 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('sync:office-schedules')->hourly()->between('08:00', '22:00');
 
         $schedule->command('sync:monday-contact-board')->hourly()->between('08:00', '22:00');
-        $schedule->command('sync:monday-board-webhooks')->everyMinute();
+        $schedule->command('sync:monday-project-webhooks')->hourly()->between('08:00', '22:00');
 
 
         /*
