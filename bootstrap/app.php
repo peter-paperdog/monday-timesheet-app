@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule) {
         // Schedule tasks to run every hour between 6 AM and 12 PM (weekdays only)
         $schedule->command('sync:monday-users')->daily()->at("00:20");
+        $schedule->command('sync:monday-user-boards')->daily()->at("00:30");
         $schedule->command('sync:monday-tasks')->everyFifteenMinutes()->between('08:00', '23:00');
         $schedule->command('sync:monday-boards')->everyFifteenMinutes()->between('08:00', '23:00');
         $schedule->command('sync:monday-folders')->hourly()->between('08:05', '23:05');
