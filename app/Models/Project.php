@@ -17,4 +17,9 @@ class Project extends Model
     {
         return $this->morphMany(Task::class, 'taskable');
     }
+
+    public function groups()
+    {
+        return $this->hasMany(Group::class);
+    }
 }
