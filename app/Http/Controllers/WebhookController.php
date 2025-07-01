@@ -34,7 +34,7 @@ class WebhookController extends Controller
     public function handle(Request $request, string $event)
     {
         $eventData = $request->input('event');
-        Log::channel('webhook')->debug(json_encode($request->all(), JSON_PRETTY_PRINT));
+        Log::channel('webhook')->debug(json_encode($eventData, JSON_PRETTY_PRINT));
 
         if (isset($eventData['userId'])) {
             static $userCache = [];
