@@ -69,11 +69,23 @@ class MondayTimeTracking extends Model
 
     protected static function booted()
     {
+        static::saving(function ($tracking) {
+            $tracking->load('task');
+        });
+
+        static::deleting(function ($tracking) {
+            $tracking->load('task');
+        });
+
         static::saved(function ($tracking) {
             $tracking->task?->updateDurationSummary();
         });
 
         static::deleted(function ($tracking) {
+            $tracking->task?->updateDurationSummary();
+        });
+
+        static::forceDeleted(function ($tracking) {
             $tracking->task?->updateDurationSummary();
         });
     }
