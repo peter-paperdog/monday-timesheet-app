@@ -14,8 +14,8 @@ class TimeTrackingController extends Controller
     {
         $task = $project->tasks()->findOrFail($id);
 
-        if ($task->project_id !== $project->id) {
-            abort(404, 'Task does not belong to the given project.');
+        if ($task->taskable_type !== Project::class || $task->taskable_id !== $project->id) {
+            abort(404, "Task {$task->name} (ID: {$id}) does not belong to project {$project->name} (ID: {$project->id}).");
         }
 
         // Eager-load user relation
