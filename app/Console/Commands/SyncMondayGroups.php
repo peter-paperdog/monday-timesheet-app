@@ -38,7 +38,10 @@ class SyncMondayGroups extends Command
         $mondayService = app(MondayService::class);
 
         foreach (Project::all() as $project) {
-            $groups = $mondayService->getGroups($project->id);
+            if(empty($project->time_board_id)){
+                continue;
+            }
+            $groups = $mondayService->getGroups($project->time_board_id);
 
             foreach ($groups as $group) {
                 if ($group['id'] === "topics") {
