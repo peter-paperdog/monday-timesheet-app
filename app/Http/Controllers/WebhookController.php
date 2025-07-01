@@ -58,7 +58,7 @@ class WebhookController extends Controller
         if (method_exists($this, $method)) {
             Log::channel('webhook')->info("➡️ Dispatching to handler: {$method}");
             return $this->{$method}($request);
-        }else{
+        } else {
             Log::channel('webhook')->warning("⚠️ No handler found for event: {$event}");
         }
 
@@ -161,13 +161,14 @@ class WebhookController extends Controller
         $task->taskable()->associate($taskable);
         $task->save();
 
-        Log::channel('webhook')->info("New task created: ".$eventData['pulseName']." ({$task->id})");
+        Log::channel('webhook')->info("New task created: " . $eventData['pulseName'] . " ({$task->id})");
         return $this->webhookChallengeResponse($request);
     }
 
     private function handleCreateProjectButton(Request $request)
     {
         Log::channel('webhook')->debug(__METHOD__ . " by {$this->_username} ");
+
         /** @var \App\Services\MondayService $mondayService */
         $mondayService = app(MondayService::class);
 
@@ -212,12 +213,19 @@ class WebhookController extends Controller
                 Log::channel('webhook')->info("DONE ✅");
             }
         }
+        return $this->webhookChallengeResponse($request);
     }
 
     private function handleChangeColumnValue(Request $request)
     {
         Log::channel('webhook')->debug(__METHOD__ . " by {$this->_username} ");
         $eventData = $request->input('event');
+
+        //create project button clicked
+        if ($eventData["columnId"] === "button_mkrwhp23") {
+            $this->handleCreateProjectButton($request);
+        }
+
         $taskId = $eventData['pulseId'];
 
         $task = Task::find($taskId);
@@ -229,10 +237,7 @@ class WebhookController extends Controller
         }
         Log::channel('webhook')->info("Column: {$eventData['columnTitle']} (ID: {$eventData['columnId']})");
 
-        //create project button clicked
-        if ($eventData["columnId"] === "button_mkrwhp23") {
-            $this->handleCreateProjectButton($request);
-        } else if (
+        if (
             isset($eventData['columnType']) &&
             $eventData['columnType'] === 'duration' &&
             isset($eventData['pulseId'])
