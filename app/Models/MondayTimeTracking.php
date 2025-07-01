@@ -32,7 +32,7 @@ class MondayTimeTracking extends Model
 
     public function task()
     {
-        return $this->trackable();
+        return $this->belongsTo(Task::class, 'item_id', 'id');
     }
 
     /**
