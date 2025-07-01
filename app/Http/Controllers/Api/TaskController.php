@@ -43,4 +43,13 @@ class TaskController extends Controller
     {
         return TaskResource::collection($project->tasks()->with('group')->get());
     }
+
+    public function indexByGroup(Project $project, string $id)
+    {
+        $tasks = $project->tasks()
+            ->where('group_id', $id)
+            ->with('group')
+            ->get();
+
+        return TaskResource::collection($tasks);    }
 }
