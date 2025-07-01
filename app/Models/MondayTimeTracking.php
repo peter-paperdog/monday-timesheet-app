@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 class MondayTimeTracking extends Model
 {
     use HasFactory;
+
     public $incrementing = false;
     protected $keyType = 'int';
     public $timestamps = false;
@@ -60,5 +61,10 @@ class MondayTimeTracking extends Model
     public function getFormattedEndedAtAttribute()
     {
         return $this->ended_at ? Carbon::parse($this->ended_at)->toDateTimeString() : null;
+    }
+
+    public function trackable()
+    {
+        return $this->morphTo();
     }
 }
