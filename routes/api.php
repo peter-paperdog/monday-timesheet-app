@@ -34,7 +34,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/clients/{client}/projects', [ProjectController::class, 'indexByClient']);
 
     Route::get('/projects', [ProjectController::class, 'index']);
-    Route::get('/projects/{id}', [ProjectController::class, 'show']);
+    Route::get('/projects/{project}', [ProjectController::class, 'show']);
     Route::get('/projects/{project}/groups', [GroupController::class, 'index']);
     Route::get('/projects/{project}/groups/{id}', [GroupController::class, 'show']);
     Route::get('/projects/{project}/groups/{id}/tasks', [TaskController::class, 'indexByGroup']);
