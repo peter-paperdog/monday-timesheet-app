@@ -54,10 +54,10 @@ class SyncMondayBoardWebhooks extends Command
         foreach ($boards as $board) {
             $boardId = $board['id'];
             $boardType = $board['type'];
+            $boardName = $board['name'];
 
             // Skip subitem boards
             if ($boardType === "sub_items_board") {
-                $this->info("Skipping subitem board: $boardId");
                 continue;
             }
 
@@ -78,14 +78,12 @@ class SyncMondayBoardWebhooks extends Command
                     $this->createWebhook($boardId, $event);
                 } elseif ($eventCount > 1) {
                     // Event registered more than once → keep one, delete the rest
-                    $this->info("Found duplicate webhooks for '$event' on board $boardId");
+                    $this->info("Found duplicate webhooks for '$event' on board $boardId ($boardName)");
                     $webhookIds = $existingEvents[$event];
                     // Keep the first, delete the rest
                     foreach (array_slice($webhookIds, 1) as $duplicateId) {
                         $this->deleteWebhook($duplicateId);
                     }
-                } else {
-                    $this->info("Webhook for '$event' already exists on board $boardId");
                 }
             }
         }
