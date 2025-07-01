@@ -36,26 +36,33 @@ class SyncMondayTasks extends Command
     public function handle()
     {
         $this->info('Syncing Tasks...');
+
         foreach (Project::all() as $project) {
             if (is_null($project->time_board_id)) {
                 continue;
             }
-            $this->info("Synch " . $project->name);
+
+            $this->info("Syncing project: " . $project->name);
             $tasks = $this->mondayService->getTasks($project->time_board_id);
             $i = 0;
-            foreach ($tasks as $task) {
+
+            foreach ($tasks as $taskData) {
                 $i++;
+
                 Task::updateOrCreate(
-                    ['id' => $task['id']],
+                    ['id' => $taskData['id']],
                     [
-                        'name' => $task['name'] ?? '',
-                        'project_id' => $project->id,
-                        'group_id' => $task['group']['id'] ?? null,
+                        'name' => $taskData['name'] ?? '',
+                        'group_id' => $taskData['group']['id'] ?? null,
+                        'taskable_id' => $project->id,
+                        'taskable_type' => Project::class,
                     ]
                 );
             }
-            $this->info("Processed " . $i . " tasks.");
+
+            $this->info("Processed $i tasks for project '{$project->name}'.");
         }
-        $this->info('End of syncing Tasks...');
+
+        $this->info('All project tasks synced.');
     }
 }
