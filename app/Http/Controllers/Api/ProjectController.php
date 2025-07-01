@@ -28,9 +28,13 @@ class ProjectController extends Controller
      * @param $id
      * @return ProjectResource
      */
-    public function show($id)
+    public function show(Project $project)
     {
-        $project = Project::with('client')->findOrFail($id);
+        $project->load([
+            'groups.tasks',
+            'client'
+        ]);
+
         return new ProjectResource($project);
     }
 }
