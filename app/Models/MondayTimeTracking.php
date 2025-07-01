@@ -84,9 +84,5 @@ class MondayTimeTracking extends Model
         static::deleted(function ($tracking) {
             $tracking->task?->updateDurationSummary();
         });
-
-        static::forceDeleted(function ($tracking) {
-            $tracking->task?->updateDurationSummary();
-        });
     }
 }
