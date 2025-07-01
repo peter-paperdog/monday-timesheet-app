@@ -226,6 +226,12 @@ class WebhookController extends Controller
             $this->handleCreateProjectButton($request);
         }
 
+        //project board column update
+        //do nothing, just note
+        if($eventData["boardId"] === 9370542454){
+            return $this->webhookChallengeResponse($request);
+        }
+
         $taskId = $eventData['pulseId'];
 
         $task = Task::find($taskId);
