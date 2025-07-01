@@ -19,4 +19,12 @@ class Group extends Model
     {
         return $this->hasMany(Task::class);
     }
+    public function updateDurationSummary(): void
+    {
+        $total = $this->tasks()->sum('duration_seconds');
+        $this->duration_seconds = $total;
+        $this->save();
+
+        $this->project?->updateDurationSummary();
+    }
 }
