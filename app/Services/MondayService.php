@@ -795,6 +795,30 @@ GRAPHQL;
         return $response['data']['boards'][0]['items_page']['items'];
     }
 
+    /**
+     * Fetches the user boards
+     *
+     * @return array The array of user boards.
+     */
+    public function getUserBoards()
+    {
+        $query = <<<GRAPHQL
+            query {
+              folders(ids: 17501476) {
+                children {
+                  id
+                  name
+                }
+              }
+            }
+GRAPHQL;
+
+        // Define the variables to pass into the query
+        $response = $this->makeApiRequest($query);
+
+        return $response['data']['folders'][0]['children'];
+    }
+
 
     /**
      * Fetches the list of clients, projects from the Monday.com API.
