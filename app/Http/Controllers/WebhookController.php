@@ -130,7 +130,7 @@ class WebhookController extends Controller
         $task->taskable()->associate($taskable);
         $task->save();
 
-        Log::channel('webhook')->info("New task created", ['id' => $task->id]);
+        Log::channel('webhook')->info("New task created: ".$eventData['pulseName']." ({$task->id})");
         return $this->webhookChallengeResponse($request);
     }
 
