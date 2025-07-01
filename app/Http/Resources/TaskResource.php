@@ -21,6 +21,8 @@ class TaskResource extends JsonResource
             'group_id' => $this->group_id,
             'project_id' => $this->taskable_type === Project::class ? $this->taskable_id : null,
             'user_board_id' => $this->taskable_type === \App\Models\UserBoard::class ? $this->taskable_id : null,
+            'duration_seconds' => $this->duration_seconds,
+            'duration_human' => gmdate("H:i", $this->duration_seconds),
         ];
     }
 }
