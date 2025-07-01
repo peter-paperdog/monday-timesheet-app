@@ -2,11 +2,24 @@
 
 namespace App\Services;
 
+use App\Models\Project;
 use Illuminate\Support\Facades\Http;
 
 class MondayService
 {
     protected $apiKey;
+
+    protected array $webhookEvents = [
+        "create_item",
+        "change_name",
+        "item_archived",
+        "item_deleted",
+        "item_moved_to_any_group",
+        "item_restored",
+        "change_column_value",
+        "change_status_column_value",
+        "create_column",
+    ];
 
     public function __construct()
     {
@@ -1073,5 +1086,82 @@ GRAPHQL;
                 throw $exception;
             }
         }
+    }
+
+
+    public function setupWebhooksForProject(Project $project)
+    {
+        $toSynchronize = [];
+
+        if ($project->time_board_id) {
+            $toSynchronize[$project->time_board_id] = 'Time board';
+        }
+        if ($project->expenses_board_id) {
+            $toSynchronize[$project->expenses_board_id] = 'Expenses board';
+        }
+
+        foreach ($toSynchronize as $boardId => $boardName) {
+            $webhooks = $this->getWebhooksForBoard($boardId);
+            $existingEvents = [];
+
+            // Count occurrences per event
+            foreach ($webhooks as $webhook) {
+                $event = $webhook['event'];
+                $existingEvents[$event][] = $webhook['id'];
+            }
+
+            foreach ($this->webhookEvents as $event) {
+                $eventCount = count($existingEvents[$event] ?? []);
+
+                if ($eventCount === 0) {
+                    // Event not registered at all → create it
+                    $this->createWebhook($this->id, $event);
+                } elseif ($eventCount > 1) {
+                    // Event registered more than once → keep one, delete the rest
+                    //    $this->info("Found duplicate webhooks for '$event' on board $boardId ($boardName)");
+                    $webhookIds = $existingEvents[$event];
+                    // Keep the first, delete the rest
+                    foreach (array_slice($webhookIds, 1) as $duplicateId) {
+                        $this->deleteWebhook($duplicateId);
+                    }
+                }
+            }
+        }
+    }
+
+    protected function createWebhook(string $boardId, string $event): ?string
+    {
+        $url = env('MONDAY_WEBHOOK_CALLBACK') . '/' . $event;
+
+        $mutation = <<<GRAPHQL
+        mutation {
+            create_webhook(board_id: $boardId, url: "$url", event: $event) {
+                id
+            }
+        }
+        GRAPHQL;
+
+        $response = Http::withHeaders([
+            'Authorization' => env('MONDAY_API_TOKEN'),
+        ])->post('https://api.monday.com/v2', ['query' => $mutation]);
+
+        return data_get($response->json(), 'data.create_webhook.id');
+    }
+
+    protected function deleteWebhook(string $webhookId): ?string
+    {
+        $mutation = <<<GRAPHQL
+        mutation {
+            delete_webhook(id: $webhookId) {
+                id
+            }
+        }
+        GRAPHQL;
+
+        $response = Http::withHeaders([
+            'Authorization' => env('MONDAY_API_TOKEN'),
+        ])->post('https://api.monday.com/v2', ['query' => $mutation]);
+
+        return data_get($response->json(), 'data.delete_webhook.id');
     }
 }
