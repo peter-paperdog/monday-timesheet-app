@@ -36,8 +36,15 @@ class WebhookController extends Controller
         $eventData = $request->input('event');
         Log::channel('webhook')->debug(json_encode($request->all(), JSON_PRETTY_PRINT));
 
-        if (isset($eventData['userId']) && User::find($eventData['userId'])) {
-            $this->_username = User::find($eventData['userId'])->name;
+        if (isset($eventData['userId'])) {
+            static $userCache = [];
+            $userId = $eventData['userId'];
+
+            if (!isset($userCache[$userId])) {
+                $userCache[$userId] = User::find($userId);
+            }
+
+            $this->_username = $userCache[$userId]?->name ?? 'unknown';
         }
         Log::channel('webhook')->info("Webhook received by {$this->_username} for event: {$event}");
         $method = 'handle' . str_replace(' ', '', ucwords(str_replace('_', ' ', $event)));
