@@ -22,7 +22,32 @@ class ProjectResource extends JsonResource
             'expenses_board_id' => $this->expenses_board_id,
             'groups' => GroupResource::collection($this->whenLoaded('groups')),
             'duration_seconds' => $this->duration_seconds,
-            'duration_human' => gmdate("H:i", $this->duration_seconds),
+            'duration_human' => $this->formatDuration($this->duration_seconds),
         ];
+    }
+
+    private function formatDuration(int $seconds): string
+    {
+        $hours = floor($seconds / 3600);
+        $seconds %= 3600;
+
+        $minutes = floor($seconds / 60);
+        $seconds %= 60;
+
+        $parts = [];
+
+        if ($hours > 0) {
+            $parts[] = $hours . 'h';
+        }
+
+        if ($minutes > 0) {
+            $parts[] = $minutes . 'm';
+        }
+
+        if ($seconds > 0 || empty($parts)) {
+            $parts[] = $seconds . 's';
+        }
+
+        return implode(' ', $parts);
     }
 }

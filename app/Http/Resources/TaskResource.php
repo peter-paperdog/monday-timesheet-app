@@ -22,7 +22,32 @@ class TaskResource extends JsonResource
             'project_id' => $this->taskable_type === Project::class ? $this->taskable_id : null,
             'user_board_id' => $this->taskable_type === \App\Models\UserBoard::class ? $this->taskable_id : null,
             'duration_seconds' => $this->duration_seconds,
-            'duration_human' => gmdate("H:i", $this->duration_seconds),
+            'duration_human' => $this->formatDuration($this->duration_seconds),
         ];
+    }
+
+    private function formatDuration(int $seconds): string
+    {
+        $hours = floor($seconds / 3600);
+        $seconds %= 3600;
+
+        $minutes = floor($seconds / 60);
+        $seconds %= 60;
+
+        $parts = [];
+
+        if ($hours > 0) {
+            $parts[] = $hours . 'h';
+        }
+
+        if ($minutes > 0) {
+            $parts[] = $minutes . 'm';
+        }
+
+        if ($seconds > 0 || empty($parts)) {
+            $parts[] = $seconds . 's';
+        }
+
+        return implode(' ', $parts);
     }
 }
