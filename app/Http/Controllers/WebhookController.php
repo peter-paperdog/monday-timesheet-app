@@ -70,16 +70,8 @@ class WebhookController extends Controller
         Log::channel('webhook')->debug(__METHOD__ . " by {$this->_username} ");
         $eventData = $request->input('event');
 
-        $itemId = $eventData['itemId'] ?? null;
-        $newName = $eventData['value'] ?? null;
-
-        if (!$itemId || !$newName) {
-            Log::channel('webhook')->warning("Missing itemId or new name in event data", [
-                'itemId' => $itemId,
-                'value' => $newName,
-            ]);
-            return $this->webhookChallengeResponse($request);
-        }
+        $itemId = $eventData['pulseId'];
+        $newName = $eventData['value']['name'];
 
         $task = Task::find($itemId);
 
