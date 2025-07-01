@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Project;
 use App\Models\UserBoard;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class MondayService
 {
@@ -57,19 +58,20 @@ class MondayService
                 return $response->json();
             }
 
-            // Log or handle non-successful responses
-            logger()->error('API request failed', [
+            Log::error('[MONDAY API] Request failed', [
+                'query' => $query,
+                'variables' => $variables,
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
 
-            die($response->body());
+            return null;
         } catch (\Exception $e) {
-            // Log the exception for debugging purposes
-            logger()->error('API request encountered an error', [
-                'message' => $e->getMessage(),
+            Log::error('[MONDAY API] Exception during request', [
+                'query' => $query,
+                'variables' => $variables,
+                'error' => $e->getMessage(),
             ]);
-
             return null;
         }
     }
