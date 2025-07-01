@@ -66,23 +66,4 @@ class MondayTimeTracking extends Model
     {
         return $this->ended_at ? Carbon::parse($this->ended_at)->toDateTimeString() : null;
     }
-
-    protected static function booted()
-    {
-        static::saving(function ($tracking) {
-            $tracking->load('task');
-        });
-
-        static::deleting(function ($tracking) {
-            $tracking->load('task');
-        });
-
-        static::saved(function ($tracking) {
-            $tracking->task?->updateDurationSummary();
-        });
-
-        static::deleted(function ($tracking) {
-            $tracking->task?->updateDurationSummary();
-        });
-    }
 }
