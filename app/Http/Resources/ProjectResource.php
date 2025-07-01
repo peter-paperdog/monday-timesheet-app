@@ -20,6 +20,7 @@ class ProjectResource extends JsonResource
             'client' => new ClientResource($this->whenLoaded('client')),
             'time_board_id' => $this->time_board_id,
             'expenses_board_id' => $this->expenses_board_id,
+            'groups' => GroupResource::collection($this->whenLoaded('groups')),
         ];
     }
 }
