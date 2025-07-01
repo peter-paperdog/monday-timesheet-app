@@ -7,18 +7,13 @@ use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TimeTrackingController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InvoicingController;
 use App\Http\Controllers\OfficeController;
 use App\Http\Controllers\WebhookController;
-use App\Models\Client;
-use App\Models\Project;
-use App\Models\Task;
-use App\Services\MondayService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
 
 Route::options('{any}', function () {
     return response()->json([], 200)
@@ -31,6 +26,7 @@ Route::options('{any}', function () {
 
 //---protected routes, but do not increase token lifetime---
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/currencies', [CurrencyController::class, 'index']);
     Route::get('/clients', [ClientController::class, 'index']);
     Route::get('/clients/{id}', [ClientController::class, 'show']);
     Route::get('/clients/{client}/contacts', [ContactController::class, 'indexByClient']);
