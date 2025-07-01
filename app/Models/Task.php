@@ -16,7 +16,7 @@ class Task extends Model
 
     public function timeTrackings()
     {
-        return $this->morphMany(MondayTimeTracking::class, 'trackable');
+        return $this->hasMany(MondayTimeTracking::class, 'item_id', 'id');
     }
     public function taskable()
     {
