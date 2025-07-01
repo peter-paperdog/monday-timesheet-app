@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Item;
 use App\Models\MondayTimeTracking;
 use App\Models\Project;
 use App\Models\Task;
@@ -26,6 +25,10 @@ class WebhookController extends Controller
     private function webhookChallengeResponse(Request $request)
     {
         Log::channel('webhook')->debug(__METHOD__);
+
+        Log::channel('webhook')->info("✅ Webhook COMPLETED");
+        Log::channel('webhook')->info(str_repeat('=', 80));
+
         if ($request->has('challenge')) {
             return response()->json(['challenge' => $request->input('challenge')]);
         }
@@ -35,6 +38,8 @@ class WebhookController extends Controller
     public function handle(Request $request, string $event)
     {
         $eventData = $request->input('event');
+        Log::channel('webhook')->info(str_repeat('=', 80));
+        Log::channel('webhook')->info("📥 Webhook STARTED — Event: {$event}");
         Log::channel('webhook')->debug(json_encode($eventData, JSON_PRETTY_PRINT));
 
         if (isset($eventData['userId'])) {
@@ -51,8 +56,10 @@ class WebhookController extends Controller
         $method = 'handle' . str_replace(' ', '', ucwords(str_replace('_', ' ', $event)));
 
         if (method_exists($this, $method)) {
-            Log::channel('webhook')->info("Calling handler method: {$method}");
+            Log::channel('webhook')->info("➡️ Dispatching to handler: {$method}");
             return $this->{$method}($request);
+        }else{
+            Log::channel('webhook')->warning("⚠️ No handler found for event: {$event}");
         }
 
         return $this->webhookChallengeResponse($request);
