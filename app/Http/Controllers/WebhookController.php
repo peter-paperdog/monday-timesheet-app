@@ -34,6 +34,8 @@ class WebhookController extends Controller
     public function handle(Request $request, string $event)
     {
         $eventData = $request->input('event');
+        Log::channel('webhook')->debug(json_encode($request->all(), JSON_PRETTY_PRINT));
+
         if (isset($eventData['userId']) && User::find($eventData['userId'])) {
             $this->_username = User::find($eventData['userId'])->name;
         }
@@ -44,8 +46,6 @@ class WebhookController extends Controller
             Log::channel('webhook')->info("Calling handler method: {$method}");
             return $this->{$method}($request);
         }
-
-        Log::channel('webhook')->warning("No handler method found for event: {$event}" . json_encode($request->all(), JSON_PRETTY_PRINT));
 
         return $this->webhookChallengeResponse($request);
     }
