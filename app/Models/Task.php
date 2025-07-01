@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Task extends Model
 {
@@ -20,5 +21,14 @@ class Task extends Model
     public function taskable()
     {
         return $this->morphTo();
+    }
+    public function updateDurationSummary(): void
+    {
+        $total = $this->timeTrackings()->sum(DB::raw('TIMESTAMPDIFF(SECOND, started_at, ended_at)'));
+        $this->duration_seconds = $total;
+        $this->save();
+
+        // Update group and project too
+        $this->group?->updateDurationSummary();
     }
 }
