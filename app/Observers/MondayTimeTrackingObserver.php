@@ -12,6 +12,7 @@ class MondayTimeTrackingObserver
      */
     public function created(MondayTimeTracking $mondayTimeTracking): void
     {
+        Log::debug("Observer triggered: created tracking {$mondayTimeTracking->id} for item {$mondayTimeTracking->item_id}");
         $this->updateTaskDuration($mondayTimeTracking, 'created');
     }
 
@@ -20,6 +21,7 @@ class MondayTimeTrackingObserver
      */
     public function updated(MondayTimeTracking $mondayTimeTracking): void
     {
+        Log::debug("Observer triggered: updated tracking {$mondayTimeTracking->id}");
         $this->updateTaskDuration($mondayTimeTracking, 'updated');
     }
 
@@ -28,6 +30,7 @@ class MondayTimeTrackingObserver
      */
     public function deleted(MondayTimeTracking $mondayTimeTracking): void
     {
+        Log::debug("Observer triggered: deleted tracking {$mondayTimeTracking->id}");
         $this->updateTaskDuration($mondayTimeTracking, 'deleted');
     }
 
@@ -36,6 +39,7 @@ class MondayTimeTrackingObserver
      */
     public function restored(MondayTimeTracking $mondayTimeTracking): void
     {
+        Log::debug("Observer triggered: restored tracking {$mondayTimeTracking->id}");
         $this->updateTaskDuration($mondayTimeTracking, 'restored');
     }
 
@@ -44,6 +48,7 @@ class MondayTimeTrackingObserver
      */
     public function forceDeleted(MondayTimeTracking $mondayTimeTracking): void
     {
+        Log::debug("Observer triggered: forceDeleted tracking {$mondayTimeTracking->id}");
         $this->updateTaskDuration($mondayTimeTracking, 'forceDeleted');
     }
 
