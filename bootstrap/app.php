@@ -34,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('sync:monday-assignments')->everyTenMinutes()->between('08:00', '23:00');
 
         $schedule->command('sync:office-schedules')->hourly()->between('08:00', '22:00');
+        $schedule->command('sync:monday-user-tasks')->everyFifteenMinutes()->between('08:00', '23:00');
 
         $schedule->command('sync:monday-contact-board')->hourly()->between('08:00', '22:00');
         $schedule->command('sync:monday-project-webhooks')->hourly()->between('08:00', '22:00');
