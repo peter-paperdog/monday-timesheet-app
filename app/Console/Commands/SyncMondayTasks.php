@@ -49,15 +49,13 @@ class SyncMondayTasks extends Command
             foreach ($tasks as $taskData) {
                 $i++;
 
-                Task::updateOrCreate(
-                    ['id' => $taskData['id']],
-                    [
-                        'name' => $taskData['name'] ?? '',
-                        'group_id' => $taskData['group']['id'] ?? null,
-                        'taskable_id' => $project->id,
-                        'taskable_type' => Project::class,
-                    ]
-                );
+                $task = Task::find($taskData['id']) ?? new Task(['id' => $taskData['id']]);
+
+                $task->name = $taskData['name'] ?? '';
+                $task->group_id = $taskData['group']['id'] ?? null;
+                $task->taskable()->associate($project);
+
+                $task->save();
             }
 
             $this->info("Processed $i tasks for project '{$project->name}'.");
