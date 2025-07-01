@@ -80,4 +80,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserSchedule::class, 'user_id', 'id');
     }
+
+    public function userBoard()
+    {
+        return $this->hasOne(UserBoard::class);
+    }
 }
