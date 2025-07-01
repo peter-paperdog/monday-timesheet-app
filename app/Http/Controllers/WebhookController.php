@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Item;
 use App\Models\MondayTimeTracking;
 use App\Models\Project;
 use App\Models\Task;
@@ -187,6 +188,16 @@ class WebhookController extends Controller
     {
         Log::channel('webhook')->debug(__METHOD__ . " by {$this->_username} ");
         $eventData = $request->input('event');
+        $itemId = $eventData['pulseId'];
+
+        $item = Item::find($itemId);
+
+        if (!$item) {
+            Log::channel('webhook')->warning("No item found with ID: {$itemId}");
+        } else {
+            Log::channel('webhook')->info("Item found: {$item->name} (ID: {$item->id})");
+        }
+        Log::channel('webhook')->info("Column: {$eventData['columnTitle']} (ID: {$eventData['time_tracking_Mjj69Jw8']})");
 
         //create project button clicked
         if ($eventData["columnId"] === "button_mkrwhp23") {
@@ -199,7 +210,6 @@ class WebhookController extends Controller
             /** @var \App\Services\MondayService $mondayService */
             $mondayService = app(MondayService::class);
 
-            $itemId = $eventData['pulseId'];
             $trackingItems = $mondayService->getTimeTrackingItemsForItem($itemId);
 
             $newIds = array_column($trackingItems, 'id');
