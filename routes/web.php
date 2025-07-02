@@ -82,7 +82,7 @@ Route::middleware('auth')->group(function () {
                     'title' => implode(' - ', $titleParts),
                     'start' => $entry->started_at->toIso8601String(),
                     'end' => $entry->ended_at ? $entry->ended_at->toIso8601String() : null,
-                    'color' => $isAdminBoard ? '#9ec5fe' : '#007bff', // lighter blue for Admin
+                    'color' => $isAdminBoard ? '#9ec5fe' : '#ffd8a8',
                 ];
             });
 
