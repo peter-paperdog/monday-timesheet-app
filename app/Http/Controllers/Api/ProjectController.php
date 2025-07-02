@@ -14,12 +14,18 @@ class ProjectController extends Controller
 {
     use LoadsWithDepth;
 
+    protected array $relationDepthMap = [
+        1 => ['client', 'groups'],
+        2 => ['client', 'groups.tasks'],
+        3 => ['client', 'groups.tasks.timeTrackings'],
+    ];
+
     /**
      * @return AnonymousResourceCollection
      */
     public function index(Request $request)
     {
-        $depth = (int)$request->query('depth', 1);
+        $depth = (int) $request->query('depth', 1);
 
         $projects = Project::with($this->getRelationsByDepth($depth))->get();
 
@@ -28,7 +34,7 @@ class ProjectController extends Controller
 
     public function indexByClient(Request $request, Client $client)
     {
-        $depth = (int)$request->query('depth', 1);
+        $depth = (int) $request->query('depth', 1);
 
         $client->load(['projects' => function ($query) use ($depth) {
             $query->with($this->getRelationsByDepth($depth));
@@ -43,13 +49,9 @@ class ProjectController extends Controller
      */
     public function show(Request $request, Project $project)
     {
-        $depth = (int)$request->query('depth', 1);
+        $depth = (int) $request->query('depth', 1);
 
-        $this->loadWithDepth($project, $depth, [
-            1 => ['client', 'groups'],
-            2 => ['groups.tasks'],
-            3 => ['groups.tasks.timeTrackings'],
-        ]);
+        $this->loadWithDepth($project, $depth, $this->relationDepthMap);
 
         return new ProjectResource($project);
     }
