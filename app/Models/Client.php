@@ -15,6 +15,6 @@ class Client extends Model
 
     public function contacts()
     {
-        return $this->hasMany(Contact::class, 'company', 'name');
+        return $this->hasMany(Contact::class);
     }
 }
