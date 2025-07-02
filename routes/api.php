@@ -40,6 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/projects/{project}/groups/{id}/tasks', [TaskController::class, 'indexByGroup']);
     Route::get('/projects/{project}/tasks', [TaskController::class, 'indexByProject']);
     Route::get('/projects/{project}/tasks/{id}', [TaskController::class, 'show']);
+    Route::get('/projects/{project}/groups/{group}/tasks/{task}', [TaskController::class, 'showFromGroup']);
     Route::get('/projects/{project}/tasks/{id}/timetrackings', [TimeTrackingController::class, 'indexByTask']);
 
     Route::get('/contacts', [ContactController::class, 'index']);
