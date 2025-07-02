@@ -21,4 +21,9 @@ class Contact extends Model
         'work_phone',
         'address'
     ];
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
 }
