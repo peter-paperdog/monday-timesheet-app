@@ -58,22 +58,31 @@ Route::middleware('auth')->group(function () {
         // Fetch time tracking data
         $events = MondayTimeTracking::where('user_id', $userId)
             ->whereBetween('started_at', [$startOfWeek, $endOfWeek])
-            ->with(['item.board', 'item.group', 'item.parent.group']) // <-- hozzáadva a parent.group betöltése
+            ->with(['item.board', 'item.group', 'item.parent.group'])
             ->get()
             ->map(function ($entry) {
-                // if no group, but has parent, use parent's group
+                $boardName = $entry->item->board->name ?? 'No Board';
+                $isAdminBoard = $boardName === '2_Admin';
+
+                // Group: use item's group, or parent's group, or null
                 $group = $entry->item->group ?? $entry->item->parent->group ?? null;
 
+                // Prepare title parts
+                $titleParts = [];
+
+                $titleParts[] = $isAdminBoard ? 'Admin' : $boardName;
+
+                if ($group?->name) {
+                    $titleParts[] = $group->name;
+                }
+
+                $titleParts[] = $entry->item->name ?? 'Unknown Task';
+
                 return [
-                    'title' => sprintf(
-                        "%s - %s - %s",
-                        $entry->item->board->name ?? 'No Board',
-                        $group->name ?? 'No Group',
-                        $entry->item->name ?? 'Unknown Task'
-                    ),
+                    'title' => implode(' - ', $titleParts),
                     'start' => $entry->started_at->toIso8601String(),
                     'end' => $entry->ended_at ? $entry->ended_at->toIso8601String() : null,
-                    'color' => '#007bff',
+                    'color' => $isAdminBoard ? '#9ec5fe' : '#007bff', // lighter blue for Admin
                 ];
             });
 
