@@ -8,31 +8,47 @@ use App\Models\Client;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Support\LoadsWithDepth;
 
 class ProjectController extends Controller
 {
+    use LoadsWithDepth;
+
     /**
      * @return AnonymousResourceCollection
      */
-    public function index()
+    public function index(Request $request)
     {
-        return ProjectResource::collection(Project::with('client')->get());
+        $depth = (int)$request->query('depth', 1);
+
+        $projects = Project::with($this->getRelationsByDepth($depth))->get();
+
+        return ProjectResource::collection($projects);
     }
 
-    public function indexByClient(Client $client)
+    public function indexByClient(Request $request, Client $client)
     {
+        $depth = (int)$request->query('depth', 1);
+
+        $client->load(['projects' => function ($query) use ($depth) {
+            $query->with($this->getRelationsByDepth($depth));
+        }]);
+
         return ProjectResource::collection($client->projects);
     }
 
     /**
-     * @param $id
+     * @param Project $project
      * @return ProjectResource
      */
-    public function show(Project $project)
+    public function show(Request $request, Project $project)
     {
-        $project->load([
-            'groups.tasks',
-            'client'
+        $depth = (int)$request->query('depth', 1);
+
+        $this->loadWithDepth($project, $depth, [
+            1 => ['client', 'groups'],
+            2 => ['groups.tasks'],
+            3 => ['groups.tasks.timeTrackings'],
         ]);
 
         return new ProjectResource($project);
