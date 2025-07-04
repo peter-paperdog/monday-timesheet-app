@@ -64,7 +64,7 @@ Route::middleware(['auth:sanctum', 'refresh-token'])->group(function () {
     Route::post('/tasks', [InvoicingController::class, 'tasks']);
     Route::post('/invoices', [InvoicingController::class, 'store']);
     Route::get('/invoices', [InvoicingController::class, 'index']);
-    Route::get('/invoices/{invoice}', [InvoicingController::class, 'show']);
+    Route::get('/invoices/{id}', [InvoicingController::class, 'show']);
     Route::delete('/invoices/{id}', [InvoicingController::class, 'destroy']);
 });
 
