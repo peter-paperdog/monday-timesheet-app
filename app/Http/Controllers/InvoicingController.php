@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\Project;
+use App\Models\Task;
 use App\Services\MondayService;
 use Google\Client;
 use Google\Service\AdMob\App;
@@ -367,9 +369,15 @@ class InvoicingController extends Controller
         );
     }
 
-    public function show(Invoice $invoice)
+    public function show($id)
     {
-       return  $invoice->load(['client']);
+        $invoice = Invoice::with([
+            'client',
+            'groups.invoiceProject.project',
+            'groups.items.task',
+            'groups.items.project'
+        ])->findOrFail($id);
+        return new InvoiceResource($invoice);
     }
 
     public function destroy($id)
