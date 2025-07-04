@@ -34,4 +34,8 @@ class InvoiceItem extends Model
     {
         return $this->belongsTo(Task::class);
     }
+    public function group()
+    {
+        return $this->belongsTo(InvoiceGroup::class, 'invoice_group_id');
+    }
 }
