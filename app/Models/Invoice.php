@@ -20,8 +20,4 @@ class Invoice extends Model
     {
         return $this->hasMany(Project::class);
     }
-    public function items()
-    {
-        return $this->hasMany(Item::class);
-    }
 }

@@ -25,16 +25,8 @@ class InvoicingController extends Controller
     public function index(Request $request)
     {
         $query = Invoice::with([
-            'client',
-            'items',
-            'items.project'
+            'client'
         ])->latest();
-
-        if ($request->has('client_id')) {
-            $query->whereHas('client', function ($q) use ($request) {
-                $q->where('monday_id', $request->input('client_id'));
-            });
-        }
 
         $invoices = $query->get();
 
@@ -377,25 +369,7 @@ class InvoicingController extends Controller
 
     public function show(Invoice $invoice)
     {
-        $invoice->load(['client', 'items', 'items.project']);
-
-        return response()->json([
-            'id' => $invoice->id,
-            'client' => $invoice->client,
-            'sheet_url' => $invoice->sheet_url,
-            'items' => $invoice->items->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'description' => $item->description,
-                    'type' => $item->type,
-                    'quantity' => $item->quantity,
-                    'unit' => $item->unit,
-                    'unit_price' => $item->unit_price,
-                    'currency' => $item->currency,
-                    'project_name' => optional($item->project)->name,
-                ];
-            }),
-        ]);
+       return  $invoice->load(['client']);
     }
 
     public function destroy($id)
