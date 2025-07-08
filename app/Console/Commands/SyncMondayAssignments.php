@@ -44,20 +44,6 @@ class SyncMondayAssignments extends Command
             foreach ($assignment['items_page']['items'] as $item) {
                 $itemId = $item['id'];
 
-                // Check if the item is marked as done
-                $isDone = false;
-                foreach ($item['column_values'] as $column) {
-                    if (isset($column['is_done'])) {
-                        $isDone = $column['is_done'];
-                        break;
-                    }
-                }
-
-                // Skip completed tasks
-                if ($isDone) {
-                    continue;
-                }
-
                 // Process assigned users
                 foreach ($item['column_values'] as $column) {
                     if (!empty($column['persons_and_teams'])) {
