@@ -18,9 +18,7 @@ class EpicController extends Controller
 
         $i = 0;
         foreach ($items as $item) {
-            if ($i > 5) {
-                break;
-            }
+
             $entry = new \stdClass();
             $entry->name = $item->name;
 
