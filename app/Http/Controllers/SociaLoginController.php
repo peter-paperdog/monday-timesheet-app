@@ -55,7 +55,7 @@ class SociaLoginController extends Controller
             $user->update(['last_login_at' => now()]);
             Log::info("User successfully logged in: {$user->name} ({$user->email})");
 
-            return redirect(route('dashboard'))->with('success', 'Login successful.');
+            return redirect(route('timesheets'))->with('success', 'Login successful.');
 
         } catch (Exception $e) {
             Log::error('Error during Google login: ' . $e->getMessage());
