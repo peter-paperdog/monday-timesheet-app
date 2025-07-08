@@ -31,6 +31,9 @@
                         <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.index')">
                             Admin
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.epic')" :active="request()->routeIs('admin.epic')">
+                            Epic times
+                        </x-nav-link>
                     @endif
                 </div>
             </div>

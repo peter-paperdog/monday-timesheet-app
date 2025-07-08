@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\EpicController;
 use App\Http\Controllers\InvoicingController;
 use App\Http\Controllers\OfficeController;
 use App\Http\Controllers\ProfileController;
@@ -111,6 +112,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/download/timesheets/pdf/{weekStartDate}', [TimesheetController::class, 'timesheetsPDF'])->name('timesheet.download.PDFs');
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+    Route::get('/epic', [EpicController::class, 'index'])->name('admin.epic');
 
 
     /*
