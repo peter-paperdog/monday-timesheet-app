@@ -41,9 +41,7 @@ class InvoicingController extends Controller
             'contact.id' => 'required|numeric',
             'client.id' => 'required|numeric',
             'currency' => 'required|string',
-            'number' => 'nullable|string',
-            'issueDate' => 'required|date',
-            'invoice_projects' => 'array',
+            'invoice_projects' => 'array'
         ]);
 
         $contact = Contact::find($data['contact']['id']);
@@ -56,9 +54,7 @@ class InvoicingController extends Controller
         $invoice = Invoice::create([
             'contact_id' => $contact->id,
             'client_id' => $client->id,
-            'currency' => $data['currency'],
-            'number' => $data['number'] ?? null,
-            'issue_date' => $data['issueDate'],
+            'currency' => $data['currency']
         ]);
 
         foreach ($request->input('invoice_projects', []) as $projData) {
@@ -66,7 +62,6 @@ class InvoicingController extends Controller
                 'invoice_id' => $invoice->id,
                 'project_id' => $projData['project_id'],
             ]);
-
             foreach ($projData['invoice_groups'] ?? [] as $groupData) {
                 $invoiceGroup = \App\Models\InvoiceGroup::create([
                     'invoice_project_id' => $invoiceProject->id,
@@ -99,7 +94,8 @@ class InvoicingController extends Controller
         ]);
     }
 
-    public function googleCreate(Request $request){
+    public function googleCreate(Request $request)
+    {
 
 
         try {
@@ -113,7 +109,7 @@ class InvoicingController extends Controller
                 ], 500);
             }
 
-            $pathToCredentials = storage_path('app/'.$envValue);
+            $pathToCredentials = storage_path('app/' . $envValue);
 
             if (!file_exists($pathToCredentials)) {
                 Log::error("Google service account file not found at: $pathToCredentials");
@@ -140,7 +136,7 @@ class InvoicingController extends Controller
                     'supportsAllDrives' => true,
                 ]);
             } catch (\Exception $e) {
-                Log::error("Access to original spreadsheet failed: ".$e->getMessage());
+                Log::error("Access to original spreadsheet failed: " . $e->getMessage());
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Cannot access original Google Sheet.',
@@ -150,7 +146,7 @@ class InvoicingController extends Controller
 
             // Duplicate spreadsheet
             $copy = new DriveFile([
-                'name' => 'Invoice #'.$invoice->id.' – '.now()->format('Y-m-d H:i:s'),
+                'name' => 'Invoice #' . $invoice->id . ' – ' . now()->format('Y-m-d H:i:s'),
                 'parents' => [$targetFolderId],
             ]);
 
@@ -167,31 +163,31 @@ class InvoicingController extends Controller
             $invoice->sheet_url = $sheetUrl;
             $invoice->save();
         } catch (\Google\Service\Exception $e) {
-            Log::error("Google API error: ".$e->getMessage());
+            Log::error("Google API error: " . $e->getMessage());
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Google API error: '.$e->getMessage(),
+                'message' => 'Google API error: ' . $e->getMessage(),
             ], 500);
         } catch (\Exception $e) {
-            Log::error("General error: ".$e->getMessage());
+            Log::error("General error: " . $e->getMessage());
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Unexpected error: '.$e->getMessage(),
+                'message' => 'Unexpected error: ' . $e->getMessage(),
             ], 500);
         }
 
         $items = array_map(function ($item) {
             return [
-                'item_id' => (int) $item['monday_id'],
-                'board_id' => (int) $item['board_id'], // itt történik a cast int-re
+                'item_id' => (int)$item['monday_id'],
+                'board_id' => (int)$item['board_id'], // itt történik a cast int-re
             ];
         }, $data['items']);
         try {
             $this->mondayService->updateTaskStatus('Invoiced', $items);
         } catch (\Exception $e) {
-            Log::error("Monday task update failed: ".$e->getMessage());
+            Log::error("Monday task update failed: " . $e->getMessage());
 
             return response()->json([
                 'status' => 'error',
@@ -203,7 +199,7 @@ class InvoicingController extends Controller
         try {
             // Load credentials
             $envValue = trim(env('GOOGLE_SERVICE_ACCOUNT_JSON'));
-            $pathToCredentials = storage_path('app/'.$envValue);
+            $pathToCredentials = storage_path('app/' . $envValue);
 
             if (empty($envValue) || !file_exists($pathToCredentials)) {
                 throw new \Exception("Service account config missing.");
@@ -274,7 +270,7 @@ class InvoicingController extends Controller
             }
 
             // Write values
-            $sheets->spreadsheets_values->update($spreadsheetId, 'A'.$insertRow, new \Google\Service\Sheets\ValueRange([
+            $sheets->spreadsheets_values->update($spreadsheetId, 'A' . $insertRow, new \Google\Service\Sheets\ValueRange([
                 'values' => $rows,
             ]), ['valueInputOption' => 'USER_ENTERED']);
 
@@ -335,7 +331,7 @@ class InvoicingController extends Controller
                 'invoice' => $invoice->load('client'),
             ]);
         } catch (\Exception $e) {
-            Log::error("Sheet update failed: ".$e->getMessage());
+            Log::error("Sheet update failed: " . $e->getMessage());
 
             return response()->json([
                 'status' => 'error',
@@ -379,10 +375,11 @@ class InvoicingController extends Controller
     public function show($id)
     {
         $invoice = Invoice::with([
+            'contact',
             'client',
-            'invoiceProjects.project',
-            'invoiceProjects.groups.items.task',
-            'invoiceProjects.groups.items.project',
+            'invoiceProjects',
+            'invoiceProjects.invoiceGroups',
+            'invoiceProjects.invoiceGroups.invoiceItems',
         ])->findOrFail($id);
 
         return new InvoiceResource($invoice);
@@ -405,8 +402,8 @@ class InvoicingController extends Controller
             foreach ($invoice->items as $item) {
                 $item->delete();
                 $items[] = [
-                    'item_id' => (int) $item['monday_id'],
-                    'board_id' => (int) $item['board_id'],
+                    'item_id' => (int)$item['monday_id'],
+                    'board_id' => (int)$item['board_id'],
                 ];
             }
 
@@ -421,7 +418,7 @@ class InvoicingController extends Controller
                 'message' => "Invoice #{$invoice->id} deleted successfully.",
             ]);
         } catch (\Exception $e) {
-            Log::error("Failed to delete invoice: ".$e->getMessage());
+            Log::error("Failed to delete invoice: " . $e->getMessage());
 
             return response()->json([
                 'status' => 'error',
