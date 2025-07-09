@@ -31,6 +31,11 @@ class Invoice extends Model
         return $this->hasMany(InvoiceGroup::class);
     }
 
+    public function tasks()
+    {
+        return $this->belongsToMany(Task::class, 'invoice_task');
+    }
+
     public function invoiceProjects()
     {
         return $this->hasMany(InvoiceProject::class, 'invoice_id');
