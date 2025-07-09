@@ -25,4 +25,9 @@ class Invoice extends Model
     {
         return $this->hasMany(InvoiceGroup::class);
     }
+
+    public function invoiceProjects()
+    {
+        return $this->hasMany(InvoiceProject::class, 'invoice_id');
+    }
 }
