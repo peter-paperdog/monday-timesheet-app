@@ -22,6 +22,7 @@ class InvoiceResource extends JsonResource
             'client' => [
                 'id' => $this->client_id
             ],
+            'tasks' => TaskResource::collection($this->whenLoaded('tasks')),
             'currency' => $this->currency,
             'purchaseOrder' => $this->purchaseOrder ?? null,
             'invoice_projects' => InvoiceProjectResource::collection($this->whenLoaded('invoiceProjects')),
