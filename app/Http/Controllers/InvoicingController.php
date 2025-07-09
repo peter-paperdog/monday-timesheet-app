@@ -41,6 +41,8 @@ class InvoicingController extends Controller
             'contact.id' => 'required|numeric',
             'client.id' => 'required|numeric',
             'currency' => 'required|string',
+            'tasks' => 'array',
+            'tasks.*.id' => 'required|numeric',
             'invoice_projects' => 'array'
         ]);
 
@@ -56,6 +58,9 @@ class InvoicingController extends Controller
             'client_id' => $client->id,
             'currency' => $data['currency']
         ]);
+
+        $taskIds = collect($data['tasks'] ?? [])->pluck('id')->all();
+        $invoice->tasks()->sync($taskIds);
 
         foreach ($request->input('invoice_projects', []) as $projData) {
             $invoiceProject = \App\Models\InvoiceProject::create([
@@ -377,6 +382,7 @@ class InvoicingController extends Controller
         $invoice = Invoice::with([
             'contact',
             'client',
+            'tasks',
             'invoiceProjects',
             'invoiceProjects.invoiceGroups',
             'invoiceProjects.invoiceGroups.invoiceItems',
