@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TimeTrackingController;
+use App\Http\Controllers\Api\VatCodeController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\GoogleAuthController;
@@ -27,6 +28,7 @@ Route::options('{any}', function () {
 
 //---protected routes, but do not increase token lifetime---
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/vat-codes', [VatCodeController::class, 'index']);
     Route::get('/currencies', [CurrencyController::class, 'index']);
     Route::get('/clients', [ClientController::class, 'index']);
     Route::get('/clients/{id}', [ClientController::class, 'show']);
