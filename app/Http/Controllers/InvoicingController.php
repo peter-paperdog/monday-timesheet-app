@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\InvoiceResource;
 use App\Models\Client;
+use App\Models\Contact;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Services\MondayService;
@@ -37,19 +38,27 @@ class InvoicingController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'customer.id' => 'required|numeric',
+            'contact.id' => 'required|numeric',
+            'client.id' => 'required|numeric',
             'currency' => 'required|string',
             'number' => 'nullable|string',
             'issueDate' => 'required|date',
         ]);
 
-        $client = Client::where('external_id', $data['customer']['id'])->first();
+        $contact = Contact::where('id', $data['contact']['id'])->first();
+
+        if (!$contact) {
+            return response()->json(['message' => 'Contact not found.'], 422);
+        }
+
+        $client = Client::where('id', $data['client']['id'])->first();
 
         if (!$client) {
             return response()->json(['message' => 'Client not found.'], 422);
         }
 
         $invoice = Invoice::create([
+            'contact_id' => $contact->id,
             'client_id' => $client->id,
             'currency' => $data['currency'],
             'number' => $data['number'] ?? null,
