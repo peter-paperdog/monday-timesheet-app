@@ -16,14 +16,15 @@ class InvoiceResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'customer' => new ContactResource(optional($this->client)->contact),
+            'contact' => [
+                'id' => intval($this->contact_id)
+            ],
+            'client' => [
+                'id' => $this->client_id
+            ],
             'currency' => $this->currency,
-            'number' => $this->number,
-            'issueDate' => $this->issue_date,
-            'tasks' => $this->whenLoaded('tasks', function () {
-                return $this->tasks->map(fn($task) => ['id' => $task->id]);
-            }),
-            'invoice_groups' => InvoiceGroupResource::collection($this->whenLoaded('groups')),
+            'purchaseOrder' => $this->purchaseOrder ?? null,
+            'invoice_projects' => InvoiceProjectResource::collection($this->whenLoaded('invoiceProjects')),
         ];
     }
 }
