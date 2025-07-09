@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class InvoiceGroup extends Model
 {
-    protected $fillable = ['invoice_id', 'name'];
+    protected $fillable = ['invoice_id', 'invoice_project_id', 'name'];
 
     public function invoice()
     {
@@ -15,7 +15,7 @@ class InvoiceGroup extends Model
 
     public function invoiceProject()
     {
-        return $this->hasOne(InvoiceProject::class);
+        return $this->belongsTo(InvoiceProject::class);
     }
 
     public function items()
