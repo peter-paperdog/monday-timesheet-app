@@ -24,7 +24,10 @@ class Task extends Model
     {
         return $this->morphTo();
     }
-
+    public function invoices()
+    {
+        return $this->belongsToMany(Invoice::class, 'invoice_task');
+    }
     public function updateDurationSummary(): void
     {
         $total = $this->timeTrackings()->sum(DB::raw('TIMESTAMPDIFF(SECOND, started_at, ended_at)'));
