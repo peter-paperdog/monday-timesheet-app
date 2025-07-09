@@ -16,7 +16,7 @@ class InvoiceProjectResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'project_id' => $this->project_id,
+            'invoice_groups' => InvoiceGroupResource::collection($this->whenLoaded('invoiceGroups')),
         ];
     }
 }
