@@ -43,18 +43,14 @@ class InvoicingController extends Controller
             'currency' => 'required|string',
             'number' => 'nullable|string',
             'issueDate' => 'required|date',
+            'invoice_projects' => 'array',
         ]);
 
-        $contact = Contact::where('id', $data['contact']['id'])->first();
+        $contact = Contact::find($data['contact']['id']);
+        $client = Client::find($data['client']['id']);
 
-        if (!$contact) {
-            return response()->json(['message' => 'Contact not found.'], 422);
-        }
-
-        $client = Client::where('id', $data['client']['id'])->first();
-
-        if (!$client) {
-            return response()->json(['message' => 'Client not found.'], 422);
+        if (!$contact || !$client) {
+            return response()->json(['message' => 'Contact or Client not found.'], 422);
         }
 
         $invoice = Invoice::create([
@@ -65,12 +61,44 @@ class InvoicingController extends Controller
             'issue_date' => $data['issueDate'],
         ]);
 
+        foreach ($request->input('invoice_projects', []) as $projData) {
+            $invoiceProject = \App\Models\InvoiceProject::create([
+                'invoice_id' => $invoice->id,
+                'project_id' => $projData['project_id'],
+            ]);
+
+            foreach ($projData['invoice_groups'] ?? [] as $groupData) {
+                $invoiceGroup = \App\Models\InvoiceGroup::create([
+                    'invoice_project_id' => $invoiceProject->id,
+                    'name' => $groupData['name'] ?? '',
+                ]);
+
+                foreach ($groupData['invoice_items'] ?? [] as $itemData) {
+                    if (!empty($itemData['removed'])) {
+                        continue;
+                    }
+
+                    \App\Models\InvoiceItem::create([
+                        'invoice_id' => $invoice->id,
+                        'invoice_group_id' => $invoiceGroup->id,
+                        'project_id' => $projData['project_id'] ?? null,
+                        'task_id' => $itemData['id'] ?? null,
+                        'description' => $itemData['name'] ?? '',
+                        'qty' => $itemData['qty'] ?? 1,
+                        'price' => $itemData['price'] ?? 0,
+                        'TAX' => $itemData['TAX'] ?? null,
+                        'discount' => $itemData['discount'] ?? null,
+                    ]);
+                }
+            }
+        }
+
         return response()->json([
-            'message' => 'Invoice created',
+            'message' => 'Invoice created with items.',
             'invoice_id' => $invoice->id,
         ]);
-
     }
+
     public function googleCreate(Request $request){
 
 
@@ -352,10 +380,11 @@ class InvoicingController extends Controller
     {
         $invoice = Invoice::with([
             'client',
-            'groups.invoiceProject.project',
-            'groups.items.task',
-            'groups.items.project'
+            'invoiceProjects.project',
+            'invoiceProjects.groups.items.task',
+            'invoiceProjects.groups.items.project',
         ])->findOrFail($id);
+
         return new InvoiceResource($invoice);
     }
 
