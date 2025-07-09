@@ -19,7 +19,7 @@ class InvoiceGroup extends Model
         return $this->belongsTo(InvoiceProject::class);
     }
 
-    public function items()
+    public function invoiceItems()
     {
         return $this->hasMany(InvoiceItem::class);
     }
