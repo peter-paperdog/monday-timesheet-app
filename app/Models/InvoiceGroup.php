@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class InvoiceGroup extends Model
 {
-    protected $fillable = ['invoice_id', 'invoice_project_id', 'name'];
+    public $timestamps = false;
+    protected $fillable = ['invoice_project_id', 'name'];
 
     public function invoice()
     {
