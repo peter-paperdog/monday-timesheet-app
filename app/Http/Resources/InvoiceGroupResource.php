@@ -17,8 +17,7 @@ class InvoiceGroupResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'invoice_project' => new InvoiceProjectResource($this->whenLoaded('invoiceProject')),
-            'invoice_items' => InvoiceItemResource::collection($this->whenLoaded('items')),
+            'invoice_items' => InvoiceItemResource::collection($this->whenLoaded('invoiceItems')),
         ];
     }
 }
