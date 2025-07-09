@@ -16,12 +16,8 @@ class InvoiceResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'contact' => [
-                'id' => intval($this->contact_id)
-            ],
-            'client' => [
-                'id' => $this->client_id
-            ],
+            'contact' => new ContactResource($this->whenLoaded('contact')),
+            'client' => new ClientResource($this->whenLoaded('client')),
             'tasks' => TaskResource::collection($this->whenLoaded('tasks')),
             'currency' => $this->currency,
             'purchaseOrder' => $this->purchaseOrder ?? null,
