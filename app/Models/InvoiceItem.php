@@ -9,6 +9,7 @@ class InvoiceItem extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
     protected $fillable = [
         'invoice_id',
         'invoice_group_id',
