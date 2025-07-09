@@ -3,13 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\InvoiceResource;
+use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Item;
-use App\Models\Project;
-use App\Models\Task;
 use App\Services\MondayService;
-use Google\Client;
-use Google\Service\AdMob\App;
 use Google\Service\Drive\DriveFile;
 use Google\Service\Sheets;
 use Google\Service\Drive;
@@ -40,60 +37,33 @@ class InvoicingController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'client.monday_id' => 'required|integer',
-            'client.name' => 'required|string',
-            'projects' => 'required|array',
-            'projects.*.monday_id' => 'required|integer',
-            'projects.*.name' => 'required|string',
-            'items' => 'required|array',
-            'items.*.monday_id' => 'required|integer',
-            'items.*.description' => 'required|string',
-            'items.*.type' => 'required|string',
-            'items.*.quantity' => 'required|numeric',
-            'items.*.unit' => 'required|string',
-            'items.*.unit_price' => 'required|numeric',
-            'items.*.currency' => 'required|string',
-            'items.*.project_monday_id' => 'required|integer',
-            'items.*.board_id' => 'required|integer',
+            'customer.id' => 'required|numeric',
+            'currency' => 'required|string',
+            'number' => 'nullable|string',
+            'issueDate' => 'required|date',
         ]);
 
-        $client = \App\Models\Client::updateOrCreate(
-            ['monday_id' => $data['client']['monday_id']],
-            ['name' => $data['client']['name']]
-        );
+        $client = Client::where('external_id', $data['customer']['id'])->first();
+
+        if (!$client) {
+            return response()->json(['message' => 'Client not found.'], 422);
+        }
 
         $invoice = Invoice::create([
             'client_id' => $client->id,
+            'currency' => $data['currency'],
+            'number' => $data['number'] ?? null,
+            'issue_date' => $data['issueDate'],
         ]);
 
-        $projects = collect($data['projects'])->mapWithKeys(function ($projectData) use ($invoice) {
-            $project = Project::updateOrCreate(
-                ['monday_id' => $projectData['monday_id']],
-                [
-                    'name' => $projectData['name'],
-                    'invoice_id' => $invoice->id,
-                ]
-            );
-            return [$projectData['monday_id'] => $project->id];
-        });
+        return response()->json([
+            'message' => 'Invoice created',
+            'invoice_id' => $invoice->id,
+        ]);
 
-        foreach ($data['items'] as $itemData) {
-            $item = new Item([
-                'monday_id' => $itemData['monday_id'],
-                'description' => $itemData['description'],
-                'type' => $itemData['type'],
-                'quantity' => $itemData['quantity'],
-                'unit' => $itemData['unit'],
-                'unit_price' => $itemData['unit_price'],
-                'currency' => $itemData['currency'],
-                'project_id' => $projects[$itemData['project_monday_id']],
-                'invoice_id' => $invoice->id,
-                'board_id' => $itemData['board_id'],
-            ]);
+    }
+    public function googleCreate(Request $request){
 
-            $item->invoice_id = $invoice->id;
-            $item->save();
-        }
 
         try {
             $envValue = trim(env('GOOGLE_SERVICE_ACCOUNT_JSON'));
